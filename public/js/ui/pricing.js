@@ -192,12 +192,68 @@ class PricingSection {
         // Here you would typically integrate with a payment processor
         console.log(`User selected the ${tier.name} pack`);
         
-        // Implement custom purchase handling logic
-        if (typeof this.options.onPurchase === 'function') {
-            this.options.onPurchase(tier);
+        // Check authentication
+        if (!window.authService || !window.authService.isAuthenticated()) {
+            // Redirect to login
+            if (window.notifications) {
+                window.notifications.warning('Please log in to make a purchase');
+            }
+            
+            // Scroll to auth section
+            const authSection = document.getElementById('auth');
+            if (authSection) {
+                authSection.scrollIntoView({ behavior: 'smooth' });
+            }
+            return;
+        }
+        
+        // Check if payment UI is available
+        if (!window.paymentUI) {
+            console.error('Payment UI not loaded');
+            alert(`Thank you for choosing the ${tier.name}!\nPayment system is currently unavailable. Please try again later.`);
+            return;
+        }
+        
+        // Handle subscription vs one-time purchase
+        if (tier.type === 'subscription') {
+            window.paymentUI.showSubscriptionForm(
+                {
+                    name: tier.name,
+                    price: tier.price * 100, // Convert to cents
+                    interval: tier.billingInterval || 'month'
+                },
+                (result) => {
+                    console.log('Subscription success:', result);
+                    
+                    // Call custom onPurchase handler if provided
+                    if (typeof this.options.onPurchase === 'function') {
+                        this.options.onPurchase(tier, result);
+                    }
+                },
+                () => {
+                    console.log('Subscription cancelled');
+                }
+            );
         } else {
-            // For demonstration purposes
-            alert(`Thank you for choosing the ${tier.name}!\nThis would typically redirect to a payment processor.`);
+            // One-time purchase
+            window.paymentUI.showGamePurchaseForm(
+                {
+                    id: tier.id || tier.name.toLowerCase().replace(/\s+/g, '_'),
+                    name: tier.name,
+                    price: tier.price * 100 // Convert to cents
+                },
+                (result) => {
+                    console.log('Purchase success:', result);
+                    
+                    // Call custom onPurchase handler if provided
+                    if (typeof this.options.onPurchase === 'function') {
+                        this.options.onPurchase(tier, result);
+                    }
+                },
+                () => {
+                    console.log('Purchase cancelled');
+                }
+            );
         }
     }
 }

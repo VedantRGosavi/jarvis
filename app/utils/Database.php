@@ -49,6 +49,26 @@ class Database {
         return $this->db->exec($sql);
     }
     
+    // Execute a prepared statement with parameters
+    public function execPrepared($stmt, $params = []) {
+        if (is_string($stmt)) {
+            $stmt = $this->db->prepare($stmt);
+        }
+        
+        // Bind parameters
+        if (is_array($params)) {
+            foreach ($params as $index => $value) {
+                $paramIndex = is_int($index) ? $index + 1 : $index;
+                $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
+                $stmt->bindValue($paramIndex, $value, $type);
+            }
+        }
+        
+        // Execute statement
+        $result = $stmt->execute();
+        return $result;
+    }
+    
     // Fetch methods
     public function fetchAll($sql, $params = []) {
         $stmt = $this->db->prepare($sql);

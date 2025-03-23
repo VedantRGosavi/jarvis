@@ -349,4 +349,14 @@ html {
 
 .game-image:hover img {
     transform: scale(1.05);
+}
+
+/* Custom class to replace flex without conflicting with hidden */
+.fridayai-flex {
+  display: flex;
+}
+
+/* Add a CSS rule to properly show the overlay when not hidden */
+#auth-check-overlay:not(.hidden) {
+  display: flex;
 } 

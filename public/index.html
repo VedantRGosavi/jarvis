@@ -150,6 +150,19 @@
             </div>
         </section>
 
+        <!-- Authentication Section -->
+        <section id="auth" class="auth-section py-32 bg-gaming-gray-900">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Your Account</h2>
+                <div id="auth-container" class="max-w-md mx-auto fade-in-element">
+                    <!-- Auth forms will be dynamically inserted here -->
+                </div>
+                <div id="account-actions" class="mt-6 text-center">
+                    <a href="#" class="account-link text-gaming-gray-400 hover:text-gaming-gray-300">View My Account</a>
+                </div>
+            </div>
+        </section>
+
         <!-- System Requirements Section -->
         <section id="requirements" class="requirements-section py-32">
             <div class="container mx-auto px-6">
@@ -380,5 +393,22 @@
     </script>
     <script src="js/app.js"></script>
     <script type="module" src="js/main.js"></script>
+    <!-- Authentication Scripts -->
+    <script src="js/data/authService.js"></script>
+    <script src="js/ui/authForms.js"></script>
+    <script src="js/ui/accountUI.js"></script>
+    
+    <!-- Payment Scripts -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Dispatch event when Stripe is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.Stripe) {
+                document.dispatchEvent(new CustomEvent('stripe-loaded'));
+            }
+        });
+    </script>
+    <script src="js/data/paymentService.js"></script>
+    <script src="js/ui/paymentUI.js"></script>
 </body>
 </html>

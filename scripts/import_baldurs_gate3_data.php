@@ -117,7 +117,7 @@ function importLocations($db) {
             ) VALUES (?, ?, ?, ?, ?, ?, ?)"
         );
         
-        $result = $db->exec($stmt, [
+        $result = $db->execPrepared($stmt, [
             $location['id'],
             $location['name'],
             $location['description'],
@@ -137,7 +137,7 @@ function importLocations($db) {
                     content_id, content_type, name, description, keywords
                 ) VALUES (?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            $db->execPrepared($stmt, [
                 $location['id'],
                 'location',
                 $location['name'],
@@ -284,7 +284,7 @@ function importNPCs($db) {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         
-        $result = $db->exec($stmt, [
+        $result = $db->execPrepared($stmt, [
             $npc['id'],
             $npc['name'],
             $npc['description'],
@@ -299,12 +299,11 @@ function importNPCs($db) {
         if ($result) {
             $count++;
             
-            // Connect NPC to location
-            $stmt = $db->prepare(
-                "INSERT INTO npc_locations (npc_id, location_id) 
-                 VALUES (?, ?)"
-            );
-            $db->exec($stmt, [$npc['id'], $npc['default_location']]);
+            // Link NPC to default location if provided
+            if (!empty($npc['default_location'])) {
+                $locStmt = $db->prepare("INSERT INTO npc_locations (npc_id, location_id) VALUES (?, ?)");
+                $db->execPrepared($locStmt, [$npc['id'], $npc['default_location']]);
+            }
             
             // Add to search index
             $keywords = $npc['name'] . ' ' . $npc['role'] . ' ' . $npc['faction'];
@@ -313,7 +312,7 @@ function importNPCs($db) {
                     content_id, content_type, name, description, keywords
                 ) VALUES (?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            $db->execPrepared($stmt, [
                 $npc['id'],
                 'npc',
                 $npc['name'],
@@ -450,14 +449,14 @@ function importItems($db) {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         );
         
-        $result = $db->exec($stmt, [
+        $result = $db->execPrepared($stmt, [
             $item['id'],
             $item['name'],
             $item['description'],
             $item['type'],
             $item['subtype'],
-            $item['stats'],
-            $item['requirements'],
+            $item['stats'] ? json_encode($item['stats']) : null,
+            $item['requirements'] ? json_encode($item['requirements']) : null,
             $item['rarity']
         ]);
         
@@ -465,13 +464,13 @@ function importItems($db) {
             $count++;
             
             // Add to search index
-            $keywords = $item['name'] . ' ' . $item['type'] . ' ' . $item['subtype'];
+            $keywords = $item['name'] . ' ' . $item['type'] . ' ' . $item['subtype'] . ' ' . $item['rarity'];
             $stmt = $db->prepare(
                 "INSERT INTO search_index (
                     content_id, content_type, name, description, keywords
                 ) VALUES (?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            $db->execPrepared($stmt, [
                 $item['id'],
                 'item',
                 $item['name'],
@@ -617,7 +616,7 @@ function importQuests($db) {
             ) VALUES (?, ?, ?, ?, ?, ?)"
         );
         
-        $result = $db->exec($stmt, [
+        $result = $db->execPrepared($stmt, [
             $quest['id'],
             $quest['name'],
             $quest['description'],
@@ -630,13 +629,13 @@ function importQuests($db) {
             $count++;
             
             // Add to search index
-            $keywords = $quest['name'] . ' ' . $quest['type'] . ' quest';
+            $keywords = $quest['name'] . ' ' . $quest['type'] . ' ' . ($quest['is_main_story'] ? 'main story' : 'side quest');
             $stmt = $db->prepare(
                 "INSERT INTO search_index (
                     content_id, content_type, name, description, keywords
                 ) VALUES (?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            $db->execPrepared($stmt, [
                 $quest['id'],
                 'quest',
                 $quest['name'],
@@ -644,26 +643,33 @@ function importQuests($db) {
                 $keywords
             ]);
             
-            // Insert quest steps
+            // Add quest steps
+            $stepCount = 0;
             foreach ($quest['steps'] as $step) {
-                $stepId = $quest['id'] . '_step' . $step['step_number'];
+                // Generate a unique step ID if not provided
+                $stepId = $step['id'] ?? $quest['id'] . '_step' . $step['step_number'];
                 
-                $stmt = $db->prepare(
+                $stepStmt = $db->prepare(
                     "INSERT INTO quest_steps (
                         step_id, quest_id, step_number, title,
-                        description, objective, hints
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                        description, objective, hints, location_id,
+                        spoiler_level
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
                 
-                $db->exec($stmt, [
+                $db->execPrepared($stepStmt, [
                     $stepId,
                     $quest['id'],
                     $step['step_number'],
                     $step['title'],
                     $step['description'],
                     $step['objective'],
-                    $step['hints']
+                    $step['hints'],
+                    $step['location_id'] ?? null,
+                    $quest['spoiler_level'] ?? 0
                 ]);
+                
+                $stepCount++;
             }
         }
     }

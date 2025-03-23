@@ -1,0 +1,22 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Set the base directory for rewrites
+RewriteBase /
+
+# Handle API requests
+RewriteRule ^api/games(/.*)?$ app/api/games.php [L,QSA]
+
+# If requested resource exists as a file or directory, skip the following rules
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Handle overlay route
+RewriteRule ^overlay$ overlay.html [L]
+
+# Handle the root URL
+RewriteRule ^$ index.php [L]
+
+# Redirect all other requests to the index.php entrypoint
+RewriteRule ^(.*)$ index.php [L,QSA] 

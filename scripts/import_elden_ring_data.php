@@ -64,61 +64,79 @@ function fetchFromAPI($endpoint) {
 function importLocations($db) {
     echo "Importing locations...\n";
     
-    // Clear existing locations data
-    $db->exec("DELETE FROM locations");
-    $db->exec("DELETE FROM sqlite_sequence WHERE name='locations'");
-    
-    $response = fetchFromAPI("locations?limit=100");
-    $locations = $response['data'] ?? [];
-    
-    $count = 0;
-    foreach ($locations as $location) {
-        // Create a unique ID for the location
-        $locationId = 'loc_' . md5($location['name']);
+    try {
+        // Clear existing locations data
+        $db->exec("DELETE FROM locations");
+        $db->exec("DELETE FROM sqlite_sequence WHERE name='locations'");
         
-        // Determine parent location if available
-        $parentLocationId = null;
-        $region = $location['region'] ?? null;
+        $response = fetchFromAPI("locations?limit=100");
+        $locations = $response['data'] ?? [];
         
-        // Insert location
-        $stmt = $db->prepare(
-            "INSERT INTO locations (
-                location_id, name, description, region, 
-                parent_location_id, coordinates, points_of_interest
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        
-        $result = $db->exec($stmt, [
-            $locationId,
-            $location['name'],
-            $location['description'],
-            $region,
-            $parentLocationId,
-            null, // coordinates
-            null  // points_of_interest
-        ]);
-        
-        if ($result) {
-            $count++;
+        $count = 0;
+        foreach ($locations as $location) {
+            // Create a unique ID for the location
+            $locationId = 'loc_' . md5($location['name']);
             
-            // Add to search index
-            $keywords = $location['name'] . ' ' . ($region ?? '');
+            // Determine parent location if available
+            $parentLocationId = null;
+            $region = $location['region'] ?? null;
+            
+            // Check if location already exists
+            $checkStmt = $db->prepare("SELECT location_id FROM locations WHERE location_id = ?");
+            $result = $db->execPrepared($checkStmt, [$locationId]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if ($exists) {
+                // Skip if it already exists
+                echo "Skipping duplicate location: " . $location['name'] . "\n";
+                continue;
+            }
+            
+            // Ensure description is not null
+            $description = $location['description'] ?? 'No description available';
+            
+            // Insert location
             $stmt = $db->prepare(
-                "INSERT INTO search_index (
-                    content_id, content_type, name, description, keywords
-                ) VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO locations (
+                    location_id, name, description, region, 
+                    parent_location_id, coordinates, points_of_interest
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            
+            $result = $db->execPrepared($stmt, [
                 $locationId,
-                'location',
                 $location['name'],
-                $location['description'],
-                $keywords
+                $description,
+                $region,
+                $parentLocationId,
+                null, // coordinates
+                null  // points_of_interest
             ]);
+            
+            if ($result) {
+                $count++;
+                
+                // Add to search index
+                $keywords = $location['name'] . ' ' . ($region ?? '');
+                $stmt = $db->prepare(
+                    "INSERT INTO search_index (
+                        content_id, content_type, name, description, keywords
+                    ) VALUES (?, ?, ?, ?, ?)"
+                );
+                $db->execPrepared($stmt, [
+                    $locationId,
+                    'location',
+                    $location['name'],
+                    $description,
+                    $keywords
+                ]);
+            }
         }
+        
+        echo "Imported $count locations.\n";
+    } catch (Exception $e) {
+        echo "Error importing locations: " . $e->getMessage() . "\n";
     }
-    
-    echo "Imported $count locations.\n";
 }
 
 /**
@@ -166,7 +184,7 @@ function importItems($db) {
             $requirements = json_encode($item['requiredAttributes'] ?? null);
             $effects = $item['skill'] ?? $item['effect'] ?? null;
             
-            $result = $db->exec($stmt, [
+            $result = $db->execPrepared($stmt, [
                 $itemId,
                 $item['name'],
                 $item['description'] ?? '',
@@ -188,7 +206,7 @@ function importItems($db) {
                         content_id, content_type, name, description, keywords
                     ) VALUES (?, ?, ?, ?, ?)"
                 );
-                $db->exec($stmt, [
+                $db->execPrepared($stmt, [
                     $itemId,
                     'item',
                     $item['name'],
@@ -208,107 +226,120 @@ function importItems($db) {
 function importNPCs($db) {
     echo "Importing NPCs...\n";
     
-    // Clear existing NPCs data
-    $db->exec("DELETE FROM npcs");
-    $db->exec("DELETE FROM sqlite_sequence WHERE name='npcs'");
-    
-    $response = fetchFromAPI("npcs?limit=100");
-    $npcs = $response['data'] ?? [];
-    
-    $count = 0;
-    foreach ($npcs as $npc) {
-        // Create a unique ID for the NPC
-        $npcId = 'npc_' . md5($npc['name']);
+    try {
+        // Clear existing NPCs data
+        $db->exec("DELETE FROM npcs");
+        $db->exec("DELETE FROM sqlite_sequence WHERE name='npcs'");
         
-        // Determine hostility
-        $isHostile = 0;
-        if (strpos(strtolower($npc['description'] ?? ''), 'enemy') !== false || 
-            strpos(strtolower($npc['description'] ?? ''), 'hostile') !== false ||
-            strpos(strtolower($npc['description'] ?? ''), 'boss') !== false) {
-            $isHostile = 1;
-        }
+        $response = fetchFromAPI("npcs?limit=100");
+        $npcs = $response['data'] ?? [];
         
-        // Determine if merchant
-        $isMerchant = 0;
-        if (strpos(strtolower($npc['description'] ?? ''), 'merchant') !== false || 
-            strpos(strtolower($npc['description'] ?? ''), 'sells') !== false ||
-            strpos(strtolower($npc['description'] ?? ''), 'vendor') !== false) {
-            $isMerchant = 1;
-        }
-        
-        // Insert NPC
-        $stmt = $db->prepare(
-            "INSERT INTO npcs (
-                npc_id, name, description, role, faction,
-                is_hostile, is_merchant, dialogue_summary
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        
-        $result = $db->exec($stmt, [
-            $npcId,
-            $npc['name'],
-            $npc['description'] ?? '',
-            $npc['role'] ?? null,
-            $npc['faction'] ?? null,
-            $isHostile,
-            $isMerchant,
-            $npc['quote'] ?? null
-        ]);
-        
-        if ($result) {
-            $count++;
+        $count = 0;
+        foreach ($npcs as $npc) {
+            // Create a unique ID for the NPC
+            $npcId = 'npc_' . md5($npc['name']);
             
-            // Add location if available
-            if (!empty($npc['location'])) {
-                // Look up or create location
-                $locationId = 'loc_' . md5($npc['location']);
-                
-                $stmt = $db->prepare("SELECT 1 FROM locations WHERE location_id = ?");
-                $locationExists = $db->fetchOne($stmt, [$locationId]);
-                
-                if (!$locationExists) {
-                    $stmt = $db->prepare(
-                        "INSERT INTO locations (location_id, name, description, region) 
-                         VALUES (?, ?, ?, ?)"
-                    );
-                    $db->exec($stmt, [
-                        $locationId,
-                        $npc['location'],
-                        "Location of " . $npc['name'],
-                        null
-                    ]);
-                }
-                
-                // Connect NPC to location
-                $stmt = $db->prepare(
-                    "INSERT INTO npc_locations (npc_id, location_id) 
-                     VALUES (?, ?)"
-                );
-                $db->exec($stmt, [$npcId, $locationId]);
-                
-                // Update NPC record with default location
-                $stmt = $db->prepare("UPDATE npcs SET default_location_id = ? WHERE npc_id = ?");
-                $db->exec($stmt, [$locationId, $npcId]);
+            // Check if NPC already exists
+            $checkStmt = $db->prepare("SELECT npc_id FROM npcs WHERE npc_id = ?");
+            $result = $db->execPrepared($checkStmt, [$npcId]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if ($exists) {
+                // Skip if it already exists
+                echo "Skipping duplicate NPC: " . $npc['name'] . "\n";
+                continue;
             }
             
-            // Add to search index
-            $keywords = $npc['name'] . ' ' . ($npc['role'] ?? '') . ' ' . ($npc['faction'] ?? '');
+            // Determine hostility
+            $isHostile = 0;
+            if (strpos(strtolower($npc['description'] ?? ''), 'enemy') !== false || 
+                strpos(strtolower($npc['description'] ?? ''), 'hostile') !== false ||
+                strpos(strtolower($npc['description'] ?? ''), 'boss') !== false) {
+                $isHostile = 1;
+            }
+            
+            // Determine if merchant
+            $isMerchant = 0;
+            if (strpos(strtolower($npc['description'] ?? ''), 'merchant') !== false || 
+                strpos(strtolower($npc['description'] ?? ''), 'sells') !== false ||
+                strpos(strtolower($npc['description'] ?? ''), 'vendor') !== false) {
+                $isMerchant = 1;
+            }
+            
+            // Ensure description is not null
+            $description = $npc['description'] ?? 'No description available';
+            
+            // Insert NPC
             $stmt = $db->prepare(
-                "INSERT INTO search_index (
-                    content_id, content_type, name, description, keywords
-                ) VALUES (?, ?, ?, ?, ?)"
+                "INSERT INTO npcs (
+                    npc_id, name, description, role, faction,
+                    is_hostile, is_merchant, dialogue_summary
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            
+            $result = $db->execPrepared($stmt, [
                 $npcId,
-                'npc',
                 $npc['name'],
-                $npc['description'] ?? '',
-                $keywords
+                $description,
+                null, // role
+                null, // faction
+                $isHostile,
+                $isMerchant,
+                null  // dialogue_summary
             ]);
+            
+            if ($result) {
+                $count++;
+                
+                // Add default location if found in description
+                $locationKeywords = ['found at', 'located in', 'resides in', 'lives in', 'stays at'];
+                $locationId = null;
+                
+                foreach ($locationKeywords as $keyword) {
+                    if (strpos(strtolower($description), $keyword) !== false) {
+                        // Extract location from description (simplified)
+                        preg_match('/' . $keyword . ' ([^\.]+)/i', $description, $matches);
+                        if (!empty($matches[1])) {
+                            // Find location by name
+                            $locationStmt = $db->prepare("SELECT location_id FROM locations WHERE name LIKE ? LIMIT 1");
+                            $locationResult = $db->execPrepared($locationStmt, ['%' . trim($matches[1]) . '%']);
+                            $locationRow = $locationResult->fetchArray(SQLITE3_ASSOC);
+                            if ($locationRow) {
+                                $locationId = $locationRow['location_id'];
+                                
+                                // Link NPC to location
+                                $npcLocationStmt = $db->prepare("INSERT INTO npc_locations (npc_id, location_id) VALUES (?, ?)");
+                                $db->execPrepared($npcLocationStmt, [$npcId, $locationId]);
+                                
+                                // Update location's notable NPCs
+                                $updateLocationStmt = $db->prepare("UPDATE locations SET notable_npcs = COALESCE(notable_npcs, '') || ',' || ? WHERE location_id = ?");
+                                $db->execPrepared($updateLocationStmt, [$npcId, $locationId]);
+                            }
+                        }
+                    }
+                }
+                
+                // Add to search index
+                $keywords = $npc['name'] . ' ' . ($isHostile ? 'enemy hostile' : 'friendly') . ' ' . ($isMerchant ? 'merchant vendor' : '');
+                $stmt = $db->prepare(
+                    "INSERT INTO search_index (
+                        content_id, content_type, name, description, keywords
+                    ) VALUES (?, ?, ?, ?, ?)"
+                );
+                $db->execPrepared($stmt, [
+                    $npcId,
+                    'npc',
+                    $npc['name'],
+                    $description,
+                    $keywords
+                ]);
+            }
         }
+        
+        echo "Imported $count NPCs.\n";
+    } catch (Exception $e) {
+        echo "Error importing NPCs: " . $e->getMessage() . "\n";
     }
-    
-    echo "Imported $count NPCs.\n";
 }
 
 /**
@@ -430,7 +461,7 @@ function importQuests($db) {
             ) VALUES (?, ?, ?, ?, ?, ?)"
         );
         
-        $result = $db->exec($stmt, [
+        $result = $db->execPrepared($stmt, [
             $quest['id'],
             $quest['name'],
             $quest['description'],
@@ -449,7 +480,7 @@ function importQuests($db) {
                     content_id, content_type, name, description, keywords
                 ) VALUES (?, ?, ?, ?, ?)"
             );
-            $db->exec($stmt, [
+            $db->execPrepared($stmt, [
                 $quest['id'],
                 'quest',
                 $quest['name'],
@@ -457,26 +488,34 @@ function importQuests($db) {
                 $keywords
             ]);
             
-            // Insert quest steps
-            foreach ($quest['steps'] as $step) {
-                $stepId = $quest['id'] . '_step' . $step['step_number'];
+            // Extract quest steps if available
+            if (!empty($quest['steps'])) {
+                $stepCount = 0;
+                foreach ($quest['steps'] as $index => $step) {
+                    $stepId = 'step_' . md5($quest['id'] . '_' . $index);
+                    
+                    $stepStmt = $db->prepare(
+                        "INSERT INTO quest_steps (
+                            step_id, quest_id, step_number, title, description,
+                            objective, location_id, spoiler_level
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    
+                    $db->execPrepared($stepStmt, [
+                        $stepId,
+                        $quest['id'],
+                        $index + 1,
+                        $step['title'] ?? "Step " . ($index + 1),
+                        $step['description'] ?? '',
+                        $step['objective'] ?? '',
+                        null, // location_id
+                        null  // spoiler_level
+                    ]);
+                    
+                    $stepCount++;
+                }
                 
-                $stmt = $db->prepare(
-                    "INSERT INTO quest_steps (
-                        step_id, quest_id, step_number, title,
-                        description, objective, hints
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?)"
-                );
-                
-                $db->exec($stmt, [
-                    $stepId,
-                    $quest['id'],
-                    $step['step_number'],
-                    $step['title'],
-                    $step['description'],
-                    $step['objective'],
-                    $step['hints']
-                ]);
+                echo "Added $stepCount steps for quest " . $quest['id'] . "\n";
             }
         }
     }
