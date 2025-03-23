@@ -30,6 +30,23 @@ To verify that the databases are working correctly:
 
 For detailed information about working with the databases, see the `database/README.md` file.
 
+### Importing Game Data
+
+To populate the databases with actual game content for Elden Ring and Baldur's Gate 3, use the data import script:
+
+```bash
+./scripts/setup_game_data.sh
+```
+
+This script will:
+1. Create the database files if they don't exist
+2. Import locations, NPCs, items, and quests for Elden Ring using public API data
+3. Import manually curated data for Baldur's Gate 3
+4. Create search indexes for fast in-game lookups
+5. Verify the integrity of all databases
+
+For Elden Ring, data is sourced from the Elden Ring Fan API. For Baldur's Gate 3, data is manually curated from various wikis and game guides.
+
 ## Database Structure
 
 ### System Database Tables
@@ -56,6 +73,18 @@ Both game databases share the same structure:
 - **quest_consequences**: Tracks effects of quest decisions
 - **search_index**: Optimized table for text search
 
+## API Endpoints
+
+The backend provides several API endpoints for accessing game data:
+
+- `/api/games/{game_id}` - Get general game information
+- `/api/games/{game_id}/quests` - List all quests or get a specific quest
+- `/api/games/{game_id}/items` - List all items or get a specific item
+- `/api/games/{game_id}/locations` - List all locations or get a specific location
+- `/api/games/{game_id}/npcs` - List all NPCs or get a specific NPC
+- `/api/games/{game_id}/search` - Search across all game content
+- `/api/games/{game_id}/categories` - Get available categories for a content type
+
 ## Development
 
 For examples of how to interact with the databases, see `database/db_example.php`. This script demonstrates common operations like:
@@ -68,7 +97,8 @@ For examples of how to interact with the databases, see `database/db_example.php
 ## Prerequisites
 
 - SQLite3 (command-line tool)
-- PHP with SQLite extension (for running example code)
+- PHP 8.1+ with SQLite extension
+- cURL extension for PHP (for data import scripts)
 
 ## Working with the Databases
 

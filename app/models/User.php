@@ -186,4 +186,37 @@ class User {
         );
         return $gameDb->exec($stmt, [$bookmarkId, $userId]);
     }
+    
+    /**
+     * Check if a user has access to a specific game
+     * 
+     * @param int $userId User ID
+     * @param string $gameId Game identifier
+     * @return bool True if user has access, false otherwise
+     */
+    public function checkGameAccess($userId, $gameId) {
+        // Check if user has a subscription
+        $stmt = $this->db->prepare(
+            "SELECT subscription_status FROM users WHERE id = ?"
+        );
+        $user = $this->db->fetchOne($stmt, [$userId]);
+        
+        if (!$user) {
+            return false;
+        }
+        
+        // If user has active subscription, they have access to all games
+        if ($user['subscription_status'] === 'active' || $user['subscription_status'] === 'trialing') {
+            return true;
+        }
+        
+        // Check for individual game purchase
+        $stmt = $this->db->prepare(
+            "SELECT 1 FROM purchases 
+             WHERE user_id = ? AND game_id = ? AND status = 'completed'"
+        );
+        $purchase = $this->db->fetchOne($stmt, [$userId, $gameId]);
+        
+        return $purchase ? true : false;
+    }
 }
