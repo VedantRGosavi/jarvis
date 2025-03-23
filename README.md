@@ -1,4 +1,5 @@
 # FridayAI: Gaming Companion Overlay Tool
+![image](https://github.com/user-attachments/assets/8153e61a-b402-4e96-b85b-2c6ca37bd3d6)
 
 FridayAI is a comprehensive gaming companion tool that provides in-game overlay information for RPG games like Elden Ring and Baldur's Gate 3.
 
