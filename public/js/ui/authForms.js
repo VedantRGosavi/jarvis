@@ -30,20 +30,20 @@ class AuthForms {
           <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
           <div class="grid grid-cols-2 gap-2">
             <button id="googleAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/google.svg" alt="Google" class="w-5 h-5 mr-2">
-              <span>Google</span>
+              ${window.authIcons.GoogleIcon()}
+              <span class="ml-2">Google</span>
             </button>
             <button id="githubAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/github.svg" alt="GitHub" class="w-5 h-5 mr-2">
-              <span>GitHub</span>
+              ${window.authIcons.GithubIcon()}
+              <span class="ml-2">GitHub</span>
             </button>
             <button id="psnAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/playstation.svg" alt="PlayStation" class="w-5 h-5 mr-2">
-              <span>PlayStation</span>
+              ${window.authIcons.PlayStationIcon()}
+              <span class="ml-2">PlayStation</span>
             </button>
             <button id="steamAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/steam.svg" alt="Steam" class="w-5 h-5 mr-2">
-              <span>Steam</span>
+              ${window.authIcons.SteamIcon()}
+              <span class="ml-2">Steam</span>
             </button>
           </div>
         </div>
@@ -80,20 +80,20 @@ class AuthForms {
           <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
           <div class="grid grid-cols-2 gap-2">
             <button id="googleAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/google.svg" alt="Google" class="w-5 h-5 mr-2">
-              <span>Google</span>
+              ${window.authIcons.GoogleIcon()}
+              <span class="ml-2">Google</span>
             </button>
             <button id="githubAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/github.svg" alt="GitHub" class="w-5 h-5 mr-2">
-              <span>GitHub</span>
+              ${window.authIcons.GithubIcon()}
+              <span class="ml-2">GitHub</span>
             </button>
             <button id="psnAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/playstation.svg" alt="PlayStation" class="w-5 h-5 mr-2">
-              <span>PlayStation</span>
+              ${window.authIcons.PlayStationIcon()}
+              <span class="ml-2">PlayStation</span>
             </button>
             <button id="steamAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
-              <img src="assets/icons/steam.svg" alt="Steam" class="w-5 h-5 mr-2">
-              <span>Steam</span>
+              ${window.authIcons.SteamIcon()}
+              <span class="ml-2">Steam</span>
             </button>
           </div>
         </div>

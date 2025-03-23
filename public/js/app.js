@@ -9,10 +9,10 @@ class FridayAIApp {
     this.gameModules = {};
     this.activeGame = null;
     
-    this.initialize();
+    this.initializeApp();
   }
   
-  initialize() {
+  initializeApp() {
     console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
     
     // Load theme preference
@@ -26,6 +26,9 @@ class FridayAIApp {
     
     // Handle navigation
     this.handleNavigation();
+    
+    // Initialize auth button
+    this.initializeAuthButton();
   }
   
   loadThemePreference() {
@@ -208,6 +211,57 @@ class FridayAIApp {
         });
       }
     });
+  }
+  
+  initializeAuthButton() {
+    const authButton = document.getElementById('auth-button');
+    if (!authButton) return;
+
+    // Update button state based on auth status
+    const updateAuthButton = () => {
+      if (window.authService && window.authService.isAuthenticated()) {
+        const user = window.authService.getCurrentUser();
+        authButton.textContent = user?.name || 'Account';
+        authButton.classList.add('logged-in');
+      } else {
+        authButton.textContent = 'Login';
+        authButton.classList.remove('logged-in');
+      }
+    };
+
+    // Handle auth button click
+    authButton.addEventListener('click', () => {
+      if (window.authService && window.authService.isAuthenticated()) {
+        // Show account page if logged in
+        if (window.accountPage) {
+          window.accountPage.show();
+        }
+      } else {
+        // Show login form if not logged in
+        if (this.authForms) {
+          const container = document.createElement('div');
+          container.className = 'fixed inset-0 bg-gaming-gray-900 bg-opacity-90 flex items-center justify-center z-50';
+          document.body.appendChild(container);
+          this.authForms.renderLoginForm(container);
+        }
+      }
+    });
+
+    // Listen for auth state changes
+    document.addEventListener('userLogin', () => {
+      updateAuthButton();
+    });
+
+    document.addEventListener('userLogout', () => {
+      updateAuthButton();
+      // Hide account page if it's open
+      if (window.accountPage) {
+        window.accountPage.hide();
+      }
+    });
+
+    // Initial state
+    updateAuthButton();
   }
 }
 
