@@ -2,6 +2,9 @@ Project Structure:
 
 Jarvis
 ├── README.md
+├── .env
+├── .env.example
+├── .gitignore
 ├── app
 │   ├── api
 │   │   ├── auth.php
@@ -16,16 +19,15 @@ Jarvis
 │   │   ├── GameData.php
 │   │   ├── Subscription.php
 │   │   └── User.php
-│   └── utils
-│       ├── Auth.php
-│       ├── Config.php
-│       └── Database.php
+│   ├── utils
+│   │   ├── Auth.php
+│   │   ├── Config.php
+│   │   └── Database.php
+│   └── views
 ├── composer.json
 ├── composer.lock
 ├── composer.phar
 ├── config
-│   ├── .env
-│   ├── .env.example
 │   ├── project_structure.txt
 │   └── tailwind.config.js
 ├── data
@@ -71,4 +73,5 @@ Jarvis
 │   ├── build.sh
 │   ├── deploy.sh
 │   └── import.php
+├── tailwind.config.js
 └── vendor
