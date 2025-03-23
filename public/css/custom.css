@@ -233,4 +233,120 @@ html {
   z-index: 15;
   background: linear-gradient(to bottom, transparent, var(--color-black));
   pointer-events: none;
+}
+
+/* Documentation Section */
+.docs-section {
+    background: linear-gradient(to bottom, var(--color-gray-900), var(--color-black) 40%, var(--color-gray-900));
+    position: relative;
+    z-index: 1;
+}
+
+.tab-button {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active {
+    background: var(--color-gray-700);
+}
+
+.tab-button:hover:not(.active) {
+    background: var(--color-gray-700/50);
+}
+
+.tab-content {
+    opacity: 0;
+    visibility: hidden;
+    max-height: 0;
+    overflow: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease-in-out,
+                visibility 0.4s ease-in-out,
+                max-height 0.4s ease-in-out,
+                transform 0.4s ease-in-out;
+    padding: 0;
+}
+
+.tab-content.active {
+    opacity: 1;
+    visibility: visible;
+    max-height: 1000px;
+    transform: translateY(0);
+    padding: 1rem 0;
+}
+
+.tab-content.hidden {
+    display: none;
+}
+
+/* System Requirements Section */
+.requirements-section {
+    background: linear-gradient(to bottom, var(--color-gray-900), var(--color-black) 40%, var(--color-gray-900));
+    position: relative;
+    z-index: 1;
+}
+
+/* FAQ Section */
+.faq-section {
+    background: linear-gradient(to bottom, var(--color-gray-900), var(--color-black) 40%, var(--color-gray-900));
+    position: relative;
+    z-index: 1;
+}
+
+.faq-item button {
+    transition: all 0.3s ease;
+}
+
+.faq-item button:hover {
+    background: var(--color-gray-700/50);
+}
+
+.faq-item button svg {
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0.7;
+}
+
+.faq-item.active button svg {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 1.5rem;
+}
+
+.faq-answer.active {
+    max-height: 500px;
+    opacity: 1;
+    padding: 1rem 1.5rem;
+}
+
+.faq-answer p {
+    transform: translateY(-10px);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-answer.active p {
+    transform: translateY(0);
+}
+
+/* Community Section */
+.community-section {
+    background: linear-gradient(to bottom, var(--color-gray-900), var(--color-black) 40%, var(--color-gray-900));
+    position: relative;
+    z-index: 1;
+}
+
+.game-image img {
+    transition: transform 0.3s ease;
+}
+
+.game-image:hover img {
+    transform: scale(1.05);
 } 
