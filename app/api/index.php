@@ -36,6 +36,9 @@ switch ($endpoint) {
     case 'webhook':
         require BASE_PATH . '/app/api/webhook.php';
         break;
+    case 'download':
+        require BASE_PATH . '/app/api/download.php';
+        break;
     default:
         // Handle 404 for API
         header('HTTP/1.1 404 Not Found');

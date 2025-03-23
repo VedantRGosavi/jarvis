@@ -25,6 +25,28 @@ class AuthForms {
             <a href="#" id="showRegistration" class="text-sm text-gaming-gray-400 hover:text-gaming-gray-300">Need an account?</a>
           </div>
         </form>
+        
+        <div class="mt-6 pt-6 border-t border-gaming-gray-700">
+          <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="googleAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/google.svg" alt="Google" class="w-5 h-5 mr-2">
+              <span>Google</span>
+            </button>
+            <button id="githubAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/github.svg" alt="GitHub" class="w-5 h-5 mr-2">
+              <span>GitHub</span>
+            </button>
+            <button id="psnAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/playstation.svg" alt="PlayStation" class="w-5 h-5 mr-2">
+              <span>PlayStation</span>
+            </button>
+            <button id="steamAuthBtn" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/steam.svg" alt="Steam" class="w-5 h-5 mr-2">
+              <span>Steam</span>
+            </button>
+          </div>
+        </div>
       </div>
     `;
     
@@ -53,6 +75,28 @@ class AuthForms {
             <a href="#" id="showLogin" class="text-sm text-gaming-gray-400 hover:text-gaming-gray-300">Already have an account?</a>
           </div>
         </form>
+        
+        <div class="mt-6 pt-6 border-t border-gaming-gray-700">
+          <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button id="googleAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/google.svg" alt="Google" class="w-5 h-5 mr-2">
+              <span>Google</span>
+            </button>
+            <button id="githubAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/github.svg" alt="GitHub" class="w-5 h-5 mr-2">
+              <span>GitHub</span>
+            </button>
+            <button id="psnAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/playstation.svg" alt="PlayStation" class="w-5 h-5 mr-2">
+              <span>PlayStation</span>
+            </button>
+            <button id="steamAuthBtnReg" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md shadow-sm bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+              <img src="assets/icons/steam.svg" alt="Steam" class="w-5 h-5 mr-2">
+              <span>Steam</span>
+            </button>
+          </div>
+        </div>
       </div>
     `;
     
@@ -115,6 +159,9 @@ class AuthForms {
         this.renderRegistrationForm(container);
       });
     }
+    
+    // Set up OAuth buttons
+    this.setupOAuthButtons();
   }
   
   /**
@@ -140,6 +187,65 @@ class AuthForms {
         e.preventDefault();
         this.renderLoginForm(container);
       });
+    }
+    
+    // Set up OAuth buttons
+    this.setupOAuthButtons(true);
+  }
+  
+  /**
+   * Set up OAuth provider buttons
+   * @param {boolean} isRegistration - Whether this is for the registration form
+   */
+  setupOAuthButtons(isRegistration = false) {
+    const suffix = isRegistration ? 'Reg' : '';
+    
+    // Google
+    const googleAuthBtn = document.getElementById(`googleAuthBtn${suffix}`);
+    if (googleAuthBtn) {
+      googleAuthBtn.addEventListener('click', () => this.handleOAuthLogin('google'));
+    }
+    
+    // GitHub
+    const githubAuthBtn = document.getElementById(`githubAuthBtn${suffix}`);
+    if (githubAuthBtn) {
+      githubAuthBtn.addEventListener('click', () => this.handleOAuthLogin('github'));
+    }
+    
+    // PlayStation
+    const psnAuthBtn = document.getElementById(`psnAuthBtn${suffix}`);
+    if (psnAuthBtn) {
+      psnAuthBtn.addEventListener('click', () => this.handleOAuthLogin('playstation'));
+    }
+    
+    // Steam
+    const steamAuthBtn = document.getElementById(`steamAuthBtn${suffix}`);
+    if (steamAuthBtn) {
+      steamAuthBtn.addEventListener('click', () => this.handleOAuthLogin('steam'));
+    }
+  }
+  
+  /**
+   * Handle OAuth login
+   * @param {string} provider - OAuth provider (google, github, playstation, steam)
+   */
+  async handleOAuthLogin(provider) {
+    if (!window.authService) return;
+    
+    try {
+      const result = await window.authService.getOAuthUrl(provider);
+      
+      if (result.success && result.auth_url) {
+        // Redirect to provider's authorization page
+        window.location.href = result.auth_url;
+      } else {
+        // Show error
+        const errorDisplay = document.getElementById('loginError') || document.getElementById('registrationError');
+        this.showFormError(errorDisplay, result.message || `Failed to connect to ${provider}`);
+      }
+    } catch (error) {
+      const errorDisplay = document.getElementById('loginError') || document.getElementById('registrationError');
+      this.showFormError(errorDisplay, `An error occurred connecting to ${provider}`);
     }
   }
   

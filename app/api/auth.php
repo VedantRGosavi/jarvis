@@ -1,8 +1,15 @@
 <?php
 require_once BASE_PATH . '/app/utils/Response.php';
 require_once BASE_PATH . '/app/models/User.php';
+require_once BASE_PATH . '/app/utils/OAuthProvider.php';
+require_once BASE_PATH . '/app/utils/OAuthFactory.php';
+require_once BASE_PATH . '/app/utils/GoogleOAuth.php';
+require_once BASE_PATH . '/app/utils/GitHubOAuth.php';
+require_once BASE_PATH . '/app/utils/PlayStationOAuth.php';
+require_once BASE_PATH . '/app/utils/SteamOAuth.php';
 
 use App\Utils\Response;
+use App\Utils\OAuthFactory;
 use App\Models\User;
 
 // Get request data
@@ -85,6 +92,62 @@ switch ($action) {
         }
         
         Response::success(['user' => $userData]);
+        break;
+    
+    case 'oauth':
+        // Handles OAuth provider authorization URLs
+        $provider = $api_segments[2] ?? '';
+        
+        if (empty($provider)) {
+            Response::error('Provider is required', 400);
+            break;
+        }
+        
+        try {
+            $oauthProvider = OAuthFactory::getProvider($provider);
+            $authUrl = $oauthProvider->getAuthorizationUrl();
+            
+            Response::success(['auth_url' => $authUrl]);
+        } catch (\Exception $e) {
+            Response::error($e->getMessage(), 400);
+        }
+        break;
+    
+    case 'callback':
+        // Handles OAuth callback
+        $provider = $api_segments[2] ?? '';
+        
+        if (empty($provider)) {
+            Response::error('Provider is required', 400);
+            break;
+        }
+        
+        try {
+            $oauthProvider = OAuthFactory::getProvider($provider);
+            
+            // Different providers have different callback parameters
+            if ($provider === 'steam') {
+                $result = $oauthProvider->handleCallback($_GET);
+            } else {
+                $code = $_GET['code'] ?? '';
+                if (empty($code)) {
+                    Response::error('Authorization code is required', 400);
+                    break;
+                }
+                $result = $oauthProvider->handleCallback($code);
+            }
+            
+            if ($result['success']) {
+                // Redirect to frontend with token
+                $redirectUrl = $_ENV['FRONTEND_URL'] . '/auth/callback?token=' . $result['token'];
+                header("Location: $redirectUrl");
+                exit;
+            } else {
+                Response::error($result['error'] ?? 'Authentication failed', 400);
+            }
+        } catch (\Exception $e) {
+            Response::error($e->getMessage(), 400);
+        }
         break;
         
     default:

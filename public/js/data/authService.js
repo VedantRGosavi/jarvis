@@ -15,6 +15,9 @@ class AuthService {
     if (this.token) {
       this.validateToken();
     }
+    
+    // Check for OAuth callback token
+    this.handleOAuthCallback();
   }
   
   /**
@@ -42,12 +45,69 @@ class AuthService {
   }
   
   /**
+   * Handle OAuth callback if present in URL
+   */
+  handleOAuthCallback() {
+    if (window.location.pathname.includes('/auth/callback')) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      
+      if (token) {
+        // Store token
+        this.token = token;
+        localStorage.setItem(this.tokenKey, token);
+        
+        // Get user info
+        this.fetchUserInfo(token);
+        
+        // Remove callback parameters from URL
+        const newUrl = window.location.origin;
+        window.history.replaceState({}, document.title, newUrl);
+      }
+    }
+  }
+  
+  /**
+   * Fetch user info using token
+   * @param {string} token - JWT token
+   */
+  async fetchUserInfo(token) {
+    try {
+      const response = await fetch(`${this.baseUrl}/verify`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to get user info');
+      }
+      
+      const data = await response.json();
+      this.user = data.user;
+      localStorage.setItem(this.userKey, JSON.stringify(this.user));
+      
+      // Dispatch login event
+      document.dispatchEvent(new CustomEvent('userLogin', { detail: this.user }));
+      
+      // Redirect to home if needed
+      setTimeout(() => {
+        window.location.href = '/index.html';
+      }, 500);
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      this.logout();
+    }
+  }
+  
+  /**
    * Validate the current token
    * @returns {Promise<boolean>} Whether token is valid
    */
   async validateToken() {
     try {
-      const response = await fetch(`${this.baseUrl}/validate`, {
+      const response = await fetch(`${this.baseUrl}/verify`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${this.token}`
@@ -64,6 +124,36 @@ class AuthService {
       console.error('Error validating token:', error);
       this.logout();
       return false;
+    }
+  }
+  
+  /**
+   * Get OAuth authorization URL
+   * @param {string} provider - OAuth provider (google, github, etc.)
+   * @returns {Promise<Object>} Authorization URL
+   */
+  async getOAuthUrl(provider) {
+    try {
+      const response = await fetch(`${this.baseUrl}/oauth/${provider}`, {
+        method: 'GET'
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || `Failed to get ${provider} authentication URL`);
+      }
+      
+      return {
+        success: true,
+        auth_url: data.auth_url
+      };
+    } catch (error) {
+      console.error(`OAuth URL error for ${provider}:`, error);
+      return {
+        success: false,
+        message: error.message
+      };
     }
   }
   

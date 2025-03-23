@@ -10,6 +10,18 @@ CREATE TABLE users (
     stripe_customer_id TEXT
 );
 
+-- OAuth accounts table: Links users with their OAuth providers
+CREATE TABLE oauth_accounts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    provider TEXT NOT NULL,
+    provider_user_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(provider, provider_user_id)
+);
+
 -- subscriptions table: Tracks user subscription details
 CREATE TABLE subscriptions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,6 +107,16 @@ CREATE TABLE usage_logs (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- downloads table: Tracks product downloads by users
+CREATE TABLE downloads (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    platform TEXT NOT NULL,
+    version TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 -- Create indexes for performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_subscriptions_user_id ON subscriptions(user_id);
@@ -103,4 +125,5 @@ CREATE INDEX idx_purchases_game_id ON purchases(game_id);
 CREATE INDEX idx_usage_logs_user_id ON usage_logs(user_id);
 CREATE INDEX idx_usage_logs_game_id ON usage_logs(game_id);
 CREATE INDEX idx_user_game_progress_user_game ON user_game_progress(user_id, game_id);
-CREATE INDEX idx_user_bookmarks_user_game ON user_bookmarks(user_id, game_id); 
+CREATE INDEX idx_user_bookmarks_user_game ON user_bookmarks(user_id, game_id);
+CREATE INDEX idx_downloads_user_id ON downloads(user_id); 

@@ -5,7 +5,12 @@ RewriteEngine On
 RewriteBase /
 
 # Handle API requests
+RewriteRule ^api/auth(/.*)?$ app/api/auth.php [L,QSA]
 RewriteRule ^api/games(/.*)?$ app/api/games.php [L,QSA]
+RewriteRule ^api/download(/.*)?$ app/api/download.php [L,QSA]
+
+# Handle OAuth callback
+RewriteRule ^auth/callback$ app/api/auth.php?action=callback [L,QSA]
 
 # If requested resource exists as a file or directory, skip the following rules
 RewriteCond %{REQUEST_FILENAME} -f [OR]
@@ -14,6 +19,9 @@ RewriteRule ^ - [L]
 
 # Handle overlay route
 RewriteRule ^overlay$ overlay.html [L]
+
+# Handle download route
+RewriteRule ^download$ download.html [L]
 
 # Handle the root URL
 RewriteRule ^$ index.php [L]

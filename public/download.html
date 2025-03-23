@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FridayAI - Downloads</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/tailwind.css">
+    <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="bg-gaming-primary text-gaming-light font-sans">
+    <!-- Integrated layout with seamless transitions -->
+    <div class="page-container relative">
+        <!-- Navbar -->
+        <header class="navbar-container">
+            <div class="container mx-auto px-6 flex justify-between items-center">
+                <h1 class="text-2xl font-bold text-gaming-light">FridayAI</h1>
+                <nav>
+                    <ul class="flex space-x-8">
+                        <li><a href="index.html#features" class="hover:text-gaming-gray-200 transition font-medium">Features</a></li>
+                        <li><a href="index.html#games" class="hover:text-gaming-gray-200 transition font-medium">Games</a></li>
+                        <li><a href="index.html#pricing" class="hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
+                        <li><a href="#" class="text-gaming-light font-bold">Download</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- Download Section -->
+        <section class="download-section py-32">
+            <div class="container mx-auto px-6">
+                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Download FridayAI</h2>
+                
+                <!-- Not Authenticated State -->
+                <div id="not-authenticated" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
+                    <h3 class="text-2xl font-bold mb-4">Authentication Required</h3>
+                    <p class="text-gaming-gray-300 mb-6">You need to be logged in with an active subscription to download FridayAI.</p>
+                    <div class="flex justify-center">
+                        <a href="index.html#auth" class="bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 px-8 rounded-md transition">
+                            Log In or Sign Up
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Trial/Free User State -->
+                <div id="trial-user" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
+                    <h3 class="text-2xl font-bold mb-4">You're on a Trial Account</h3>
+                    <p class="text-gaming-gray-300 mb-6">Download FridayAI and enjoy your trial period!</p>
+                    <div id="trial-downloads" class="download-options grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <!-- Download options will be inserted here dynamically -->
+                    </div>
+                    <p class="text-sm text-gaming-gray-400">Your trial expires in <span id="trial-days">14</span> days.</p>
+                </div>
+                
+                <!-- Premium User State -->
+                <div id="premium-user" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
+                    <h3 class="text-2xl font-bold mb-4">Premium Downloads</h3>
+                    <p class="text-gaming-gray-300 mb-6">Thank you for your support! Download the full version of FridayAI:</p>
+                    <div id="premium-downloads" class="download-options grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Download options will be inserted here dynamically -->
+                    </div>
+                    <div class="mt-8 pt-8 border-t border-gaming-gray-700">
+                        <h4 class="text-xl font-semibold mb-4">Beta Versions</h4>
+                        <p class="text-gaming-gray-300 mb-6">As a premium user, you have access to beta releases:</p>
+                        <div id="beta-downloads" class="download-options grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Beta download options will be inserted here dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="js/data/authService.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check authentication
+            if (window.authService && window.authService.isAuthenticated()) {
+                const user = window.authService.getCurrentUser();
+                
+                if (user && (user.subscription_status === 'trial' || user.subscription_status === 'active' || user.subscription_status === 'admin')) {
+                    // User has access to downloads
+                    if (user.subscription_status === 'trial' || user.subscription_status === 'admin') {
+                        // Show trial UI
+                        document.getElementById('trial-user').classList.remove('hidden');
+                        populateDownloadOptions('trial-downloads', 'latest');
+                    } else {
+                        // Show premium UI
+                        document.getElementById('premium-user').classList.remove('hidden');
+                        populateDownloadOptions('premium-downloads', 'latest');
+                        populateDownloadOptions('beta-downloads', 'beta');
+                    }
+                } else {
+                    // User is authenticated but doesn't have access
+                    document.getElementById('not-authenticated').classList.remove('hidden');
+                }
+            } else {
+                // Not authenticated
+                document.getElementById('not-authenticated').classList.remove('hidden');
+            }
+            
+            // Populate download options based on version and container ID
+            function populateDownloadOptions(containerId, version) {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                const platforms = [
+                    { name: 'Windows', icon: 'windows', ext: 'zip' },
+                    { name: 'macOS', icon: 'apple', ext: 'dmg' },
+                    { name: 'Linux', icon: 'linux', ext: 'tar.gz' }
+                ];
+                
+                let html = '';
+                platforms.forEach(platform => {
+                    const platformKey = platform.name.toLowerCase();
+                    if (platform.name === 'macOS') {
+                        platformKey = 'mac';
+                    }
+                    
+                    html += `
+                        <div class="download-option flex flex-col items-center">
+                            <a href="/api/download/${version}?platform=${platformKey}" 
+                               class="download-button flex flex-col items-center p-4 rounded-lg bg-gaming-gray-700 hover:bg-gaming-gray-600 transition w-full">
+                                <i class="fab fa-${platform.icon} text-3xl mb-2"></i>
+                                <span class="font-medium">${platform.name}</span>
+                                <span class="text-xs text-gaming-gray-400 mt-1">${version === 'beta' ? 'Beta' : ''} (.${platform.ext})</span>
+                            </a>
+                        </div>
+                    `;
+                });
+                
+                container.innerHTML = html;
+            }
+        });
+    </script>
+</body>
+</html> 
