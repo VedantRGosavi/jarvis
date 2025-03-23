@@ -13,7 +13,11 @@ CREATE TABLE quests (
     related_quests TEXT,
     spoiler_level INTEGER DEFAULT 0,
     version_added TEXT,
-    last_updated TEXT
+    last_updated TEXT,
+    time_sensitive INTEGER DEFAULT 0,
+    category TEXT,
+    level TEXT,
+    location_note TEXT
 );
 
 -- quest_steps table: Detailed quest progression steps
@@ -69,6 +73,10 @@ CREATE TABLE npcs (
     relationship_to_other_npcs TEXT,
     schedule TEXT,
     drops_on_defeat TEXT,
+    category TEXT,
+    image_url TEXT,
+    health TEXT,
+    drops TEXT,
     FOREIGN KEY (default_location_id) REFERENCES locations(location_id)
 );
 
@@ -87,7 +95,9 @@ CREATE TABLE items (
     quest_related INTEGER DEFAULT 0,
     related_quests TEXT,
     rarity TEXT,
-    image_path TEXT
+    image_path TEXT,
+    is_missable INTEGER DEFAULT 0,
+    location_note TEXT
 );
 
 -- npc_locations table: Tracks where NPCs can be found at different stages
@@ -124,6 +134,48 @@ CREATE TABLE quest_consequences (
     spoiler_level INTEGER DEFAULT 0,
     FOREIGN KEY (quest_id) REFERENCES quests(quest_id),
     FOREIGN KEY (step_id) REFERENCES quest_steps(step_id)
+);
+
+-- tasks table: Missable tasks and time-sensitive events
+CREATE TABLE tasks (
+    task_id TEXT PRIMARY KEY,
+    description TEXT NOT NULL,
+    location TEXT,
+    act TEXT,
+    is_missable INTEGER DEFAULT 0,
+    completed INTEGER DEFAULT 0
+);
+
+-- abilities table: Missable abilities and special skills
+CREATE TABLE abilities (
+    ability_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    location TEXT,
+    act TEXT,
+    url TEXT
+);
+
+-- classes table: Character starting classes (Elden Ring)
+CREATE TABLE classes (
+    class_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    stats TEXT,
+    equipment TEXT,
+    image_url TEXT
+);
+
+-- merchant_items table: Links merchants (NPCs) to their available items
+CREATE TABLE merchant_items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    merchant_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    is_missable INTEGER DEFAULT 0,
+    act TEXT,
+    location TEXT,
+    FOREIGN KEY (merchant_id) REFERENCES npcs(npc_id),
+    FOREIGN KEY (item_id) REFERENCES items(item_id)
 );
 
 -- search_index table: Optimized table for text search

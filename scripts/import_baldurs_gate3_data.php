@@ -484,6 +484,1226 @@ function importItems($db) {
 }
 
 /**
+ * Import missable items from BG3 Missables repository
+ */
+function importMissableItems($db) {
+    echo "Importing missable items...\n";
+    
+    try {
+        // Fetch the checklist.md content from GitHub
+        $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+        
+        echo "Fetching missable items data from: $missablesUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $missablesUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        if ($err) {
+            echo "cURL Error: " . $err . "\n";
+            return;
+        }
+        
+        // Parse the markdown to extract item data
+        $lines = explode("\n", $response);
+        $items = [];
+        $currentAct = '';
+        $currentLocation = '';
+        
+        // Define rarity mapping
+        $rarityMap = [
+            'item_common' => 'common',
+            'item_uncommon' => 'uncommon',
+            'item_rare' => 'rare',
+            'item_veryrare' => 'very rare',
+            'item_legendary' => 'legendary',
+            'item_story' => 'story',
+            'item_ordinary' => 'ordinary'
+        ];
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Extract item information
+            if (preg_match('/- ::(item_\w+):: \[(.*?)\]\((.*?)\)/', $line, $matches)) {
+                $rarityCode = $matches[1];
+                $itemName = $matches[2];
+                $itemUrl = $matches[3];
+                
+                // Get description from the link if possible
+                $description = "A missable item in Baldur's Gate 3.";
+                
+                // Create a unique ID for the item
+                $itemId = 'item_' . md5($itemName);
+                
+                // Add to items array
+                $items[] = [
+                    'id' => $itemId,
+                    'name' => $itemName,
+                    'description' => $description,
+                    'type' => 'Missable Item',
+                    'subtype' => isset($rarityMap[$rarityCode]) ? ucfirst($rarityMap[$rarityCode]) : 'Unknown',
+                    'rarity' => isset($rarityMap[$rarityCode]) ? $rarityMap[$rarityCode] : 'common',
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'url' => $itemUrl
+                ];
+            }
+        }
+        
+        $count = 0;
+        foreach ($items as $item) {
+            // Check if item already exists
+            $checkStmt = $db->prepare("SELECT item_id FROM items WHERE name = ?");
+            $result = $db->execPrepared($checkStmt, [$item['name']]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if ($exists) {
+                // Update the existing item with missable flag
+                $updateStmt = $db->prepare("UPDATE items SET is_missable = 1, rarity = ? WHERE name = ?");
+                $updateResult = $db->execPrepared($updateStmt, [$item['rarity'], $item['name']]);
+                
+                if ($updateResult) {
+                    $count++;
+                    echo "Updated existing item as missable: " . $item['name'] . "\n";
+                }
+            } else {
+                // Insert new item
+                $stmt = $db->prepare(
+                    "INSERT INTO items (
+                        item_id, name, description, type, subtype,
+                        stats, requirements, effects, rarity, is_missable,
+                        location_note
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+                
+                $locationNote = "{$item['act']} - {$item['location']}";
+                
+                $result = $db->execPrepared($stmt, [
+                    $item['id'],
+                    $item['name'],
+                    $item['description'],
+                    $item['type'],
+                    $item['subtype'],
+                    null, // stats
+                    null, // requirements
+                    null, // effects
+                    $item['rarity'],
+                    1,    // is_missable
+                    $locationNote
+                ]);
+                
+                if ($result) {
+                    $count++;
+                    
+                    // Add to search index
+                    $keywords = $item['name'] . ' ' . $item['type'] . ' ' . $item['rarity'] . ' missable ' . $item['act'] . ' ' . $item['location'];
+                    $stmt = $db->prepare(
+                        "INSERT INTO search_index (
+                            content_id, content_type, name, description, keywords
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $db->execPrepared($stmt, [
+                        $item['id'],
+                        'item',
+                        $item['name'],
+                        $item['description'],
+                        $keywords
+                    ]);
+                }
+            }
+        }
+        
+        echo "Imported/updated $count missable items.\n";
+    } catch (Exception $e) {
+        echo "Error importing missable items: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
+ * Import missable quests from BG3 Missables repository
+ */
+function importMissableQuests($db) {
+    echo "Importing missable quests...\n";
+    
+    try {
+        // Fetch the checklist.md content from GitHub
+        $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+        
+        echo "Fetching missable quests data from: $missablesUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $missablesUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        if ($err) {
+            echo "cURL Error: " . $err . "\n";
+            return;
+        }
+        
+        // Parse the markdown to extract quest data
+        $lines = explode("\n", $response);
+        $quests = [];
+        $currentAct = '';
+        $currentLocation = '';
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Extract missable quest information
+            if (preg_match('/- ::missable:: (?:Act \d+ - )?(.+?)(?:\((.*?)\))?$/', $line, $matches) || 
+                preg_match('/- ::missable:: (.+?)(?:\((.*?)\))?$/', $line, $matches)) {
+                
+                $questDescription = trim($matches[1]);
+                
+                // Check if there's a link in the description
+                $questName = $questDescription;
+                $questUrl = null;
+                
+                if (preg_match('/\[(.*?)\]\((.*?)\)/', $questDescription, $linkMatches)) {
+                    $questName = $linkMatches[1];
+                    $questUrl = $linkMatches[2];
+                    $questDescription = str_replace($linkMatches[0], $questName, $questDescription);
+                }
+                
+                // Create a unique ID for the quest
+                $questId = 'quest_' . md5($questName);
+                
+                // Add to quests array
+                $quests[] = [
+                    'id' => $questId,
+                    'name' => $questName,
+                    'description' => $questDescription,
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'url' => $questUrl,
+                    'time_sensitive' => true
+                ];
+            }
+        }
+        
+        $count = 0;
+        foreach ($quests as $quest) {
+            // Check if quest already exists
+            $checkStmt = $db->prepare("SELECT quest_id FROM quests WHERE name = ?");
+            $result = $db->execPrepared($checkStmt, [$quest['name']]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if ($exists) {
+                // Update the existing quest with time sensitive flag
+                $updateStmt = $db->prepare("UPDATE quests SET time_sensitive = 1 WHERE name = ?");
+                $updateResult = $db->execPrepared($updateStmt, [$quest['name']]);
+                
+                if ($updateResult) {
+                    $count++;
+                    echo "Updated existing quest as time-sensitive: " . $quest['name'] . "\n";
+                }
+            } else {
+                // Insert new quest
+                $stmt = $db->prepare(
+                    "INSERT INTO quests (
+                        quest_id, name, description, category, level,
+                        prerequisites, time_sensitive, location_note, type
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                );
+                
+                $locationNote = "{$quest['act']} - {$quest['location']}";
+                
+                $result = $db->execPrepared($stmt, [
+                    $quest['id'],
+                    $quest['name'],
+                    $quest['description'],
+                    'Missable',
+                    null, // level
+                    null, // prerequisites
+                    1,    // time_sensitive
+                    $locationNote,
+                    'Side Quest' // Default type for missable quests
+                ]);
+                
+                if ($result) {
+                    $count++;
+                    
+                    // Add to search index
+                    $keywords = $quest['name'] . ' ' . 'missable quest time-sensitive ' . $quest['act'] . ' ' . $quest['location'];
+                    $stmt = $db->prepare(
+                        "INSERT INTO search_index (
+                            content_id, content_type, name, description, keywords
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $db->execPrepared($stmt, [
+                        $quest['id'],
+                        'quest',
+                        $quest['name'],
+                        $quest['description'],
+                        $keywords
+                    ]);
+                }
+            }
+        }
+        
+        echo "Imported/updated $count missable quests.\n";
+    } catch (Exception $e) {
+        echo "Error importing missable quests: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
+ * Import general missable tasks from the bg3-missables website
+ */
+function importMissableTasks($db) {
+    echo "Importing missable tasks...\n";
+    
+    try {
+        // Fetch the checklist.md content from GitHub
+        $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+        
+        echo "Fetching missable tasks data from: $missablesUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $missablesUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        if ($err) {
+            echo "cURL Error: " . $err . "\n";
+            return;
+        }
+        
+        // Parse the markdown to extract task data
+        $lines = explode("\n", $response);
+        $tasks = [];
+        $currentAct = '';
+        $currentLocation = '';
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Extract general task information (non-item, non-quest)
+            if (preg_match('/- ::task:: (.*?)(?:\(|$)/', $line, $matches)) {
+                $taskDescription = trim($matches[1]);
+                
+                // Skip general instructions
+                if (strpos($line, '::task:: The following icon usage') !== false || 
+                    strpos($line, '::task:: Tips for obtaining') !== false ||
+                    strpos($line, '::task:: Various quests') !== false ||
+                    strpos($line, '::task:: Some NPC') !== false ||
+                    strpos($line, '::task:: It may be impossible') !== false) {
+                    continue;
+                }
+                
+                // Skip if this line is just a bullet point for another task
+                if (strpos($line, '  - ::task::') === 0) {
+                    continue;
+                }
+                
+                // Check if there's a link in the description
+                if (preg_match('/\[(.*?)\]\((.*?)\)/', $taskDescription, $linkMatches)) {
+                    $linkedText = $linkMatches[1];
+                    $url = $linkMatches[2];
+                    
+                    // Replace the markdown link with just the text
+                    $taskDescription = str_replace($linkMatches[0], $linkedText, $taskDescription);
+                }
+                
+                // Create a unique ID for the task
+                $taskId = 'task_' . md5($taskDescription . $currentLocation . $currentAct);
+                
+                // Add to tasks array
+                $tasks[] = [
+                    'id' => $taskId,
+                    'description' => $taskDescription,
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'is_missable' => 0  // Regular task
+                ];
+            }
+            
+            // Extract specifically missable tasks (time-sensitive)
+            if (preg_match('/- ::missable:: (.*?)(?:\(|$)/', $line, $matches)) {
+                $taskDescription = trim($matches[1]);
+                
+                // Skip if this is dealing with items or already captured quests
+                if (strpos($line, '::item_') !== false) {
+                    continue;
+                }
+                
+                // Check if there's a link in the description
+                if (preg_match('/\[(.*?)\]\((.*?)\)/', $taskDescription, $linkMatches)) {
+                    $linkedText = $linkMatches[1];
+                    $url = $linkMatches[2];
+                    
+                    // Replace the markdown link with just the text
+                    $taskDescription = str_replace($linkMatches[0], $linkedText, $taskDescription);
+                }
+                
+                // Create a unique ID for the task
+                $taskId = 'task_' . md5($taskDescription . $currentLocation . $currentAct);
+                
+                // Add to tasks array with missable flag
+                $tasks[] = [
+                    'id' => $taskId,
+                    'description' => $taskDescription,
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'is_missable' => 1  // Missable task
+                ];
+            }
+        }
+        
+        // Create tasks table if it doesn't exist
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS tasks (
+                task_id TEXT PRIMARY KEY,
+                description TEXT NOT NULL,
+                location TEXT,
+                act TEXT,
+                is_missable INTEGER DEFAULT 0,
+                completed INTEGER DEFAULT 0
+            )
+        ");
+        
+        // Insert tasks into database
+        $count = 0;
+        foreach ($tasks as $task) {
+            // Check if task already exists
+            $checkStmt = $db->prepare("SELECT task_id FROM tasks WHERE task_id = ?");
+            $result = $db->execPrepared($checkStmt, [$task['id']]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if (!$exists) {
+                // Insert new task
+                $stmt = $db->prepare(
+                    "INSERT INTO tasks (
+                        task_id, description, location, act, is_missable
+                    ) VALUES (?, ?, ?, ?, ?)"
+                );
+                
+                $result = $db->execPrepared($stmt, [
+                    $task['id'],
+                    $task['description'],
+                    $task['location'],
+                    $task['act'],
+                    $task['is_missable']
+                ]);
+                
+                if ($result) {
+                    $count++;
+                    
+                    // Add to search index
+                    $keywords = $task['description'] . ' ' . 
+                                ($task['is_missable'] ? 'missable time-sensitive' : 'task') . ' ' . 
+                                $task['act'] . ' ' . $task['location'];
+                    
+                    $stmt = $db->prepare(
+                        "INSERT INTO search_index (
+                            content_id, content_type, name, description, keywords
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $db->execPrepared($stmt, [
+                        $task['id'],
+                        'task',
+                        $task['description'],
+                        $task['description'],
+                        $keywords
+                    ]);
+                }
+            }
+        }
+        
+        echo "Imported $count new missable tasks.\n";
+    } catch (Exception $e) {
+        echo "Error importing missable tasks: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
+ * Import missable abilities from the bg3-missables website
+ */
+function importMissableAbilities($db) {
+    echo "Importing missable abilities...\n";
+    
+    try {
+        // Fetch the checklist.md content from GitHub
+        $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+        
+        echo "Fetching missable abilities data from: $missablesUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $missablesUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        if ($err) {
+            echo "cURL Error: " . $err . "\n";
+            return;
+        }
+        
+        // Parse the markdown to extract ability data
+        $lines = explode("\n", $response);
+        $abilities = [];
+        $currentAct = '';
+        $currentLocation = '';
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Extract ability information
+            if (preg_match('/- ::ability:: (.*?)(?:\(|$)/', $line, $matches)) {
+                $abilityDescription = trim($matches[1]);
+                
+                // Check if there's a link in the description
+                $abilityName = $abilityDescription;
+                $abilityUrl = null;
+                
+                if (preg_match('/\[(.*?)\]\((.*?)\)/', $abilityDescription, $linkMatches)) {
+                    $abilityName = $linkMatches[1];
+                    $abilityUrl = $linkMatches[2];
+                    $abilityDescription = str_replace($linkMatches[0], $abilityName, $abilityDescription);
+                }
+                
+                // Create a unique ID for the ability
+                $abilityId = 'ability_' . md5($abilityName);
+                
+                // Add to abilities array
+                $abilities[] = [
+                    'id' => $abilityId,
+                    'name' => $abilityName,
+                    'description' => $abilityDescription,
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'url' => $abilityUrl
+                ];
+            }
+        }
+        
+        // Create abilities table if it doesn't exist
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS abilities (
+                ability_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                description TEXT NOT NULL,
+                location TEXT,
+                act TEXT,
+                url TEXT
+            )
+        ");
+        
+        // Insert abilities into database
+        $count = 0;
+        foreach ($abilities as $ability) {
+            // Check if ability already exists
+            $checkStmt = $db->prepare("SELECT ability_id FROM abilities WHERE name = ?");
+            $result = $db->execPrepared($checkStmt, [$ability['name']]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            if (!$exists) {
+                // Insert new ability
+                $stmt = $db->prepare(
+                    "INSERT INTO abilities (
+                        ability_id, name, description, location, act, url
+                    ) VALUES (?, ?, ?, ?, ?, ?)"
+                );
+                
+                $result = $db->execPrepared($stmt, [
+                    $ability['id'],
+                    $ability['name'],
+                    $ability['description'],
+                    $ability['location'],
+                    $ability['act'],
+                    $ability['url']
+                ]);
+                
+                if ($result) {
+                    $count++;
+                    
+                    // Add to search index
+                    $keywords = $ability['name'] . ' ' . $ability['description'] . ' ability missable ' . 
+                                $ability['act'] . ' ' . $ability['location'];
+                    
+                    $stmt = $db->prepare(
+                        "INSERT INTO search_index (
+                            content_id, content_type, name, description, keywords
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $db->execPrepared($stmt, [
+                        $ability['id'],
+                        'ability',
+                        $ability['name'],
+                        $ability['description'],
+                        $keywords
+                    ]);
+                }
+            }
+        }
+        
+        echo "Imported $count new missable abilities.\n";
+    } catch (Exception $e) {
+        echo "Error importing missable abilities: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
+ * Import missable merchant items from the bg3-missables website
+ */
+function importMerchantItems($db) {
+    echo "Importing merchant items...\n";
+    
+    try {
+        // Fetch the checklist.md content from GitHub
+        $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+        
+        echo "Fetching merchant items data from: $missablesUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $missablesUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        if ($err) {
+            echo "cURL Error: " . $err . "\n";
+            return;
+        }
+        
+        // Parse the markdown to extract merchant items data
+        $lines = explode("\n", $response);
+        $merchants = [];
+        $currentMerchant = null;
+        $currentAct = '';
+        $currentLocation = '';
+        $inMerchantBlock = false;
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Detect merchant entries
+            if (preg_match('/- ::task:: \[(.*?)\]\((.*?)\) offers merchant services/', $line, $matches)) {
+                $inMerchantBlock = true;
+                $merchantName = $matches[1];
+                $merchantUrl = $matches[2];
+                
+                $currentMerchant = [
+                    'name' => $merchantName,
+                    'url' => $merchantUrl,
+                    'location' => $currentLocation,
+                    'act' => $currentAct,
+                    'items' => []
+                ];
+                
+                // Create a merchant ID
+                $merchantId = 'npc_' . md5($merchantName);
+                $currentMerchant['id'] = $merchantId;
+                
+                continue;
+            }
+            
+            // End of merchant block
+            if ($inMerchantBlock && (trim($line) === '' || strpos($line, '- ::task::') === 0) && strpos($line, 'merchant services') === false) {
+                if ($currentMerchant && !empty($currentMerchant['items'])) {
+                    $merchants[] = $currentMerchant;
+                }
+                $inMerchantBlock = false;
+                $currentMerchant = null;
+                continue;
+            }
+            
+            // Extract merchant items
+            if ($inMerchantBlock && preg_match('/- ::(item_\w+):: \[(.*?)\]\((.*?)\)/', $line, $matches)) {
+                $rarityCode = $matches[1];
+                $itemName = $matches[2];
+                $itemUrl = $matches[3];
+                
+                // Define rarity mapping
+                $rarityMap = [
+                    'item_common' => 'common',
+                    'item_uncommon' => 'uncommon',
+                    'item_rare' => 'rare',
+                    'item_veryrare' => 'very rare',
+                    'item_legendary' => 'legendary',
+                    'item_story' => 'story',
+                    'item_ordinary' => 'ordinary'
+                ];
+                
+                // Add to current merchant's items
+                $currentMerchant['items'][] = [
+                    'name' => $itemName,
+                    'url' => $itemUrl,
+                    'rarity' => isset($rarityMap[$rarityCode]) ? $rarityMap[$rarityCode] : 'unknown',
+                    'item_id' => 'item_' . md5($itemName)
+                ];
+            }
+            
+            // Extract missable information for merchants
+            if ($inMerchantBlock && preg_match('/- ::missable:: (.*?)(?:\(|$)/', $line, $matches)) {
+                if ($currentMerchant) {
+                    $currentMerchant['is_missable'] = true;
+                    $currentMerchant['missable_note'] = trim($matches[1]);
+                }
+            }
+        }
+        
+        // Create merchant_items table if it doesn't exist
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS merchant_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                merchant_id TEXT NOT NULL,
+                item_id TEXT NOT NULL,
+                is_missable INTEGER DEFAULT 0,
+                act TEXT,
+                location TEXT,
+                FOREIGN KEY (merchant_id) REFERENCES npcs(npc_id),
+                FOREIGN KEY (item_id) REFERENCES items(item_id)
+            )
+        ");
+        
+        // Insert merchants and their items
+        $merchantCount = 0;
+        $itemCount = 0;
+        
+        foreach ($merchants as $merchant) {
+            // Check if merchant exists in NPCs table
+            $checkStmt = $db->prepare("SELECT npc_id FROM npcs WHERE name = ?");
+            $result = $db->execPrepared($checkStmt, [$merchant['name']]);
+            $exists = $result->fetchArray(SQLITE3_ASSOC);
+            
+            $merchantId = $exists ? $exists['npc_id'] : $merchant['id'];
+            
+            // If merchant doesn't exist, create a new NPC entry
+            if (!$exists) {
+                $merchantStmt = $db->prepare(
+                    "INSERT INTO npcs (
+                        npc_id, name, description, role, 
+                        default_location_id, is_merchant
+                    ) VALUES (?, ?, ?, ?, ?, ?)"
+                );
+                
+                // Find location ID from location name
+                $locStmt = $db->prepare("SELECT location_id FROM locations WHERE name LIKE ? LIMIT 1");
+                $locResult = $db->execPrepared($locStmt, ['%' . $merchant['location'] . '%']);
+                $locData = $locResult->fetchArray(SQLITE3_ASSOC);
+                $locationId = $locData ? $locData['location_id'] : null;
+                
+                $description = "A merchant in Baldur's Gate 3 who can be found in {$merchant['location']}.";
+                if (isset($merchant['is_missable']) && $merchant['is_missable']) {
+                    $description .= " This merchant is missable: {$merchant['missable_note']}";
+                }
+                
+                $db->execPrepared($merchantStmt, [
+                    $merchantId,
+                    $merchant['name'],
+                    $description,
+                    'Merchant',
+                    $locationId,
+                    1 // is_merchant = true
+                ]);
+                
+                $merchantCount++;
+                
+                // Add to search index
+                $keywords = $merchant['name'] . ' merchant ' . $merchant['location'] . ' ' . $merchant['act'];
+                if (isset($merchant['is_missable']) && $merchant['is_missable']) {
+                    $keywords .= ' missable';
+                }
+                
+                $searchStmt = $db->prepare(
+                    "INSERT INTO search_index (
+                        content_id, content_type, name, description, keywords
+                    ) VALUES (?, ?, ?, ?, ?)"
+                );
+                $db->execPrepared($searchStmt, [
+                    $merchantId,
+                    'npc',
+                    $merchant['name'],
+                    $description,
+                    $keywords
+                ]);
+            }
+            
+            // Process merchant items
+            foreach ($merchant['items'] as $item) {
+                // Check if item exists
+                $checkItemStmt = $db->prepare("SELECT item_id FROM items WHERE name = ?");
+                $itemResult = $db->execPrepared($checkItemStmt, [$item['name']]);
+                $itemExists = $itemResult->fetchArray(SQLITE3_ASSOC);
+                
+                $itemId = $itemExists ? $itemExists['item_id'] : $item['item_id'];
+                
+                // If item doesn't exist, create it
+                if (!$itemExists) {
+                    $itemStmt = $db->prepare(
+                        "INSERT INTO items (
+                            item_id, name, description, type,
+                            rarity, is_missable, location_note
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    
+                    $itemDescription = "An item sold by {$merchant['name']} in {$merchant['location']}.";
+                    if (isset($merchant['is_missable']) && $merchant['is_missable']) {
+                        $itemDescription .= " This item is missable because the merchant may become unavailable.";
+                    }
+                    
+                    $db->execPrepared($itemStmt, [
+                        $itemId,
+                        $item['name'],
+                        $itemDescription,
+                        'Merchant Item',
+                        $item['rarity'],
+                        isset($merchant['is_missable']) ? 1 : 0,
+                        $merchant['act'] . ' - ' . $merchant['location']
+                    ]);
+                    
+                    // Add to search index
+                    $itemKeywords = $item['name'] . ' ' . $item['rarity'] . ' merchant item ' . 
+                                    $merchant['name'] . ' ' . $merchant['location'];
+                    
+                    $searchStmt = $db->prepare(
+                        "INSERT INTO search_index (
+                            content_id, content_type, name, description, keywords
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    $db->execPrepared($searchStmt, [
+                        $itemId,
+                        'item',
+                        $item['name'],
+                        $itemDescription,
+                        $itemKeywords
+                    ]);
+                }
+                
+                // Link item to merchant
+                $checkMerchantItemStmt = $db->prepare(
+                    "SELECT id FROM merchant_items WHERE merchant_id = ? AND item_id = ?"
+                );
+                $merchantItemResult = $db->execPrepared(
+                    $checkMerchantItemStmt, 
+                    [$merchantId, $itemId]
+                );
+                $merchantItemExists = $merchantItemResult->fetchArray(SQLITE3_ASSOC);
+                
+                if (!$merchantItemExists) {
+                    $merchantItemStmt = $db->prepare(
+                        "INSERT INTO merchant_items (
+                            merchant_id, item_id, is_missable, act, location
+                        ) VALUES (?, ?, ?, ?, ?)"
+                    );
+                    
+                    $db->execPrepared($merchantItemStmt, [
+                        $merchantId,
+                        $itemId,
+                        isset($merchant['is_missable']) ? 1 : 0,
+                        $merchant['act'],
+                        $merchant['location']
+                    ]);
+                    
+                    $itemCount++;
+                }
+            }
+        }
+        
+        echo "Imported $merchantCount new merchants with $itemCount items.\n";
+    } catch (Exception $e) {
+        echo "Error importing merchant items: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
+ * Import companion approval information from the bg3-missables repository
+ */
+function importCompanionApproval($db) {
+    echo "Importing companion approval data...\n";
+    
+    try {
+        // Try to fetch companion-specific data from GitHub repo
+        $approvalUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/companion_approval.md";
+        
+        echo "Fetching companion approval data from: $approvalUrl\n";
+        
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $approvalUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+        ]);
+        
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        // If companion_approval.md doesn't exist, fallback to main checklist
+        if ($err || strpos($response, "404: Not Found") !== false) {
+            echo "Companion approval file not found, extracting from main checklist instead.\n";
+            $approvalUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
+            
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $approvalUrl,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+            ]);
+            
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            
+            curl_close($curl);
+            
+            if ($err) {
+                echo "cURL Error: " . $err . "\n";
+                return;
+            }
+        }
+        
+        // Create companion_events table if it doesn't exist
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS companion_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT NOT NULL,
+                companion_id TEXT NOT NULL,
+                description TEXT NOT NULL,
+                location TEXT,
+                act TEXT,
+                effect TEXT,
+                approval_change TEXT,
+                is_missable INTEGER DEFAULT 0,
+                FOREIGN KEY (companion_id) REFERENCES npcs(npc_id)
+            )
+        ");
+        
+        // Parse the markdown to extract companion approval data
+        $lines = explode("\n", $response);
+        $events = [];
+        $currentAct = '';
+        $currentLocation = '';
+        $companionMap = [
+            'Astarion' => 'npc_astarion',
+            'Gale' => 'npc_gale',
+            'Karlach' => 'npc_karlach',
+            'Lae\'zel' => 'npc_laezel',
+            'Shadowheart' => 'npc_shadowheart',
+            'Wyll' => 'npc_wyll',
+            'Minthara' => 'npc_minthara',
+            'Halsin' => 'npc_halsin'
+        ];
+        
+        // Add Karlach and Minthara to NPCs if they don't exist
+        if (!isset($db->querySingle("SELECT npc_id FROM npcs WHERE npc_id = 'npc_karlach'"))) {
+            $db->exec("
+                INSERT INTO npcs (
+                    npc_id, name, description, role, is_hostile, is_merchant
+                ) VALUES (
+                    'npc_karlach', 
+                    'Karlach', 
+                    'A tiefling fighter with an infernal engine for a heart, running from hellish hunters.', 
+                    'Companion', 
+                    0, 
+                    0
+                )
+            ");
+        }
+        
+        foreach ($lines as $line) {
+            // Extract act information
+            if (preg_match('/^# (Act \d+.*)/', $line, $matches)) {
+                $currentAct = $matches[1];
+                continue;
+            }
+            
+            // Extract location information
+            if (preg_match('/^# (.*)$/', $line, $matches) && $matches[1] != 'Getting Started (Feel Free to Check These Off)') {
+                $currentLocation = $matches[1];
+                continue;
+            }
+            
+            // Look for companion approval patterns - this requires some adaptation based on the actual format
+            if (preg_match('/- ::approval:: (.+?)(?:\s*\((.*?)\))?$/', $line, $matches) || 
+                preg_match('/- ::(?:task|missable):: (.+?)(?:approves|disapproves|likes|dislikes|preferred|preference)/', $line, $matches)) {
+                
+                $description = trim($matches[1]);
+                $approvalInfo = isset($matches[2]) ? $matches[2] : '';
+                
+                // Try to identify which companion(s) this affects
+                $affectedCompanions = [];
+                
+                foreach ($companionMap as $name => $id) {
+                    if (stripos($line, $name) !== false) {
+                        $affectedCompanions[$id] = [
+                            'name' => $name,
+                            'effect' => strpos($line, 'disapprove') !== false || strpos($line, 'dislike') !== false 
+                                      ? 'negative' 
+                                      : (strpos($line, 'approve') !== false || strpos($line, 'like') !== false 
+                                         ? 'positive' 
+                                         : 'unknown')
+                        ];
+                    }
+                }
+                
+                // If no specific companions were mentioned but approval is mentioned
+                if (empty($affectedCompanions) && 
+                    (strpos($line, 'approve') !== false || strpos($line, 'like') !== false || 
+                     strpos($line, 'companion') !== false)) {
+                    
+                    // Generic approval event affecting multiple companions
+                    $affectedCompanions['generic'] = [
+                        'name' => 'Multiple companions',
+                        'effect' => 'varies'
+                    ];
+                }
+                
+                if (!empty($affectedCompanions)) {
+                    // Create a unique event ID
+                    $eventId = 'event_' . md5($description . $currentLocation . $currentAct);
+                    
+                    // Is this event missable?
+                    $isMissable = strpos($line, '::missable::') !== false ? 1 : 0;
+                    
+                    // Add to events array
+                    $events[] = [
+                        'id' => $eventId,
+                        'description' => $description,
+                        'location' => $currentLocation,
+                        'act' => $currentAct,
+                        'companions' => $affectedCompanions,
+                        'approval_info' => $approvalInfo,
+                        'is_missable' => $isMissable
+                    ];
+                }
+            }
+        }
+        
+        // Insert events into database
+        $count = 0;
+        foreach ($events as $event) {
+            foreach ($event['companions'] as $companionId => $companionData) {
+                // Skip generic events for now as they need special handling
+                if ($companionId === 'generic') {
+                    continue;
+                }
+                
+                // Check if the event for this companion already exists
+                $checkStmt = $db->prepare(
+                    "SELECT id FROM companion_events WHERE event_id = ? AND companion_id = ?"
+                );
+                $result = $db->execPrepared($checkStmt, [$event['id'], $companionId]);
+                $exists = $result->fetchArray(SQLITE3_ASSOC);
+                
+                if (!$exists) {
+                    // Insert new event
+                    $stmt = $db->prepare(
+                        "INSERT INTO companion_events (
+                            event_id, companion_id, description, location, act,
+                            effect, approval_change, is_missable
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    
+                    $result = $db->execPrepared($stmt, [
+                        $event['id'],
+                        $companionId,
+                        $event['description'],
+                        $event['location'],
+                        $event['act'],
+                        $companionData['effect'],
+                        $event['approval_info'],
+                        $event['is_missable']
+                    ]);
+                    
+                    if ($result) {
+                        $count++;
+                        
+                        // Add to search index
+                        $keywords = $event['description'] . ' ' . $companionData['name'] . ' companion approval ' . 
+                                    $companionData['effect'] . ' ' . $event['act'] . ' ' . $event['location'];
+                        
+                        if ($event['is_missable']) {
+                            $keywords .= ' missable';
+                        }
+                        
+                        $searchStmt = $db->prepare(
+                            "INSERT INTO search_index (
+                                content_id, content_type, name, description, keywords
+                            ) VALUES (?, ?, ?, ?, ?)"
+                        );
+                        $db->execPrepared($searchStmt, [
+                            $event['id'] . '_' . $companionId,
+                            'companion_event',
+                            $companionData['name'] . ' - ' . $event['description'],
+                            $event['description'],
+                            $keywords
+                        ]);
+                    }
+                }
+            }
+            
+            // Handle generic events affecting multiple companions
+            if (isset($event['companions']['generic'])) {
+                // Create a unified entry for the generic event
+                $checkStmt = $db->prepare(
+                    "SELECT id FROM companion_events WHERE event_id = ? AND companion_id = ?"
+                );
+                $result = $db->execPrepared($checkStmt, [$event['id'], 'multiple']);
+                $exists = $result->fetchArray(SQLITE3_ASSOC);
+                
+                if (!$exists) {
+                    $stmt = $db->prepare(
+                        "INSERT INTO companion_events (
+                            event_id, companion_id, description, location, act,
+                            effect, approval_change, is_missable
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    );
+                    
+                    $result = $db->execPrepared($stmt, [
+                        $event['id'],
+                        'multiple',
+                        $event['description'],
+                        $event['location'],
+                        $event['act'],
+                        'varies',
+                        $event['approval_info'],
+                        $event['is_missable']
+                    ]);
+                    
+                    if ($result) {
+                        $count++;
+                        
+                        // Add to search index
+                        $keywords = $event['description'] . ' companion approval multiple companions ' . 
+                                    $event['act'] . ' ' . $event['location'];
+                        
+                        if ($event['is_missable']) {
+                            $keywords .= ' missable';
+                        }
+                        
+                        $searchStmt = $db->prepare(
+                            "INSERT INTO search_index (
+                                content_id, content_type, name, description, keywords
+                            ) VALUES (?, ?, ?, ?, ?)"
+                        );
+                        $db->execPrepared($searchStmt, [
+                            $event['id'] . '_multiple',
+                            'companion_event',
+                            'Multiple Companions - ' . $event['description'],
+                            $event['description'],
+                            $keywords
+                        ]);
+                    }
+                }
+            }
+        }
+        
+        echo "Imported $count companion approval events.\n";
+    } catch (Exception $e) {
+        echo "Error importing companion approval data: " . $e->getMessage() . "\n";
+    }
+}
+
+/**
  * Import Quests into database
  */
 function importQuests($db) {
@@ -689,9 +1909,15 @@ try {
     
     // Import data
     importLocations($db);
-    importNPCs($db);
     importItems($db);
+    importMissableItems($db);
+    importNPCs($db);
     importQuests($db);
+    importMissableQuests($db);
+    importMissableTasks($db);
+    importMissableAbilities($db);
+    importMerchantItems($db);
+    importCompanionApproval($db);
     
     // Commit transaction
     $db->exec("COMMIT");

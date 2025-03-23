@@ -49,7 +49,7 @@ array_shift($parts);
 
 // Get resource type (locations, items, npcs, quests)
 $resourceType = !empty($parts[0]) ? $parts[0] : null;
-$allowedResources = ['locations', 'items', 'npcs', 'quests', 'search'];
+$allowedResources = ['locations', 'items', 'npcs', 'quests', 'search', 'classes'];
 
 // Validate resource type
 if (!$resourceType || !in_array($resourceType, $allowedResources)) {
@@ -152,6 +152,18 @@ function handleGetRequest($db, $resourceType, $resourceId) {
                 
                 Response::json($npc);
                 return;
+                
+            case 'classes':
+                // Get single class
+                $class = getClass($db, $resourceId);
+                
+                if (!$class) {
+                    Response::json(['error' => 'Class not found'], 404);
+                    return;
+                }
+                
+                Response::json($class);
+                return;
         }
     } else {
         // Get list of resources based on type
@@ -174,6 +186,11 @@ function handleGetRequest($db, $resourceType, $resourceId) {
             case 'npcs':
                 $npcs = getNpcs($db, $params);
                 Response::json($npcs);
+                return;
+                
+            case 'classes':
+                $classes = getClasses($db, $params);
+                Response::json($classes);
                 return;
         }
     }
@@ -250,25 +267,82 @@ function getQuests($db, $params) {
         $queryParams[] = (int) $params['is_main_story'];
     }
     
+    // Filter by type
+    if (isset($params['type'])) {
+        $whereConditions[] = "type = ?";
+        $queryParams[] = $params['type'];
+    }
+    
+    // Filter by category
+    if (isset($params['category'])) {
+        $whereConditions[] = "category = ?";
+        $queryParams[] = $params['category'];
+    }
+    
     // Filter by difficulty
     if (isset($params['difficulty'])) {
         $whereConditions[] = "difficulty = ?";
         $queryParams[] = $params['difficulty'];
     }
     
-    // Add WHERE clause if conditions exist
+    // Filter by time sensitive
+    if (isset($params['time_sensitive'])) {
+        $whereConditions[] = "time_sensitive = ?";
+        $queryParams[] = (int) $params['time_sensitive'];
+    }
+    
+    // Add search term
+    if (isset($params['q'])) {
+        $searchTerm = $params['q'];
+        $whereConditions[] = "(name LIKE ? OR description LIKE ?)";
+        $queryParams[] = "%$searchTerm%";
+        $queryParams[] = "%$searchTerm%";
+    }
+    
+    // Combine all where conditions
     if (!empty($whereConditions)) {
         $sql .= " WHERE " . implode(" AND ", $whereConditions);
     }
     
-    // Add order by
-    $sql .= " ORDER BY name ASC";
+    // Add sort order (main quests first, then alphabetically)
+    $sql .= " ORDER BY is_main_story DESC, name ASC";
     
-    try {
-        return $db->fetchAll($sql, $queryParams);
-    } catch (Exception $e) {
-        return [];
+    // Add limit and offset for pagination
+    if (isset($params['limit'])) {
+        $limit = (int) $params['limit'];
+        $sql .= " LIMIT ?";
+        $queryParams[] = $limit;
+        
+        if (isset($params['offset'])) {
+            $offset = (int) $params['offset'];
+            $sql .= " OFFSET ?";
+            $queryParams[] = $offset;
+        }
     }
+    
+    // Execute query
+    $quests = $db->fetchAll($sql, $queryParams);
+    
+    // Format results
+    foreach ($quests as &$quest) {
+        // Parse JSON fields
+        if (!empty($quest['prerequisites'])) {
+            $quest['prerequisites'] = json_decode($quest['prerequisites']);
+        }
+        if (!empty($quest['rewards'])) {
+            $quest['rewards'] = json_decode($quest['rewards']);
+        }
+        if (!empty($quest['related_quests'])) {
+            $quest['related_quests'] = json_decode($quest['related_quests']);
+        }
+        
+        // Remove any null fields for cleaner output
+        $quest = array_filter($quest, function ($value) {
+            return $value !== null;
+        });
+    }
+    
+    return $quests;
 }
 
 /**
@@ -434,31 +508,67 @@ function getItems($db, $params) {
         $queryParams[] = $params['rarity'];
     }
     
-    // Filter by quest related
+    // Filter by quest-related
     if (isset($params['quest_related'])) {
         $whereConditions[] = "quest_related = ?";
         $queryParams[] = (int) $params['quest_related'];
     }
     
-    // Filter by specific ID
-    if (isset($params['id'])) {
-        $whereConditions[] = "item_id = ?";
-        $queryParams[] = $params['id'];
+    // Filter by missable
+    if (isset($params['missable'])) {
+        $whereConditions[] = "is_missable = ?";
+        $queryParams[] = (int) $params['missable'];
     }
     
-    // Add WHERE clause if conditions exist
+    // Add search term
+    if (isset($params['q'])) {
+        $searchTerm = $params['q'];
+        $whereConditions[] = "(name LIKE ? OR description LIKE ?)";
+        $queryParams[] = "%$searchTerm%";
+        $queryParams[] = "%$searchTerm%";
+    }
+    
+    // Combine all where conditions
     if (!empty($whereConditions)) {
         $sql .= " WHERE " . implode(" AND ", $whereConditions);
     }
     
-    // Add order by
+    // Add sort order
     $sql .= " ORDER BY name ASC";
     
-    try {
-        return $db->fetchAll($sql, $queryParams);
-    } catch (Exception $e) {
-        return [];
+    // Add limit and offset for pagination
+    if (isset($params['limit'])) {
+        $limit = (int) $params['limit'];
+        $sql .= " LIMIT ?";
+        $queryParams[] = $limit;
+        
+        if (isset($params['offset'])) {
+            $offset = (int) $params['offset'];
+            $sql .= " OFFSET ?";
+            $queryParams[] = $offset;
+        }
     }
+    
+    // Execute query
+    $items = $db->fetchAll($sql, $queryParams);
+    
+    // Format results
+    foreach ($items as &$item) {
+        // Parse JSON fields
+        if (!empty($item['stats'])) {
+            $item['stats'] = json_decode($item['stats']);
+        }
+        if (!empty($item['requirements'])) {
+            $item['requirements'] = json_decode($item['requirements']);
+        }
+        
+        // Remove any null fields for cleaner output
+        $item = array_filter($item, function ($value) {
+            return $value !== null;
+        });
+    }
+    
+    return $items;
 }
 
 /**
@@ -514,56 +624,88 @@ function getNpcs($db, $params) {
     // Add filters based on params
     $whereConditions = [];
     
-    // Filter by role
-    if (isset($params['role'])) {
-        $whereConditions[] = "role = ?";
-        $queryParams[] = $params['role'];
-    }
-    
     // Filter by faction
     if (isset($params['faction'])) {
         $whereConditions[] = "faction = ?";
         $queryParams[] = $params['faction'];
     }
     
-    // Filter by hostility
-    if (isset($params['is_hostile'])) {
-        $whereConditions[] = "is_hostile = ?";
-        $queryParams[] = (int) $params['is_hostile'];
+    // Filter by category (e.g., 'boss')
+    if (isset($params['category'])) {
+        $whereConditions[] = "category = ?";
+        $queryParams[] = $params['category'];
     }
     
-    // Filter by merchant
-    if (isset($params['is_merchant'])) {
+    // Filter by role
+    if (isset($params['role'])) {
+        $whereConditions[] = "role = ?";
+        $queryParams[] = $params['role'];
+    }
+    
+    // Filter by hostility
+    if (isset($params['hostile'])) {
+        $whereConditions[] = "is_hostile = ?";
+        $queryParams[] = (int) $params['hostile'];
+    }
+    
+    // Filter by merchant capability
+    if (isset($params['merchant'])) {
         $whereConditions[] = "is_merchant = ?";
-        $queryParams[] = (int) $params['is_merchant'];
+        $queryParams[] = (int) $params['merchant'];
     }
     
     // Filter by location
-    if (isset($params['location_id'])) {
-        $sql = "SELECT n.* FROM npcs n JOIN npc_locations nl ON n.npc_id = nl.npc_id";
-        $whereConditions[] = "nl.location_id = ?";
-        $queryParams[] = $params['location_id'];
+    if (isset($params['location'])) {
+        $whereConditions[] = "default_location_id = ?";
+        $queryParams[] = $params['location'];
     }
     
-    // Filter by specific ID
-    if (isset($params['id'])) {
-        $whereConditions[] = "npc_id = ?";
-        $queryParams[] = $params['id'];
+    // Add search term
+    if (isset($params['q'])) {
+        $searchTerm = $params['q'];
+        $whereConditions[] = "(name LIKE ? OR description LIKE ?)";
+        $queryParams[] = "%$searchTerm%";
+        $queryParams[] = "%$searchTerm%";
     }
     
-    // Add WHERE clause if conditions exist
+    // Combine all where conditions
     if (!empty($whereConditions)) {
         $sql .= " WHERE " . implode(" AND ", $whereConditions);
     }
     
-    // Add order by
+    // Add sort order
     $sql .= " ORDER BY name ASC";
     
-    try {
-        return $db->fetchAll($sql, $queryParams);
-    } catch (Exception $e) {
-        return [];
+    // Add limit and offset for pagination
+    if (isset($params['limit'])) {
+        $limit = (int) $params['limit'];
+        $sql .= " LIMIT ?";
+        $queryParams[] = $limit;
+        
+        if (isset($params['offset'])) {
+            $offset = (int) $params['offset'];
+            $sql .= " OFFSET ?";
+            $queryParams[] = $offset;
+        }
     }
+    
+    // Execute query
+    $npcs = $db->fetchAll($sql, $queryParams);
+    
+    // Format results
+    foreach ($npcs as &$npc) {
+        // Parse JSON fields
+        if (!empty($npc['drops'])) {
+            $npc['drops'] = json_decode($npc['drops']);
+        }
+        
+        // Remove any null fields for cleaner output
+        $npc = array_filter($npc, function ($value) {
+            return $value !== null;
+        });
+    }
+    
+    return $npcs;
 }
 
 /**
@@ -607,6 +749,80 @@ function getNpc($db, $npcId, $params) {
         }
         
         return $npc;
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/**
+ * Get list of character classes
+ * 
+ * @param Database $db Database instance
+ * @param array $params Query parameters
+ * @return array List of classes
+ */
+function getClasses($db, $params) {
+    // We only have classes for Elden Ring, so this is game-specific
+    $sql = "SELECT * FROM classes";
+    $queryParams = [];
+    
+    // Add search term if provided
+    if (isset($params['q'])) {
+        $searchTerm = $params['q'];
+        $sql .= " WHERE name LIKE ? OR description LIKE ?";
+        $queryParams[] = "%$searchTerm%";
+        $queryParams[] = "%$searchTerm%";
+    }
+    
+    // Add sort order
+    $sql .= " ORDER BY name ASC";
+    
+    try {
+        $classes = $db->fetchAll($sql, $queryParams);
+        
+        // Format results
+        foreach ($classes as &$class) {
+            // Parse JSON fields
+            if (!empty($class['stats'])) {
+                $class['stats'] = json_decode($class['stats']);
+            }
+            if (!empty($class['equipment'])) {
+                $class['equipment'] = json_decode($class['equipment']);
+            }
+        }
+        
+        return $classes;
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/**
+ * Get a specific class by ID
+ * 
+ * @param Database $db Database instance
+ * @param string $classId Class identifier
+ * @return array|null Class data or null if not found
+ */
+function getClass($db, $classId) {
+    $sql = "SELECT * FROM classes WHERE class_id = ?";
+    
+    try {
+        $class = $db->fetchOne($sql, [$classId]);
+        
+        if (!$class) {
+            return null;
+        }
+        
+        // Parse JSON fields
+        if (!empty($class['stats'])) {
+            $class['stats'] = json_decode($class['stats']);
+        }
+        if (!empty($class['equipment'])) {
+            $class['equipment'] = json_decode($class['equipment']);
+        }
+        
+        return $class;
     } catch (Exception $e) {
         return null;
     }
