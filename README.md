@@ -157,3 +157,44 @@ sqlite3 data/system.sqlite
 ```
 
 Or use any SQLite GUI tool like DB Browser for SQLite, SQLiteStudio, or TablePlus.
+
+## Deployment
+
+FridayAI is deployed using Vercel for the static site. The deployment process has been automated using GitHub Actions.
+
+### Automatic Deployment
+
+When changes are pushed to the `main` branch, the following actions are automatically performed:
+
+1. The GitHub Action workflow is triggered
+2. Node.js dependencies are installed
+3. TailwindCSS is built (`npm run build:css`)
+4. The site is deployed to Vercel using the Vercel CLI
+
+To set up automatic deployment:
+
+1. Configure the following secrets in your GitHub repository:
+   - `VERCEL_TOKEN`: Your Vercel authentication token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID (optional)
+   - `VERCEL_PROJECT_ID`: Your Vercel project ID (optional)
+
+2. Push to the main branch to trigger deployment
+
+### Manual Deployment
+
+If you need to deploy manually, follow these steps:
+
+1. Build the CSS:
+   ```bash
+   npm run build:css
+   ```
+
+2. Deploy to Vercel:
+   ```bash
+   vercel --prod
+   ```
+
+### Important Notes
+
+- Always make sure to build your CSS locally (`npm run build:css`) before pushing if you've made changes to `tailwind.config.js` or CSS source files
+- For theme changes to take effect, ensure that `tailwind.css` is regenerated with `npm run build:css`
