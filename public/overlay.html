@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jarvis Overlay</title>
+    <link rel="stylesheet" href="css/tailwind.css">
+</head>
+<body class="bg-transparent text-gaming-light">
+    <div id="jarvis-overlay" class="fixed top-0 right-0 w-64 bg-gaming-dark bg-opacity-80 border-l border-b border-gaming-primary rounded-bl-lg shadow-lg">
+        <header class="p-2 bg-gaming-primary text-white">
+            <div class="flex justify-between items-center">
+                <h1 class="text-lg font-bold">Jarvis</h1>
+                <div class="space-x-2">
+                    <button id="minimize-btn" class="text-xs hover:text-gray-300">_</button>
+                    <button id="close-btn" class="text-xs hover:text-gray-300">×</button>
+                </div>
+            </div>
+        </header>
+        
+        <main class="p-3">
+            <div class="mb-3">
+                <input type="text" placeholder="Search..." class="w-full px-2 py-1 bg-gaming-secondary border border-gaming-primary rounded text-sm">
+            </div>
+            
+            <div id="content-area" class="space-y-2">
+                <p class="text-xs">Press Ctrl+J to toggle overlay visibility</p>
+                <p class="text-xs">Select a game to see available information</p>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/overlay.js"></script>
+    <script src="js/interaction.js"></script>
+    <script src="js/data.js"></script>
+</body>
+</html>

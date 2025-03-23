@@ -1,0 +1,62 @@
+Project Structure:
+
+Jarvis
+├── PRD-Doc.md
+├── README.md
+├── app
+│   ├── api
+│   │   ├── auth.php
+│   │   ├── data.php
+│   │   ├── payment.php
+│   │   └── user.php
+│   ├── config
+│   │   ├── database.php
+│   │   ├── openai.php
+│   │   └── stripe.php
+│   ├── models
+│   │   ├── GameData.php
+│   │   ├── Subscription.php
+│   │   └── User.php
+│   └── utils
+│       ├── Auth.php
+│       ├── Config.php
+│       └── Database.php
+├── back-end.md
+├── data
+│   ├── game_data
+│   │   ├── baldurs_gate3.sqlite
+│   │   └── elden_ring.sqlite
+│   └── system.sqlite
+├── database
+│   ├── README.md
+│   ├── db_example.php
+│   ├── schema
+│   │   ├── game_schema.sql
+│   │   └── system_schema.sql
+│   ├── setup_databases.sh
+│   └── verify_databases.sh
+├── database-schema.md
+├── docs
+│   ├── api.md
+│   ├── architecture.md
+│   └── setup.md
+├── front-end.md
+├── project_structure.txt
+├── public
+│   ├── assets
+│   │   ├── icons
+│   │   └── images
+│   ├── css
+│   │   └── tailwind.css
+│   ├── index.html
+│   ├── js
+│   │   ├── data.js
+│   │   ├── interaction.js
+│   │   └── overlay.js
+│   └── overlay.html
+├── scripts
+│   ├── build.sh
+│   ├── deploy.sh
+│   └── import.php
+├── techstack-and-project-structure.md
+└── tools-and-game-documentation.md

@@ -598,53 +598,42 @@ class GameData {
     
     public function __construct($game) {
         $this->game = $game;
-        $this->db = new SQLite3(BASE_PATH . "/data/game_data/{$game}.sqlite");
-        $this->db->enableExceptions(true);
+        // Use the Database utility class to get a game database instance
+        $this->db = Database::getGameInstance($game);
     }
     
     public function getQuest($questId, $spoilerLevel = 0) {
-        $stmt = $this->db->prepare("
+        $quest = $this->db->fetchOne("
             SELECT * FROM quests 
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
-        ");
-        $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
-        $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
-        $result = $stmt->execute();
+        ", [
+            ':quest_id' => $questId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
         
-        $quest = $result->fetchArray(SQLITE3_ASSOC);
         if (!$quest) {
             return null;
         }
         
         // Get quest steps
-        $stmt = $this->db->prepare("
+        $steps = $this->db->fetchAll("
             SELECT * FROM quest_steps 
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
             ORDER BY step_number
-        ");
-        $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
-        $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
-        $result = $stmt->execute();
-        
-        $steps = [];
-        while ($step = $result->fetchArray(SQLITE3_ASSOC)) {
-            $steps[] = $step;
-        }
+        ", [
+            ':quest_id' => $questId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
         
         $quest['steps'] = $steps;
         
         // Get prerequisites
-        $stmt = $this->db->prepare("
+        $prerequisites = $this->db->fetchAll("
             SELECT * FROM quest_prerequisites
             WHERE quest_id = :quest_id
-        ");
-        $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
-        $result = $stmt->execute();
-        
-        $prerequisites = [];
-        while ($prereq = $result->fetchArray(SQLITE3_ASSOC)) {
-            $prerequisites[] = $prereq;
-        }
+        ", [
+            ':quest_id' => $questId
+        ]);
         
         $quest['prerequisites'] = $prerequisites;
         
@@ -653,35 +642,32 @@ class GameData {
     
     public function getQuestsByLocation($locationId, $spoilerLevel = 0) {
         // Get quests that start at this location
-        $stmt = $this->db->prepare("
+        $quests = $this->db->fetchAll("
             SELECT * FROM quests 
             WHERE starting_location_id = :location_id AND spoiler_level <= :spoiler_level
-        ");
-        $stmt->bindValue(':location_id', $locationId, SQLITE3_TEXT);
-        $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
-        $result = $stmt->execute();
-        
-        $quests = [];
-        while ($quest = $result->fetchArray(SQLITE3_ASSOC)) {
-            $quests[] = $quest;
-        }
+        ", [
+            ':location_id' => $locationId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
         
         // Get quests with steps at this location
-        $stmt = $this->db->prepare("
+        $stepsAtLocation = $this->db->fetchAll("
             SELECT DISTINCT q.* FROM quests q
             JOIN quest_steps qs ON q.quest_id = qs.quest_id
             WHERE qs.location_id = :location_id 
             AND q.spoiler_level <= :spoiler_level
             AND qs.spoiler_level <= :spoiler_level
-        ");
-        $stmt->bindValue(':location_id', $locationId, SQLITE3_TEXT);
-        $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
-        $result = $stmt->execute();
+        ", [
+            ':location_id' => $locationId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
         
-        while ($quest = $result->fetchArray(SQLITE3_ASSOC)) {
-            // Avoid duplicates
-            if (!in_array($quest['quest_id'], array_column($quests, 'quest_id'))) {
+        // Merge the results, avoiding duplicates
+        $questIds = array_column($quests, 'quest_id');
+        foreach ($stepsAtLocation as $quest) {
+            if (!in_array($quest['quest_id'], $questIds)) {
                 $quests[] = $quest;
+                $questIds[] = $quest['quest_id'];
             }
         }
         
@@ -701,7 +687,8 @@ class UserProgress {
     private $db;
     
     public function __construct() {
-        $this->db = Database::getInstance();
+        // Use the Database utility class to get the system database instance
+        $this->db = Database::getSystemInstance();
     }
     
     public function trackQuestProgress($userId, $gameId, $questId, $stepId = null, $completed = 0, $status = 'in_progress') {
@@ -710,41 +697,58 @@ class UserProgress {
             SELECT id FROM user_game_progress
             WHERE user_id = :user_id AND game_id = :game_id AND quest_id = :quest_id
         ", [
-            'user_id' => $userId,
-            'game_id' => $gameId,
-            'quest_id' => $questId
+            ':user_id' => $userId,
+            ':game_id' => $gameId,
+            ':quest_id' => $questId
         ]);
         
         $timestamp = date('Y-m-d H:i:s');
         
         if ($existing) {
             // Update existing record
-            $this->db->update(
-                'user_game_progress',
-                [
-                    'step_id' => $stepId,
-                    'completed' => $completed,
-                    'marked_status' => $status,
-                    'last_accessed' => $timestamp,
-                    'updated_at' => $timestamp
-                ],
-                'id = :id',
-                ['id' => $existing['id']]
-            );
+            $this->db->fetchAll("
+                UPDATE user_game_progress
+                SET step_id = :step_id,
+                    completed = :completed,
+                    marked_status = :status,
+                    last_accessed = :last_accessed,
+                    updated_at = :updated_at
+                WHERE id = :id
+            ", [
+                ':step_id' => $stepId,
+                ':completed' => $completed,
+                ':status' => $status,
+                ':last_accessed' => $timestamp,
+                ':updated_at' => $timestamp,
+                ':id' => $existing['id']
+            ]);
+            
             return $existing['id'];
         } else {
             // Create new record
-            return $this->db->insert('user_game_progress', [
-                'user_id' => $userId,
-                'game_id' => $gameId,
-                'quest_id' => $questId,
-                'step_id' => $stepId,
-                'completed' => $completed,
-                'marked_status' => $status,
-                'last_accessed' => $timestamp,
-                'created_at' => $timestamp,
-                'updated_at' => $timestamp
-            ]);
+            $stmt = $this->db->prepare("
+                INSERT INTO user_game_progress (
+                    user_id, game_id, quest_id, step_id, completed,
+                    marked_status, last_accessed, created_at, updated_at
+                )
+                VALUES (
+                    :user_id, :game_id, :quest_id, :step_id, :completed,
+                    :status, :last_accessed, :created_at, :updated_at
+                )
+            ");
+            
+            $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
+            $stmt->bindValue(':game_id', $gameId, SQLITE3_TEXT);
+            $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
+            $stmt->bindValue(':step_id', $stepId, SQLITE3_TEXT);
+            $stmt->bindValue(':completed', $completed, SQLITE3_INTEGER);
+            $stmt->bindValue(':status', $status, SQLITE3_TEXT);
+            $stmt->bindValue(':last_accessed', $timestamp, SQLITE3_TEXT);
+            $stmt->bindValue(':created_at', $timestamp, SQLITE3_TEXT);
+            $stmt->bindValue(':updated_at', $timestamp, SQLITE3_TEXT);
+            
+            $stmt->execute();
+            return $this->db->db->lastInsertRowID();
         }
     }
     
@@ -753,24 +757,26 @@ class UserProgress {
             SELECT * FROM user_game_progress
             WHERE user_id = :user_id AND game_id = :game_id AND quest_id = :quest_id
         ", [
-            'user_id' => $userId,
-            'game_id' => $gameId,
-            'quest_id' => $questId
+            ':user_id' => $userId,
+            ':game_id' => $gameId,
+            ':quest_id' => $questId
         ]);
     }
     
     public function addQuestNote($userId, $gameId, $questId, $notes) {
         $progress = $this->getUserQuestProgress($userId, $gameId, $questId);
         if ($progress) {
-            $this->db->update(
-                'user_game_progress',
-                [
-                    'notes' => $notes,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ],
-                'id = :id',
-                ['id' => $progress['id']]
-            );
+            $this->db->fetchAll("
+                UPDATE user_game_progress
+                SET notes = :notes,
+                    updated_at = :updated_at
+                WHERE id = :id
+            ", [
+                ':notes' => $notes,
+                ':updated_at' => date('Y-m-d H:i:s'),
+                ':id' => $progress['id']
+            ]);
+            
             return true;
         }
         return false;
@@ -787,8 +793,10 @@ class UserProgress {
 // api/quests.php
 require_once BASE_PATH . '/utils/Response.php';
 require_once BASE_PATH . '/utils/Auth.php';
+require_once BASE_PATH . '/utils/Database.php';
 require_once BASE_PATH . '/models/GameData.php';
 require_once BASE_PATH . '/models/UserProgress.php';
+require_once BASE_PATH . '/models/UserSettings.php';
 
 // Validate authentication
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -818,7 +826,11 @@ $gameData = new GameData($gameId);
 $userProgress = new UserProgress();
 
 // Get user settings for spoiler level
-$userSettings = (new UserSettings())->getUserSettings($userId);
+$userSettingsDb = Database::getSystemInstance();
+$userSettings = $userSettingsDb->fetchOne("
+    SELECT * FROM user_settings WHERE user_id = :user_id
+", [':user_id' => $userId]);
+
 $showSpoilers = $userSettings['show_spoilers'] ?? false;
 $spoilerLevel = $showSpoilers ? 999 : 1; // 999 means show all spoilers
 
@@ -836,7 +848,18 @@ if ($method === 'GET' && $questId) {
     $progress = $userProgress->getUserQuestProgress($userId, $gameId, $questId);
     
     // Log this access
-    (new UsageLog())->logAction($userId, $gameId, 'view', 'quest', $questId);
+    $usageLogs = Database::getSystemInstance();
+    $usageLogs->prepare("
+        INSERT INTO usage_logs (user_id, game_id, action_type, resource_type, resource_id, created_at)
+        VALUES (:user_id, :game_id, :action_type, :resource_type, :resource_id, :created_at)
+    ")->execute([
+        ':user_id' => $userId,
+        ':game_id' => $gameId,
+        ':action_type' => 'view',
+        ':resource_type' => 'quest',
+        ':resource_id' => $questId,
+        ':created_at' => date('Y-m-d H:i:s')
+    ]);
     
     // Return combined data
     Response::success([
@@ -845,10 +868,19 @@ if ($method === 'GET' && $questId) {
     ]);
 } elseif ($method === 'GET') {
     // List all quests
-    $quests = $gameData->getAllQuests($spoilerLevel);
+    $gameDb = Database::getGameInstance($gameId);
+    $quests = $gameDb->fetchAll("
+        SELECT * FROM quests WHERE spoiler_level <= :spoiler_level
+    ", [':spoiler_level' => $spoilerLevel]);
     
     // Get user progress for these quests
-    $progress = $userProgress->getAllUserQuestProgress($userId, $gameId);
+    $progress = $userProgress->fetchAll("
+        SELECT * FROM user_game_progress
+        WHERE user_id = :user_id AND game_id = :game_id
+    ", [
+        ':user_id' => $userId,
+        ':game_id' => $gameId
+    ]);
     
     // Convert to dictionary keyed by quest_id
     $progressDict = [];

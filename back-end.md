@@ -46,11 +46,11 @@ app/
 │   ├── Response.php           # API response formatter
 │   └── Logger.php             # Logging functionality
 ├── data/                      # Data storage
-│   ├── database.sqlite        # SQLite database file
-│   ├── logs/                  # Application logs
-│   └── game_data/             # Game data JSON files
-│       ├── elden_ring/        # Elden Ring data
-│       └── baldurs_gate/      # Baldur's Gate 3 data
+│   ├── system.sqlite        # Main SQLite database for user accounts and settings
+│   ├── logs/                # Application logs
+│   └── game_data/           # Game-specific databases
+│       ├── elden_ring.sqlite   # Elden Ring database
+│       └── baldurs_gate3.sqlite # Baldur's Gate 3 database
 └── vendor/                    # Composer dependencies (minimal)
     └── stripe/                # Stripe PHP SDK
 ```
@@ -140,46 +140,69 @@ switch ($endpoint) {
 }
 ```
 
-### 3. Database Utility (`utils/Database.php`)
+### 3. Database Utilities (`utils/Database.php`)
 
-This file provides a simple database connection interface:
+This file provides a simple database connection interface for accessing both the system database and game-specific databases:
 
 ```php
 <?php
 class Database {
-    private static $instance = null;
+    private static $systemInstance = null;
+    private static $gameInstances = [];
     private $db = null;
     
-    private function __construct() {
-        $config = require BASE_PATH . '/config/database.php';
-        $db_path = BASE_PATH . '/data/' . $config['database'];
-        
-        $this->db = new SQLite3($db_path);
+    // Private constructor for singleton pattern
+    private function __construct($databasePath) {
+        $this->db = new SQLite3($databasePath);
         $this->db->enableExceptions(true);
     }
     
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
+    // Get system database instance
+    public static function getSystemInstance() {
+        if (self::$systemInstance === null) {
+            self::$systemInstance = new self(BASE_PATH . '/data/system.sqlite');
         }
-        return self::$instance;
+        return self::$systemInstance;
     }
     
-    public function query($sql, $params = []) {
+    // Get game database instance
+    public static function getGameInstance($game) {
+        // Validate game ID to prevent directory traversal
+        if (!in_array($game, ['elden_ring', 'baldurs_gate3'])) {
+            throw new Exception("Invalid game identifier");
+        }
+        
+        if (!isset(self::$gameInstances[$game])) {
+            self::$gameInstances[$game] = new self(BASE_PATH . "/data/game_data/{$game}.sqlite");
+        }
+        return self::$gameInstances[$game];
+    }
+    
+    // Query execution methods
+    public function query($sql) {
+        return $this->db->query($sql);
+    }
+    
+    public function prepare($sql) {
+        return $this->db->prepare($sql);
+    }
+    
+    public function exec($sql) {
+        return $this->db->exec($sql);
+    }
+    
+    // Fetch methods
+    public function fetchAll($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
         
         foreach ($params as $param => $value) {
-            $stmt->bindValue($param, $value);
+            $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
+            $stmt->bindValue($param, $value, $type);
         }
         
         $result = $stmt->execute();
-        return $result;
-    }
-    
-    public function fetchAll($sql, $params = []) {
-        $result = $this->query($sql, $params);
-        $rows = [];
         
+        $rows = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             $rows[] = $row;
         }
@@ -188,33 +211,16 @@ class Database {
     }
     
     public function fetchOne($sql, $params = []) {
-        $result = $this->query($sql, $params);
-        return $result->fetchArray(SQLITE3_ASSOC);
-    }
-    
-    public function insert($table, $data) {
-        $columns = implode(', ', array_keys($data));
-        $placeholders = ':' . implode(', :', array_keys($data));
+        $stmt = $this->db->prepare($sql);
         
-        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
-        $this->query($sql, $data);
-        
-        return $this->db->lastInsertRowID();
-    }
-    
-    public function update($table, $data, $where, $whereParams = []) {
-        $setParts = [];
-        foreach (array_keys($data) as $column) {
-            $setParts[] = "{$column} = :{$column}";
+        foreach ($params as $param => $value) {
+            $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
+            $stmt->bindValue($param, $value, $type);
         }
-        $setClause = implode(', ', $setParts);
         
-        $sql = "UPDATE {$table} SET {$setClause} WHERE {$where}";
+        $result = $stmt->execute();
         
-        $params = array_merge($data, $whereParams);
-        $this->query($sql, $params);
-        
-        return $this->db->changes();
+        return $result->fetchArray(SQLITE3_ASSOC);
     }
 }
 ```
@@ -838,135 +844,64 @@ require_once BASE_PATH . '/utils/Database.php';
 
 class Game {
     private $db;
-    private $dataPath;
+    private $game;
     
-    public function __construct() {
-        $this->db = Database::getInstance();
-        $this->dataPath = BASE_PATH . '/data/game_data';
+    public function __construct($game) {
+        $this->game = $game;
+        $this->db = Database::getGameInstance($game);
     }
     
-    public function checkUserAccess($userId, $game) {
-        // Check if user has access to this game
-        $user = $this->db->fetchOne(
-            "SELECT subscription_status FROM users WHERE id = :id",
-            ['id' => $userId]
-        );
+    // Get quest information with steps
+    public function getQuest($questId, $spoilerLevel = 0) {
+        $quest = $this->db->fetchOne("
+            SELECT * FROM quests 
+            WHERE quest_id = :id AND spoiler_level <= :spoiler_level
+        ", [
+            ':id' => $questId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
         
-        if ($user['subscription_status'] === 'subscribed') {
-            // Subscribers have access to all games
-            return true;
-        }
-        
-        // Check for one-time purchases
-        $purchase = $this->db->fetchOne(
-            "SELECT id FROM purchases WHERE user_id = :user_id AND game_id = :game_id",
-            [
-                'user_id' => $userId,
-                'game_id' => $game
-            ]
-        );
-        
-        return $purchase !== false;
-    }
-    
-    public function getGameOverview($game) {
-        $filePath = "{$this->dataPath}/{$game}/overview.json";
-        
-        if (!file_exists($filePath)) {
+        if (!$quest) {
             return null;
         }
         
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
+        // Fetch quest steps
+        $steps = $this->db->fetchAll("
+            SELECT * FROM quest_steps
+            WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
+            ORDER BY step_number
+        ", [
+            ':quest_id' => $questId,
+            ':spoiler_level' => $spoilerLevel
+        ]);
+        
+        $quest['steps'] = $steps;
+        
+        return $quest;
     }
     
-    public function listQuests($game) {
-        $filePath = "{$this->dataPath}/{$game}/quests/index.json";
+    // Search game content
+    public function search($term, $contentType = null, $limit = 10) {
+        $sql = "
+            SELECT * FROM search_index
+            WHERE (name LIKE :term OR description LIKE :term OR keywords LIKE :term)
+        ";
         
-        if (!file_exists($filePath)) {
-            return [];
+        if ($contentType) {
+            $sql .= " AND content_type = :content_type";
         }
         
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
-    }
-    
-    public function getQuestData($game, $questId) {
-        $filePath = "{$this->dataPath}/{$game}/quests/{$questId}.json";
+        $sql .= " LIMIT :limit";
         
-        if (!file_exists($filePath)) {
-            return null;
+        $params = [
+            ':term' => '%' . $term . '%',
+            ':limit' => $limit
+        ];
+        
+        if ($contentType) {
+            $params[':content_type'] = $contentType;
         }
         
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
-    }
-    
-    public function listRegions($game) {
-        $filePath = "{$this->dataPath}/{$game}/regions.json";
-        
-        if (!file_exists($filePath)) {
-            return [];
-        }
-        
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
-    }
-    
-    public function listItems($game) {
-        $filePath = "{$this->dataPath}/{$game}/items/index.json";
-        
-        if (!file_exists($filePath)) {
-            return [];
-        }
-        
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
-    }
-    
-    public function getItemData($game, $itemId) {
-        $filePath = "{$this->dataPath}/{$game}/items/{$itemId}.json";
-        
-        if (!file_exists($filePath)) {
-            return null;
-        }
-        
-        $jsonData = file_get_contents($filePath);
-        return json_decode($jsonData, true);
-    }
-    
-    public function search($game, $query) {
-        // Simple search implementation
-        $results = [];
-        
-        // Search quests
-        $quests = $this->listQuests($game);
-        foreach ($quests as $quest) {
-            if (stripos($quest['name'], $query) !== false || 
-                stripos($quest['description'], $query) !== false) {
-                $results[] = [
-                    'type' => 'quest',
-                    'id' => $quest['id'],
-                    'name' => $quest['name'],
-                    'description' => $quest['description']
-                ];
-            }
-        }
-        
-        // Search items
-        $items = $this->listItems($game);
-        foreach ($items as $item) {
-            if (stripos($item['name'], $query) !== false || 
-                stripos($item['description'], $query) !== false) {
-                $results[] = [
-                    'type' => 'item',
-                    'id' => $item['id'],
-                    'name' => $item['name'],
-                    'description' => $item['description']
-                ];
-            }
-        }
-        
-        return $results;
+        return $this->db->fetchAll($sql, $params);
     }
 }

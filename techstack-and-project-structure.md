@@ -44,7 +44,7 @@ The stack has been carefully selected to prioritize:
 | OpenAI API | Optional AI-generated content | Simple REST API integration for dynamic hint generation |
 | Plausible Analytics | Usage tracking | Lightweight, privacy-focused analytics without complex implementation |
 
-### 2. Project Structure
+### 2. Project Structure - Planning
 
 The project follows a monolithic architecture with a clear separation of concerns:
 
@@ -81,11 +81,10 @@ gaming-companion-overlay/
 │       ├── stripe.php    # Stripe API configuration
 │       └── openai.php    # OpenAI API configuration (optional)
 ├── data/                 # Data storage
-│   ├── database.sqlite   # SQLite database file
-│   └── game_packs/       # Game data packs
-│       ├── wow/          # World of Warcraft data
-│       ├── elden_ring/   # Elden Ring data
-│       └── baldurs_gate/ # Baldur's Gate 3 data
+│   ├── system.sqlite     # Main SQLite database for user accounts and settings
+│   └── game_data/        # Game-specific databases and resources
+│       ├── elden_ring.sqlite  # Elden Ring game database
+│       └── baldurs_gate3.sqlite # Baldur's Gate 3 game database
 ├── scripts/              # Utility scripts
 │   ├── deploy.sh         # Deployment script
 │   ├── build.sh          # Build process for Tailwind
@@ -168,21 +167,32 @@ gaming-companion-overlay/
 
 #### 3.3 Data Storage
 
-##### 3.3.1 SQLite Database (`data/database.sqlite`)
-- **Purpose**: Stores user accounts, subscriptions, and metadata
-- **Key Tables**:
+##### 3.3.1 SQLite Databases
+- **System Database** (`data/system.sqlite`):
   - `users`: User account information
   - `subscriptions`: Subscription status and details
   - `purchases`: One-time purchase records
-  - `access_logs`: Usage tracking (optional)
+  - `user_settings`: User preferences and settings
+  - `user_game_progress`: Tracks user progress in games
+  - `user_bookmarks`: Stores user-saved content
+  - `usage_logs`: Activity tracking for analytics
 
-##### 3.3.2 Game Data Packs (`data/game_packs/`)
-- **Purpose**: Stores game-specific guide content
-- **Format**: JSON files organized by game, then by content category
+##### 3.3.2 Game-Specific Databases (`data/game_data/`)
+- **Purpose**: Store game-specific content in dedicated SQLite databases
+- **Databases**:
+  - `elden_ring.sqlite`: Elden Ring game data
+  - `baldurs_gate3.sqlite`: Baldur's Gate 3 game data
 - **Structure**:
-  - Each game has its own directory
-  - Content organized by quest/mission/feature
-  - Metadata for searchability and indexing
+  - Each game database has identical table schemas:
+    - `quests`: Quest/mission information
+    - `quest_steps`: Detailed quest progression steps
+    - `locations`: Game areas and points of interest
+    - `npcs`: Non-player characters
+    - `items`: Game items and artifacts
+    - `npc_locations`: Tracks NPC locations at different stages
+    - `quest_prerequisites`: Tracks quest requirements
+    - `quest_consequences`: Tracks effects of quest decisions
+    - `search_index`: Optimized FTS5 table for text search
 
 ### 4. Integration Points
 

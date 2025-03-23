@@ -1,0 +1,24 @@
+{
+  "name": "jarvis",
+  "version": "0.1.0",
+  "description": "Jarvis: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
+  "main": "public/index.html",
+  "scripts": {
+    "dev": "php -S localhost:8000 -t public",
+    "build:css": "tailwindcss -i public/css/tailwind.src.css -o public/css/tailwind.css",
+    "watch:css": "tailwindcss -i public/css/tailwind.src.css -o public/css/tailwind.css --watch"
+  },
+  "keywords": [
+    "jarvis",
+    "gaming",
+    "overlay",
+    "companion",
+    "elden-ring",
+    "baldurs-gate"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  }
+} 
