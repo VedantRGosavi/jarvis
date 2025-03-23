@@ -2,4 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Primary Colors */
+  --color-black: #121212;
+  --color-white: #f8f8f8;
+  
+  /* Gray Scale */
+  --color-gray-100: #e5e5e5;
+  --color-gray-200: #c7c7c7;
+  --color-gray-300: #a3a3a3;
+  --color-gray-400: #737373;
+  --color-gray-500: #525252;
+  --color-gray-600: #404040;
+  --color-gray-700: #282828;
+  --color-gray-800: #1c1c1c;
+  
+  /* Accent Colors (Used sparingly) */
+  --color-accent: #404040;
+  --color-success: #1f8c3b;
+  --color-warning: #bb7d00;
+  --color-error: #c11c1c;
+}
+
 /* Custom styles can be added below */ 

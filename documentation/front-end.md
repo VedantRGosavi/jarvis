@@ -4,7 +4,7 @@
  * the entire codebase to maintain consistency and prevent integration issues.
  */
 
-# Gaming Companion Overlay Tool - Frontend Architecture
+# Jarvis Gaming Companion Overlay Tool - Frontend Architecture
 
 ## Design Philosophy
 
@@ -42,7 +42,7 @@ The frontend uses a lightweight, framework-free approach:
   --color-gray-800: #1c1c1c;
   
   /* Accent Colors (Used sparingly) */
-  --color-accent: #0061a8;
+  --color-accent: #404040;
   --color-success: #1f8c3b;
   --color-warning: #bb7d00;
   --color-error: #c11c1c;
