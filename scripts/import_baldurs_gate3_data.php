@@ -2134,4 +2134,4 @@ function ensureDatabaseSchema($db) {
     ");
     
     echo "Database schema verified.\n";
-} 
+}
