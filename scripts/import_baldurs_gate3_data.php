@@ -3,12 +3,22 @@
 define('BASE_PATH', dirname(__DIR__));
 
 // Load Composer's autoloader
-require BASE_PATH . '/vendor/autoload.php';
+if (file_exists(BASE_PATH . '/vendor/autoload.php')) {
+    require BASE_PATH . '/vendor/autoload.php';
+} else {
+    die("Error: vendor/autoload.php not found. Please run 'composer install' first.\n");
+}
 
 // Load environment variables if available
 if (file_exists(BASE_PATH . '/.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
-    $dotenv->load();
+    try {
+        $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
+        $dotenv->load();
+    } catch (Exception $e) {
+        die("Error loading .env file: " . $e->getMessage() . "\n");
+    }
+} else {
+    echo "Warning: .env file not found, using default settings.\n";
 }
 
 require_once BASE_PATH . '/app/utils/Database.php';
@@ -17,10 +27,27 @@ use App\Utils\Database;
 
 // Initialize database
 try {
+    if (!file_exists(BASE_PATH . '/database/baldurs_gate3.db')) {
+        echo "Database file doesn't exist, creating it now...\n";
+        
+        // Make sure the database directory exists
+        if (!is_dir(BASE_PATH . '/database')) {
+            mkdir(BASE_PATH . '/database', 0755, true);
+        }
+    }
+    
     $db = Database::getGameInstance('baldurs_gate3');
+    
+    // Verify database connection by running a simple query
+    $testQuery = $db->querySingle("PRAGMA table_info(npcs)");
+    if ($testQuery === false) {
+        throw new Exception("Database connection successful but couldn't query tables.");
+    }
+    
     echo "Connected to Baldur's Gate 3 database.\n";
 } catch (Exception $e) {
-    die("Error connecting to database: " . $e->getMessage() . "\n");
+    die("Error connecting to database: " . $e->getMessage() . "\n" . 
+        "Please ensure the database directory exists and is writable.\n");
 }
 
 /**
@@ -493,25 +520,10 @@ function importMissableItems($db) {
         // Fetch the checklist.md content from GitHub
         $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
         
-        echo "Fetching missable items data from: $missablesUrl\n";
+        $response = fetchUrl($missablesUrl);
         
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $missablesUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-            echo "cURL Error: " . $err . "\n";
+        if (!$response) {
+            echo "Failed to fetch missable items data, skipping this step.\n";
             return;
         }
         
@@ -651,25 +663,10 @@ function importMissableQuests($db) {
         // Fetch the checklist.md content from GitHub
         $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
         
-        echo "Fetching missable quests data from: $missablesUrl\n";
+        $response = fetchUrl($missablesUrl);
         
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $missablesUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-            echo "cURL Error: " . $err . "\n";
+        if (!$response) {
+            echo "Failed to fetch missable quests data, skipping this step.\n";
             return;
         }
         
@@ -800,25 +797,10 @@ function importMissableTasks($db) {
         // Fetch the checklist.md content from GitHub
         $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
         
-        echo "Fetching missable tasks data from: $missablesUrl\n";
+        $response = fetchUrl($missablesUrl);
         
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $missablesUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-            echo "cURL Error: " . $err . "\n";
+        if (!$response) {
+            echo "Failed to fetch missable tasks data, skipping this step.\n";
             return;
         }
         
@@ -989,25 +971,10 @@ function importMissableAbilities($db) {
         // Fetch the checklist.md content from GitHub
         $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
         
-        echo "Fetching missable abilities data from: $missablesUrl\n";
+        $response = fetchUrl($missablesUrl);
         
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $missablesUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-            echo "cURL Error: " . $err . "\n";
+        if (!$response) {
+            echo "Failed to fetch missable abilities data, skipping this step.\n";
             return;
         }
         
@@ -1135,25 +1102,10 @@ function importMerchantItems($db) {
         // Fetch the checklist.md content from GitHub
         $missablesUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
         
-        echo "Fetching merchant items data from: $missablesUrl\n";
+        $response = fetchUrl($missablesUrl);
         
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $missablesUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-            echo "cURL Error: " . $err . "\n";
+        if (!$response) {
+            echo "Failed to fetch merchant items data, skipping this step.\n";
             return;
         }
         
@@ -1418,45 +1370,17 @@ function importCompanionApproval($db) {
         // Try to fetch companion-specific data from GitHub repo
         $approvalUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/companion_approval.md";
         
-        echo "Fetching companion approval data from: $approvalUrl\n";
-        
-        $curl = curl_init();
-        curl_setopt_array($curl, [
-            CURLOPT_URL => $approvalUrl,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "GET",
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
+        $response = fetchUrl($approvalUrl);
         
         // If companion_approval.md doesn't exist, fallback to main checklist
-        if ($err || strpos($response, "404: Not Found") !== false) {
+        if (!$response || strpos($response, "404: Not Found") !== false) {
             echo "Companion approval file not found, extracting from main checklist instead.\n";
             $approvalUrl = "https://raw.githubusercontent.com/plasticmacaroni/bg3-missables/main/checklist.md";
             
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL => $approvalUrl,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-            ]);
+            $response = fetchUrl($approvalUrl);
             
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-            
-            curl_close($curl);
-            
-            if ($err) {
-                echo "cURL Error: " . $err . "\n";
+            if (!$response) {
+                echo "Failed to fetch companion approval data, skipping this step.\n";
                 return;
             }
         }
@@ -1494,19 +1418,46 @@ function importCompanionApproval($db) {
         ];
         
         // Add Karlach and Minthara to NPCs if they don't exist
-        if (!isset($db->querySingle("SELECT npc_id FROM npcs WHERE npc_id = 'npc_karlach'"))) {
+        $karlachCheck = $db->querySingle("SELECT npc_id FROM npcs WHERE npc_id = 'npc_karlach'");
+        if (!$karlachCheck) {
             $db->exec("
                 INSERT INTO npcs (
-                    npc_id, name, description, role, is_hostile, is_merchant
+                    npc_id, name, description, role, faction, default_location_id, is_hostile, is_merchant, dialogue_summary
                 ) VALUES (
                     'npc_karlach', 
                     'Karlach', 
                     'A tiefling fighter with an infernal engine for a heart, running from hellish hunters.', 
                     'Companion', 
+                    'None',
+                    'loc_wilderness_roadside',
                     0, 
-                    0
+                    0,
+                    'My heart is a cursed infernal engine, but I don\'t let that stop me from living life to the fullest.'
                 )
             ");
+            
+            // Add to search index
+            $stmt = $db->prepare(
+                "INSERT INTO search_index (
+                    content_id, content_type, name, description, keywords
+                ) VALUES (?, ?, ?, ?, ?)"
+            );
+            $db->execPrepared($stmt, [
+                'npc_karlach',
+                'npc',
+                'Karlach',
+                'A tiefling fighter with an infernal engine for a heart, running from hellish hunters.',
+                'Karlach tiefling companion fighter Act 1'
+            ]);
+            
+            echo "Added missing companion Karlach to database.\n";
+        }
+        
+        // Add Minthara if she doesn't exist (she's already in the original import but as a check)
+        $mintharaCheck = $db->querySingle("SELECT npc_id FROM npcs WHERE npc_id = 'npc_minthara'");
+        if (!$mintharaCheck) {
+            // Minthara is already imported in importNPCs function, this is just a check
+            echo "Minthara is already imported, skipping.\n";
         }
         
         foreach ($lines as $line) {
@@ -1585,6 +1536,15 @@ function importCompanionApproval($db) {
                 // Skip generic events for now as they need special handling
                 if ($companionId === 'generic') {
                     continue;
+                }
+                
+                // Check if companion exists in the database
+                if ($companionId !== 'multiple') {
+                    $companionExists = $db->querySingle("SELECT npc_id FROM npcs WHERE npc_id = '$companionId'");
+                    if (!$companionExists) {
+                        echo "Warning: Companion $companionId not found in database, skipping event.\n";
+                        continue;
+                    }
                 }
                 
                 // Check if the event for this companion already exists
@@ -1897,9 +1857,83 @@ function importQuests($db) {
     echo "Imported $count quests with their steps.\n";
 }
 
+// After the database connection setup, add this helper function:
+
+/**
+ * Helper function to fetch URL content with error handling and retry logic
+ * 
+ * @param string $url The URL to fetch
+ * @param int $maxRetries Maximum number of retries on failure
+ * @param int $retryDelay Seconds to wait between retries
+ * @return string|false Content of the URL or false on failure
+ */
+function fetchUrl($url, $maxRetries = 3, $retryDelay = 2) {
+    echo "Fetching data from: $url\n";
+    
+    $retries = 0;
+    while ($retries <= $maxRetries) {
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "GET",
+            CURLOPT_USERAGENT => 'Baldurs-Gate-3-Importer/1.0',
+        ]);
+        
+        $response = curl_exec($curl);
+        $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        $err = curl_error($curl);
+        
+        curl_close($curl);
+        
+        // If successful, return the response
+        if (!$err && $httpCode == 200) {
+            return $response;
+        }
+        
+        // If rate limited, wait and retry
+        if ($httpCode == 429) {
+            $waitTime = $retryDelay * pow(2, $retries);
+            echo "Rate limited by GitHub API. Waiting $waitTime seconds before retrying...\n";
+            sleep($waitTime);
+            $retries++;
+            continue;
+        }
+        
+        // If not found, return false immediately
+        if ($httpCode == 404) {
+            echo "Resource not found (404): $url\n";
+            return false;
+        }
+        
+        // For other errors, retry with backoff
+        if ($retries < $maxRetries) {
+            $waitTime = $retryDelay * pow(2, $retries);
+            echo "Error fetching URL (HTTP $httpCode). Retrying in $waitTime seconds...\n";
+            if ($err) {
+                echo "cURL Error: $err\n";
+            }
+            sleep($waitTime);
+            $retries++;
+        } else {
+            echo "Failed to fetch URL after $maxRetries retries. Last error: ";
+            echo $err ? "cURL Error: $err\n" : "HTTP Code: $httpCode\n";
+            return false;
+        }
+    }
+    
+    return false;
+}
+
 // Run the import functions
 try {
     echo "Starting Baldur's Gate 3 data import...\n";
+    
+    // Ensure database schema exists
+    ensureDatabaseSchema($db);
     
     // Start transaction
     $db->exec("BEGIN TRANSACTION");
@@ -1927,4 +1961,177 @@ try {
     // Rollback transaction in case of error
     $db->exec("ROLLBACK");
     echo "Error during import: " . $e->getMessage() . "\n";
+    echo "Stack trace: " . $e->getTraceAsString() . "\n";
+    exit(1);
+}
+
+/**
+ * Ensures all required database tables exist
+ * 
+ * @param SQLite3 $db Database connection
+ */
+function ensureDatabaseSchema($db) {
+    echo "Ensuring database schema exists...\n";
+    
+    // Create search_index table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS search_index (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content_id TEXT NOT NULL,
+            content_type TEXT NOT NULL,
+            name TEXT,
+            description TEXT,
+            keywords TEXT,
+            UNIQUE(content_id, content_type)
+        )
+    ");
+    
+    // Create locations table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS locations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            location_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            region TEXT,
+            parent_location_id TEXT,
+            coordinates TEXT,
+            points_of_interest TEXT
+        )
+    ");
+    
+    // Create NPCs table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS npcs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            role TEXT,
+            faction TEXT,
+            default_location_id TEXT,
+            is_hostile INTEGER DEFAULT 0,
+            is_merchant INTEGER DEFAULT 0,
+            dialogue_summary TEXT,
+            FOREIGN KEY (default_location_id) REFERENCES locations(location_id)
+        )
+    ");
+    
+    // Create npc_locations table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS npc_locations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            location_id TEXT NOT NULL,
+            FOREIGN KEY (npc_id) REFERENCES npcs(npc_id),
+            FOREIGN KEY (location_id) REFERENCES locations(location_id)
+        )
+    ");
+    
+    // Create items table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            item_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            type TEXT,
+            subtype TEXT,
+            stats TEXT,
+            requirements TEXT,
+            effects TEXT,
+            rarity TEXT,
+            is_missable INTEGER DEFAULT 0,
+            location_note TEXT
+        )
+    ");
+    
+    // Create quests table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS quests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            quest_id TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            category TEXT,
+            type TEXT,
+            is_main_story INTEGER DEFAULT 0,
+            time_sensitive INTEGER DEFAULT 0,
+            difficulty TEXT,
+            level TEXT,
+            prerequisites TEXT,
+            location_note TEXT
+        )
+    ");
+    
+    // Create quest_steps table if it doesn't exist
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS quest_steps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            step_id TEXT UNIQUE NOT NULL,
+            quest_id TEXT NOT NULL,
+            step_number INTEGER,
+            title TEXT,
+            description TEXT,
+            objective TEXT,
+            hints TEXT,
+            location_id TEXT,
+            spoiler_level INTEGER DEFAULT 0,
+            FOREIGN KEY (quest_id) REFERENCES quests(quest_id),
+            FOREIGN KEY (location_id) REFERENCES locations(location_id)
+        )
+    ");
+    
+    // Create other tables as needed
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS tasks (
+            task_id TEXT PRIMARY KEY,
+            description TEXT NOT NULL,
+            location TEXT,
+            act TEXT,
+            is_missable INTEGER DEFAULT 0,
+            completed INTEGER DEFAULT 0
+        )
+    ");
+    
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS abilities (
+            ability_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            location TEXT,
+            act TEXT,
+            url TEXT
+        )
+    ");
+    
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS merchant_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            merchant_id TEXT NOT NULL,
+            item_id TEXT NOT NULL,
+            is_missable INTEGER DEFAULT 0,
+            act TEXT,
+            location TEXT,
+            FOREIGN KEY (merchant_id) REFERENCES npcs(npc_id),
+            FOREIGN KEY (item_id) REFERENCES items(item_id)
+        )
+    ");
+    
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS companion_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT NOT NULL,
+            companion_id TEXT NOT NULL,
+            description TEXT NOT NULL,
+            location TEXT,
+            act TEXT,
+            effect TEXT,
+            approval_change TEXT,
+            is_missable INTEGER DEFAULT 0,
+            FOREIGN KEY (companion_id) REFERENCES npcs(npc_id)
+        )
+    ");
+    
+    echo "Database schema verified.\n";
 } 
