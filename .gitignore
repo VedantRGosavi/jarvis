@@ -9,6 +9,9 @@
 .env
 .env.*
 !.env.example
+# Service accounts
+*-service-key.json
+fridayai-service-key.json
 
 # Editor files
 .vscode
