@@ -1,10 +1,10 @@
 <?php
 require_once BASE_PATH . '/app/utils/Response.php';
-require_once BASE_PATH . '/app/models/Purchase.php';
+require_once BASE_PATH . '/app/utils/WebhookHandler.php';
 require_once BASE_PATH . '/vendor/autoload.php';
 
 use App\Utils\Response;
-use App\Models\Purchase;
+use App\Utils\WebhookHandler;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
@@ -15,51 +15,45 @@ Stripe::setApiKey($_ENV['STRIPE_SECRET_KEY']);
 $payload = @file_get_contents('php://input');
 $sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
 
+// Debug logging
+error_log("Webhook received - Payload: " . $payload);
+error_log("Signature header: " . $sigHeader);
+error_log("Webhook secret: " . substr($_ENV['STRIPE_WEBHOOK_SECRET'], 0, 10) . '...');
+
 try {
+    if (empty($payload)) {
+        throw new \Exception('Empty payload received');
+    }
+
+    if (empty($sigHeader)) {
+        throw new \Exception('No signature header received');
+    }
+
+    if (empty($_ENV['STRIPE_WEBHOOK_SECRET'])) {
+        throw new \Exception('Webhook secret not configured');
+    }
+
     $event = Webhook::constructEvent(
         $payload,
         $sigHeader,
         $_ENV['STRIPE_WEBHOOK_SECRET']
     );
     
-    // Handle webhook events
-    switch ($event->type) {
-        case 'checkout.session.completed':
-            $session = $event->data->object;
-            
-            // Handle successful payment
-            $purchaseModel = new Purchase();
-            $purchaseModel->createPurchase(
-                $session->metadata->user_id ?? null,
-                $session->metadata->product_id ?? null,
-                $session->payment_intent,
-                'completed',
-                $session->amount_total
-            );
-            break;
-            
-        case 'checkout.session.expired':
-            // Handle expired checkout session
-            break;
-            
-        case 'payment_intent.succeeded':
-            $paymentIntent = $event->data->object;
-            $purchaseModel = new Purchase();
-            $purchaseModel->updatePurchaseStatus($paymentIntent->id, 'completed');
-            break;
-            
-        case 'payment_intent.payment_failed':
-            $paymentIntent = $event->data->object;
-            $purchaseModel = new Purchase();
-            $purchaseModel->updatePurchaseStatus($paymentIntent->id, 'failed');
-            break;
-    }
+    error_log("Event constructed successfully: " . $event->type);
     
-    Response::success(['status' => 'Webhook processed']);
+    // Handle the event using WebhookHandler
+    $handler = new WebhookHandler($event);
+    $result = $handler->handle();
+    
+    error_log("Event handled successfully: " . json_encode($result));
+    Response::success($result);
 } catch(\UnexpectedValueException $e) {
-    Response::error('Invalid payload', 400);
+    error_log("Invalid payload error: " . $e->getMessage());
+    Response::error('Invalid payload: ' . $e->getMessage(), 400);
 } catch(\Stripe\Exception\SignatureVerificationException $e) {
-    Response::error('Invalid signature', 400);
+    error_log("Signature verification failed: " . $e->getMessage());
+    Response::error('Invalid signature: ' . $e->getMessage(), 400);
 } catch(\Exception $e) {
+    error_log("Webhook error: " . $e->getMessage());
     Response::error('Webhook error: ' . $e->getMessage(), 500);
 } 

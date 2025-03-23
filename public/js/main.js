@@ -1,3 +1,7 @@
+// Import modules
+import { PricingSection } from './ui/pricing.js';
+import { PRICING_TIERS } from './data/pricing.js';
+
 // Documentation Tabs
 document.addEventListener('DOMContentLoaded', function() {
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -53,10 +57,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
-});
 
-// FAQ Accordion
-document.addEventListener('DOMContentLoaded', function() {
+    // FAQ Accordion
     const faqItems = document.querySelectorAll('.faq-item');
 
     faqItems.forEach(item => {
@@ -82,4 +84,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Initialize pricing section
+    if (document.getElementById('pricing-section')) {
+        // Initialize pricing section with the pricing tiers data
+        new PricingSection('pricing-section', {
+            title: "Choose Your Gaming Pack",
+            subtitle: "Enhance your gaming experience with our specialized tools",
+            tiers: PRICING_TIERS
+        });
+    }
 }); 

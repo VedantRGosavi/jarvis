@@ -2,9 +2,9 @@
 namespace App\Utils;
 
 class Response {
-    public static function success($data = null, $code = 200) {
+    public static function success($data) {
         header('Content-Type: application/json');
-        http_response_code($code);
+        http_response_code(200);
         
         echo json_encode([
             'success' => true,

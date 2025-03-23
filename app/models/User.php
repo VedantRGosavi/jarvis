@@ -43,21 +43,41 @@ class User {
         return Auth::generateToken($this->db->lastInsertId());
     }
     
-    public function getById($userId) {
-        $stmt = $this->db->prepare(
-            "SELECT id, email, username, subscription_status, subscription_end_date 
-             FROM users WHERE id = ?"
-        );
-        return $this->db->fetchOne($stmt, [$userId]);
+    public function getById($id) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+    
+    public function updateStripeCustomerId($userId, $stripeCustomerId) {
+        $stmt = $this->db->prepare("UPDATE users SET stripe_customer_id = ? WHERE id = ?");
+        return $stmt->execute([$stripeCustomerId, $userId]);
+    }
+    
+    public function removeStripeCustomerId($stripeCustomerId) {
+        $stmt = $this->db->prepare("UPDATE users SET stripe_customer_id = NULL WHERE stripe_customer_id = ?");
+        return $stmt->execute([$stripeCustomerId]);
+    }
+    
+    public function updateCustomerDetails($userId, $email, $name) {
+        $stmt = $this->db->prepare("UPDATE users SET email = ?, name = ? WHERE id = ?");
+        return $stmt->execute([$email, $name, $userId]);
     }
     
     public function updateSubscription($userId, $status, $endDate = null) {
-        $stmt = $this->db->prepare(
-            "UPDATE users 
-             SET subscription_status = ?, subscription_end_date = ? 
-             WHERE id = ?"
-        );
-        return $this->db->exec($stmt, [$status, $endDate, $userId]);
+        if ($endDate) {
+            $stmt = $this->db->prepare("UPDATE users SET subscription_status = ?, subscription_end = ? WHERE id = ?");
+            return $stmt->execute([$status, $endDate, $userId]);
+        } else {
+            $stmt = $this->db->prepare("UPDATE users SET subscription_status = ? WHERE id = ?");
+            return $stmt->execute([$status, $userId]);
+        }
+    }
+    
+    public function getByStripeCustomerId($stripeCustomerId) {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE stripe_customer_id = ?");
+        $stmt->execute([$stripeCustomerId]);
+        return $stmt->fetch();
     }
     
     public function getSettings($userId) {

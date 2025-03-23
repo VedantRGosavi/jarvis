@@ -46,4 +46,4 @@ if (file_exists($file_path) && is_file($file_path)) {
 }
 
 // Default to serving the SPA entry point
-require_once BASE_PATH . '/public/app.html'; 
+require_once BASE_PATH . '/public/index.html'; 
