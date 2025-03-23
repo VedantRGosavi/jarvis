@@ -89,7 +89,6 @@ class PricingSection {
                 "border",
                 `border-${this.options.theme.borderColor}`,
                 `bg-${this.options.theme.cardBackground}/50`,
-                "backdrop-blur-sm",
                 "transition-all",
                 "duration-300",
                 "hover:transform",
