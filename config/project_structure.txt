@@ -1,7 +1,6 @@
 Project Structure:
 
 Jarvis
-├── PRD-Doc.md
 ├── README.md
 ├── app
 │   ├── api
@@ -21,7 +20,14 @@ Jarvis
 │       ├── Auth.php
 │       ├── Config.php
 │       └── Database.php
-├── back-end.md
+├── composer.json
+├── composer.lock
+├── composer.phar
+├── config
+│   ├── .env
+│   ├── .env.example
+│   ├── project_structure.txt
+│   └── tailwind.config.js
 ├── data
 │   ├── game_data
 │   │   ├── baldurs_gate3.sqlite
@@ -35,13 +41,20 @@ Jarvis
 │   │   └── system_schema.sql
 │   ├── setup_databases.sh
 │   └── verify_databases.sh
-├── database-schema.md
+├── documentation
+│   ├── PRD-Doc.md
+│   ├── back-end.md
+│   ├── database-schema.md
+│   ├── front-end.md
+│   ├── techstack-and-project-structure.md
+│   └── tools-and-game-documentation.md
 ├── docs
 │   ├── api.md
 │   ├── architecture.md
 │   └── setup.md
-├── front-end.md
-├── project_structure.txt
+├── node_modules
+├── package-lock.json
+├── package.json
 ├── public
 │   ├── assets
 │   │   ├── icons
@@ -58,5 +71,4 @@ Jarvis
 │   ├── build.sh
 │   ├── deploy.sh
 │   └── import.php
-├── techstack-and-project-structure.md
-└── tools-and-game-documentation.md
+└── vendor
