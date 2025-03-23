@@ -3,7 +3,7 @@
  * Main application initialization
  */
 
-class FridayAIApp {
+export class FridayAIApp {
   constructor() {
     this.version = '1.0.0';
     this.gameModules = {};
@@ -224,7 +224,7 @@ class FridayAIApp {
         authButton.textContent = user?.name || 'Account';
         authButton.classList.add('logged-in');
       } else {
-        authButton.textContent = 'Login';
+        authButton.textContent = 'Create an Account';
         authButton.classList.remove('logged-in');
       }
     };
@@ -237,12 +237,12 @@ class FridayAIApp {
           window.accountPage.show();
         }
       } else {
-        // Show login form if not logged in
+        // Show registration form if not logged in
         if (this.authForms) {
           const container = document.createElement('div');
           container.className = 'fixed inset-0 bg-gaming-gray-900 bg-opacity-90 flex items-center justify-center z-50';
           document.body.appendChild(container);
-          this.authForms.renderLoginForm(container);
+          this.authForms.renderRegisterForm(container);
         }
       }
     });
@@ -265,7 +265,12 @@ class FridayAIApp {
   }
 }
 
-// Initialize the app when the DOM is loaded
+// Initialize the app and expose to window
+const fridayAIApp = new FridayAIApp();
+
+// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  window.fridayAIApp = new FridayAIApp();
-}); 
+  window.fridayAIApp = fridayAIApp;
+});
+
+export default fridayAIApp; 

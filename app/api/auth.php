@@ -50,7 +50,7 @@ switch ($action) {
             break;
         }
         
-        if (!isset($data['email']) || !isset($data['password']) || !isset($data['name'])) {
+        if (!isset($data['name']) || !isset($data['email']) || !isset($data['password'])) {
             Response::error('Name, email and password required', 400);
             break;
         }
@@ -64,7 +64,7 @@ switch ($action) {
                 'user' => $result['user']
             ]);
         } else {
-            Response::error($result['message'], 400);
+            Response::error($result['message'] ?? 'Registration failed', 400);
         }
         break;
         

@@ -3,7 +3,7 @@
  * Handles user authentication, registration, and session management
  */
 
-class AuthService {
+export class AuthService {
   constructor() {
     this.baseUrl = '/api/auth';
     this.tokenKey = 'fridayai_auth_token';
@@ -261,10 +261,7 @@ class AuthService {
   }
 }
 
-// Initialize authentication service
-document.addEventListener('DOMContentLoaded', () => {
-  const authService = new AuthService();
-  
-  // Expose to global scope for other scripts
-  window.authService = authService;
-}); 
+// Initialize authentication service and expose to window
+const authService = new AuthService();
+window.authService = authService;
+export default authService; 

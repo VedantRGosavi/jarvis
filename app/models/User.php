@@ -12,35 +12,79 @@ class User {
     }
     
     public function authenticate($email, $password) {
-        $stmt = $this->db->prepare("SELECT id, password_hash FROM users WHERE email = ?");
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
         $user = $this->db->fetchOne($stmt, [$email]);
         
         if (!$user || !password_verify($password, $user['password_hash'])) {
-            return false;
+            return [
+                'success' => false,
+                'message' => 'Invalid credentials'
+            ];
         }
         
-        return Auth::generateToken($user['id']);
+        // Remove sensitive data
+        unset($user['password_hash']);
+        
+        // Generate JWT token
+        $token = Auth::generateToken($user['id']);
+        
+        return [
+            'success' => true,
+            'token' => $token,
+            'user' => $user
+        ];
     }
     
-    public function register($email, $password, $username) {
+    public function register($name, $email, $password) {
         // Check if user exists
         $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
         if ($this->db->fetchOne($stmt, [$email])) {
-            return false;
+            return [
+                'success' => false,
+                'message' => 'Email already registered'
+            ];
         }
         
         // Create user
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $timestamp = date('Y-m-d H:i:s');
+        
         $stmt = $this->db->prepare(
-            "INSERT INTO users (email, username, password_hash, created_at) 
-             VALUES (?, ?, ?, datetime('now'))"
+            "INSERT INTO users (name, email, password_hash, created_at, last_login, subscription_status) 
+             VALUES (?, ?, ?, ?, ?, ?)"
         );
         
-        if (!$this->db->exec($stmt, [$email, $username, $passwordHash])) {
-            return false;
+        if (!$this->db->exec($stmt, [$name, $email, $passwordHash, $timestamp, $timestamp, 'none'])) {
+            return [
+                'success' => false,
+                'message' => 'Failed to create user'
+            ];
         }
         
-        return Auth::generateToken($this->db->lastInsertId());
+        $userId = $this->db->lastInsertId();
+        
+        // Get user data
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+        $user = $this->db->fetchOne($stmt, [$userId]);
+        
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'Failed to retrieve user data'
+            ];
+        }
+        
+        // Remove sensitive data
+        unset($user['password_hash']);
+        
+        // Generate JWT token
+        $token = Auth::generateToken($userId);
+        
+        return [
+            'success' => true,
+            'token' => $token,
+            'user' => $user
+        ];
     }
     
     public function getById($id) {

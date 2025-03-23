@@ -1,46 +1,30 @@
 <?php
-// API request handling
-$api_path = str_replace('/api/', '', parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-$api_segments = explode('/', $api_path);
+require_once BASE_PATH . '/app/utils/Response.php';
+require_once BASE_PATH . '/app/utils/Auth.php';
 
-// Determine API endpoint
-$endpoint = $api_segments[0] ?? '';
+use App\Utils\Auth;
+use App\Utils\Response;
 
-// Handle payment pages
-if ($endpoint === 'payment') {
-    $action = $api_segments[1] ?? '';
-    switch ($action) {
-        case 'success':
-            require BASE_PATH . '/app/views/payment/success.php';
-            exit;
-        case 'cancel':
-            require BASE_PATH . '/app/views/payment/cancel.php';
-            exit;
-    }
+// Initialize Auth
+Auth::init();
+
+// Parse API path
+$request_uri = $_SERVER['REQUEST_URI'];
+$api_prefix = '/api/';
+$api_path = substr($request_uri, strlen($api_prefix));
+$api_segments = explode('/', trim($api_path, '/'));
+
+if (empty($api_segments[0])) {
+    Response::error('Invalid API endpoint', 404);
+    exit;
 }
 
-// Route to appropriate handler
-switch ($endpoint) {
-    case 'auth':
-        require BASE_PATH . '/app/api/auth.php';
-        break;
-    case 'games':
-        require BASE_PATH . '/app/api/games.php';
-        break;
-    case 'users':
-        require BASE_PATH . '/app/api/users.php';
-        break;
-    case 'payments':
-        require BASE_PATH . '/app/api/payments.php';
-        break;
-    case 'webhook':
-        require BASE_PATH . '/app/api/webhook.php';
-        break;
-    case 'download':
-        require BASE_PATH . '/app/api/download.php';
-        break;
-    default:
-        // Handle 404 for API
-        header('HTTP/1.1 404 Not Found');
-        echo json_encode(['error' => 'API endpoint not found']);
+// Route to appropriate API handler
+$handler = $api_segments[0];
+$handler_file = BASE_PATH . "/app/api/{$handler}.php";
+
+if (file_exists($handler_file)) {
+    require_once $handler_file;
+} else {
+    Response::error('API endpoint not found', 404);
 } 
