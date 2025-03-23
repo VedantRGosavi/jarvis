@@ -28,4 +28,8 @@ yarn-error.log*
 
 # Temp files
 *.tmp
-*.temp 
+*.temp
+
+# Vercel
+.vercel 
+.vercel
