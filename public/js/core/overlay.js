@@ -9,7 +9,7 @@ class GameOverlay {
     this.opacity = config.opacity || 0.85;
     this.position = config.position || { x: 10, y: 10 };
     this.size = config.size || { width: 320, height: 480 };
-    this.overlayElement = document.getElementById('jarvis-overlay');
+    this.overlayElement = document.getElementById('fridayai-overlay');
     
     this.initializeOverlay();
     this.initializeDraggable();
@@ -171,12 +171,12 @@ class GameOverlay {
       minimized: this.overlayElement.querySelector('main').style.display === 'none'
     };
     
-    localStorage.setItem('jarvis_overlay_settings', JSON.stringify(settings));
+    localStorage.setItem('fridayai_overlay_settings', JSON.stringify(settings));
   }
   
   loadSettings() {
     try {
-      const settings = JSON.parse(localStorage.getItem('jarvis_overlay_settings'));
+      const settings = JSON.parse(localStorage.getItem('fridayai_overlay_settings'));
       
       if (settings) {
         if (settings.position) this.updatePosition(settings.position);

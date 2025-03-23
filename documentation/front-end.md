@@ -4,7 +4,7 @@
  * the entire codebase to maintain consistency and prevent integration issues.
  */
 
-# Jarvis Gaming Companion Overlay Tool - Frontend Architecture
+# FridayAI Gaming Companion Overlay Tool - Frontend Architecture
 
 ## Design Philosophy
 

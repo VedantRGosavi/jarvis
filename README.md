@@ -1,6 +1,6 @@
-# Jarvis: Gaming Companion Overlay Tool
+# FridayAI: Gaming Companion Overlay Tool
 
-Jarvis is a comprehensive gaming companion tool that provides in-game overlay information for RPG games like Elden Ring and Baldur's Gate 3.
+FridayAI is a comprehensive gaming companion tool that provides in-game overlay information for RPG games like Elden Ring and Baldur's Gate 3.
 
 ## Database Setup
 

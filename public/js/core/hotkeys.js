@@ -67,12 +67,12 @@ class HotkeysHandler {
   }
   
   saveShortcuts() {
-    localStorage.setItem('jarvis_hotkeys', JSON.stringify(this.shortcuts));
+    localStorage.setItem('fridayai_hotkeys', JSON.stringify(this.shortcuts));
   }
   
   loadShortcuts() {
     try {
-      const savedShortcuts = JSON.parse(localStorage.getItem('jarvis_hotkeys'));
+      const savedShortcuts = JSON.parse(localStorage.getItem('fridayai_hotkeys'));
       if (savedShortcuts) {
         this.shortcuts = {...this.shortcuts, ...savedShortcuts};
       }

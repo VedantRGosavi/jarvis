@@ -1,6 +1,6 @@
 {
-  "name": "jarvis/gaming-companion-overlay",
-  "description": "Jarvis: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
+  "name": "fridayai/gaming-companion-overlay",
+  "description": "FridayAI: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
   "type": "project",
   "require": {
     "php": ">=7.4",

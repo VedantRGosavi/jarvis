@@ -1,7 +1,7 @@
 {
-  "name": "jarvis",
-  "version": "0.1.0",
-  "description": "Jarvis: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
+  "name": "fridayai",
+  "version": "1.0.0",
+  "description": "FridayAI: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
   "main": "public/index.html",
   "scripts": {
     "dev": "php -S localhost:8000 -t public",

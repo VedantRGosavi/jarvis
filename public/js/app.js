@@ -1,9 +1,9 @@
 /**
- * Jarvis Gaming Companion
+ * FridayAI Gaming Companion
  * Main application initialization
  */
 
-class JarvisApp {
+class FridayAIApp {
   constructor() {
     this.version = '1.0.0';
     this.gameModules = {};
@@ -13,7 +13,7 @@ class JarvisApp {
   }
   
   initialize() {
-    console.log(`Initializing Jarvis Gaming Companion v${this.version}`);
+    console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
     
     // Load theme preference
     this.loadThemePreference();
@@ -29,22 +29,22 @@ class JarvisApp {
   }
   
   loadThemePreference() {
-    const darkMode = localStorage.getItem('jarvis_dark_mode') === 'true';
+    const darkMode = localStorage.getItem('fridayai_dark_mode') === 'true';
     if (darkMode) {
       document.documentElement.classList.add('dark');
     }
   }
   
-  toggleDarkMode() {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('jarvis_dark_mode', isDark);
+  toggleDarkMode(isDark) {
+    const isDarkMode = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('fridayai_dark_mode', isDarkMode);
   }
   
   initEventListeners() {
     // Dark mode toggle (if present on the page)
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     if (darkModeToggle) {
-      darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
+      darkModeToggle.addEventListener('click', () => this.toggleDarkMode(true));
     }
     
     // Download button
@@ -89,7 +89,7 @@ class JarvisApp {
     const gameIds = Object.keys(this.gameModules);
     if (gameIds.length > 0) {
       // Try to restore the last active game
-      const lastActiveGame = localStorage.getItem('jarvis_active_game');
+      const lastActiveGame = localStorage.getItem('fridayai_active_game');
       if (lastActiveGame && this.gameModules[lastActiveGame]) {
         this.setActiveGame(lastActiveGame);
       } else {
@@ -109,7 +109,7 @@ class JarvisApp {
   setActiveGame(gameId) {
     if (this.gameModules[gameId]) {
       this.activeGame = gameId;
-      localStorage.setItem('jarvis_active_game', gameId);
+      localStorage.setItem('fridayai_active_game', gameId);
       console.log(`Active game set to: ${this.gameModules[gameId].gameName}`);
       
       // Update UI to reflect active game
@@ -213,5 +213,5 @@ class JarvisApp {
 
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  window.jarvisApp = new JarvisApp();
+  window.fridayAIApp = new FridayAIApp();
 }); 
