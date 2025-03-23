@@ -131,7 +131,7 @@ class AuthForms {
     if (window.authService && window.authService.isAuthenticated()) {
       this.renderUserProfile(container);
     } else {
-      this.renderLoginForm(container);
+      this.renderRegistrationForm(container);
     }
   }
   
