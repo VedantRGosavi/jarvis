@@ -25,9 +25,59 @@ class Response {
             header("$name: $value");
         }
 
-        // Return JSON-encoded data
-        echo json_encode($data, JSON_PRETTY_PRINT);
+        // JSON encode with error handling
+        $json = json_encode($data, JSON_PRETTY_PRINT);
+        if ($json === false) {
+            // Log the error
+            error_log("JSON encoding error: " . json_last_error_msg());
+            // Send a fallback response
+            echo json_encode([
+                'success' => false,
+                'message' => 'Server error: Unable to encode response data'
+            ]);
+        } else {
+            // Return JSON-encoded data
+            echo $json;
+        }
         exit;
+    }
+
+    /**
+     * Send a success response
+     *
+     * @param mixed $data The data to include in the response
+     * @param int $statusCode HTTP status code
+     */
+    public static function success($data = null, $statusCode = 200) {
+        $response = [
+            'success' => true
+        ];
+
+        if ($data !== null) {
+            $response['data'] = $data;
+        }
+
+        self::json($response, $statusCode);
+    }
+
+    /**
+     * Send an error response
+     *
+     * @param string $message Error message
+     * @param int $statusCode HTTP status code
+     * @param array $errors Additional error details
+     */
+    public static function error($message, $statusCode = 400, $errors = null) {
+        $response = [
+            'success' => false,
+            'message' => $message
+        ];
+
+        if ($errors !== null) {
+            $response['errors'] = $errors;
+        }
+
+        self::json($response, $statusCode);
     }
 
     /**

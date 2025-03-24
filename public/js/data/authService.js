@@ -6,12 +6,17 @@
 export class AuthService {
   constructor() {
     // Determine if we're in production based on the hostname
-    const isProduction = window.location.hostname === 'fridayai-gold.vercel.app';
+    const hostname = window.location.hostname;
+    const isProduction = hostname === 'fridayai-gold.vercel.app' || hostname === 'fridayai.me';
 
     // Set base URL accordingly
-    this.baseUrl = isProduction
-      ? 'https://fridayai-gold.vercel.app/api/auth'
-      : '/api/auth';
+    if (hostname === 'fridayai.me') {
+      this.baseUrl = 'https://fridayai.me/api/auth';
+    } else if (hostname === 'fridayai-gold.vercel.app') {
+      this.baseUrl = 'https://fridayai-gold.vercel.app/api/auth';
+    } else {
+      this.baseUrl = '/api/auth';
+    }
 
     this.tokenKey = 'fridayai_auth_token';
     this.userKey = 'fridayai_user';
@@ -141,24 +146,48 @@ export class AuthService {
    */
   async getOAuthUrl(provider) {
     try {
+      console.log(`Fetching OAuth URL for ${provider} from ${this.baseUrl}/oauth/${provider}`);
+
       const response = await fetch(`${this.baseUrl}/oauth/${provider}`, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
       });
 
-      // Check if response is HTML (error page) instead of JSON
+      // Check response type
       const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('text/html')) {
-        console.error(`OAuth URL response is HTML, not JSON for ${provider}`);
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error(`OAuth URL response has invalid content type: ${contentType} for ${provider}`);
         return {
           success: false,
           message: `Authentication service unavailable for ${provider}`
         };
       }
 
-      const data = await response.json();
+      // Safely parse JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error(`Failed to parse OAuth URL response as JSON for ${provider}:`, e);
+        return {
+          success: false,
+          message: `Authentication service for ${provider} returned an invalid response`
+        };
+      }
 
       if (!response.ok) {
         throw new Error(data.message || `Failed to get ${provider} authentication URL`);
+      }
+
+      if (!data.auth_url) {
+        console.error(`OAuth URL response is missing auth_url for ${provider}`, data);
+        return {
+          success: false,
+          message: `Authentication service for ${provider} returned an invalid response`
+        };
       }
 
       return {
@@ -185,12 +214,28 @@ export class AuthService {
       const response = await fetch(`${this.baseUrl}/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      // Check response type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error(`Login response has invalid content type: ${contentType}`);
+        throw new Error('Login service is temporarily unavailable.');
+      }
+
+      // Safely parse JSON
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse login response as JSON:', e);
+        throw new Error('Invalid response from login service.');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
@@ -225,26 +270,42 @@ export class AuthService {
    */
   async register(name, email, password) {
     try {
+      console.log(`Sending registration request to ${this.baseUrl}/register`);
+
       const response = await fetch(`${this.baseUrl}/register`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify({ name, email, password })
       });
 
-      // Handle potential HTML responses or empty responses
+      console.log(`Registration response status: ${response.status}`);
+
+      // Check response type
       const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('text/html')) {
-        console.error('Registration response is HTML, not JSON');
+      console.log(`Registration response content-type: ${contentType}`);
+
+      if (!contentType || !contentType.includes('application/json')) {
+        console.error(`Registration response has invalid content type: ${contentType}`);
         throw new Error('Registration service is temporarily unavailable.');
       }
 
+      // Safely parse JSON
       let data;
       try {
-        data = await response.json();
+        const textResponse = await response.text();
+        console.log(`Registration raw response: ${textResponse.substring(0, 200)}`);
+
+        if (!textResponse.trim()) {
+          throw new Error('Empty response received');
+        }
+
+        data = JSON.parse(textResponse);
       } catch (e) {
-        console.error('Failed to parse response as JSON:', e);
+        console.error('Failed to parse registration response as JSON:', e);
         throw new Error('Invalid response from registration service.');
       }
 

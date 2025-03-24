@@ -12,10 +12,25 @@ use App\Utils\Response;
 use App\Utils\OAuthFactory;
 use App\Models\User;
 
-// Enable CORS for API requests
-header('Access-Control-Allow-Origin: *');
+// Enable CORS for API requests - support both fridayai.me and fridayai-gold.vercel.app
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    $allowedOrigins = [
+        'https://fridayai.me',
+        'https://fridayai-gold.vercel.app',
+        'http://localhost:8000'
+    ];
+
+    if (in_array($_SERVER['HTTP_ORIGIN'], $allowedOrigins)) {
+        header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+    }
+} else {
+    header('Access-Control-Allow-Origin: *');
+}
+
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true');
+header('Content-Type: application/json');
 
 // Handle preflight OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -27,6 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $data = json_decode(file_get_contents('php://input'), true);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Log the request for debugging
+error_log("API Request: " . $_SERVER['REQUEST_URI']);
+error_log("Request Method: " . $method);
+if ($data) {
+    error_log("Request Data: " . json_encode($data));
+}
+
 // Route to appropriate auth handler
 $action = $api_segments[1] ?? '';
 
@@ -36,7 +58,6 @@ if (isset($api_segments[1]) && $api_segments[1] === 'csrf') {
     require_once BASE_PATH . '/app/utils/Security.php';
 
     // Return the CSRF token
-    header('Content-Type: application/json');
     echo json_encode([
         'csrf_token' => \App\Utils\Security::generateCSRFToken()
     ]);
@@ -103,16 +124,21 @@ switch ($action) {
             break;
         }
 
-        $user = new User();
-        $result = $user->register($data['name'], $data['email'], $data['password']);
+        try {
+            $user = new User();
+            $result = $user->register($data['name'], $data['email'], $data['password']);
 
-        if ($result['success']) {
-            Response::success([
-                'token' => $result['token'],
-                'user' => $result['user']
-            ]);
-        } else {
-            Response::error($result['message'] ?? 'Registration failed', 400);
+            if ($result['success']) {
+                Response::success([
+                    'token' => $result['token'],
+                    'user' => $result['user']
+                ]);
+            } else {
+                Response::error($result['message'] ?? 'Registration failed', 400);
+            }
+        } catch (\Exception $e) {
+            error_log("Registration error: " . $e->getMessage());
+            Response::error('Registration failed: ' . $e->getMessage(), 500);
         }
         break;
 
@@ -157,6 +183,7 @@ switch ($action) {
 
             Response::success(['auth_url' => $authUrl]);
         } catch (\Exception $e) {
+            error_log("OAuth URL error for $provider: " . $e->getMessage());
             Response::error($e->getMessage(), 400);
         }
         break;
@@ -194,6 +221,7 @@ switch ($action) {
                 Response::error($result['error'] ?? 'Authentication failed', 400);
             }
         } catch (\Exception $e) {
+            error_log("OAuth callback error for $provider: " . $e->getMessage());
             Response::error($e->getMessage(), 400);
         }
         break;
