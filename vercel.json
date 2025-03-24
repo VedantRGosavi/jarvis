@@ -1,14 +1,16 @@
 {
   "version": 2,
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.7.0"
-    }
-  },
   "builds": [
     {
       "src": "api/**/*.php",
-      "use": "vercel-php@0.7.0"
+      "use": "vercel-php@0.7.0",
+      "config": {
+        "composer": true,
+        "php.ini": {
+          "display_errors": "1",
+          "memory_limit": "256M"
+        }
+      }
     },
     {
       "src": "public/**",

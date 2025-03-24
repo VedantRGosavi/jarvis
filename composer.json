@@ -3,7 +3,7 @@
   "description": "FridayAI: A minimalist gaming companion overlay tool for games like Elden Ring and Baldur's Gate 3",
   "type": "project",
   "require": {
-    "php": ">=7.4",
+    "php": "^8.1",
     "stripe/stripe-php": "^10.0",
     "vlucas/phpdotenv": "^5.5",
     "ext-sqlite3": "*",
@@ -17,6 +17,18 @@
   },
   "config": {
     "sort-packages": true,
-    "optimize-autoloader": true
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "heroku/installer-plugin": true
+    }
+  },
+  "require-dev": {
+    "heroku/heroku-buildpack-php": "*"
+  },
+  "scripts": {
+    "post-install-cmd": [
+      "php artisan clear-compiled",
+      "chmod -R 777 storage"
+    ]
   }
 }

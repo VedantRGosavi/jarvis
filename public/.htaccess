@@ -23,8 +23,18 @@ RewriteRule ^overlay$ overlay.html [L]
 # Handle download route
 RewriteRule ^download$ download.html [L]
 
-# Handle the root URL
-RewriteRule ^$ index.php [L]
+# Handle Front Controller Pattern
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]
+
+# Force HTTPS
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Handle Authorization Header
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
 # Redirect all other requests to the index.php entrypoint
 RewriteRule ^(.*)$ index.php [L,QSA]

@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# Install PHP and its dependencies
+apt-get update && apt-get install -y \
+    php \
+    php-cli \
+    php-fpm \
+    php-json \
+    php-common \
+    php-mysql \
+    php-zip \
+    php-gd \
+    php-mbstring \
+    php-curl \
+    php-xml \
+    php-bcmath \
+    php-json
+
+# Install Composer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+php -r "unlink('composer-setup.php');"
+
+# Install dependencies
+composer install --no-dev --optimize-autoloader
+
+# Set permissions
+chmod -R 755 .
+
 # Build the front-end assets
 echo "Building front-end assets..."
 npm run build:css
@@ -27,17 +54,6 @@ extension=pdo_sqlite.so
 extension=sqlite3.so
 extension=json.so
 EOL
-
-# Download composer
-echo "Downloading composer..."
-curl -sS https://getcomposer.org/installer | \
-PHP_INI_SCAN_DIR=/tmp/php \
-php -- --install-dir=/tmp --filename=composer
-
-# Install PHP dependencies
-echo "Installing PHP dependencies..."
-PHP_INI_SCAN_DIR=/tmp/php \
-php /tmp/composer install --no-dev --optimize-autoloader
 
 # Create dist directory if it doesn't exist
 mkdir -p dist
