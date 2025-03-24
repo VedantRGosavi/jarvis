@@ -32,6 +32,25 @@ if (isset($api_segments[1]) && $api_segments[1] === 'csrf') {
     exit;
 }
 
+// OAuth debug endpoint - only available in development mode
+if (isset($api_segments[1]) && $api_segments[1] === 'debug' && ($_ENV['APP_ENV'] ?? getenv('APP_ENV')) === 'development') {
+    $provider = $api_segments[2] ?? '';
+
+    if (empty($provider)) {
+        Response::error('Provider is required', 400);
+        exit;
+    }
+
+    try {
+        $oauthProvider = OAuthFactory::getProvider($provider);
+        $debug = $oauthProvider->debugEnvironment();
+        Response::success($debug);
+    } catch (\Exception $e) {
+        Response::error($e->getMessage(), 400);
+    }
+    exit;
+}
+
 switch ($action) {
     case 'login':
         if ($method !== 'POST') {

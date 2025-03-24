@@ -3,9 +3,9 @@ namespace App\Utils;
 
 class GitHubOAuth extends OAuthProvider {
     protected function loadConfig() {
-        $this->clientId = $_ENV['GITHUB_CLIENT_ID'] ?? '';
-        $this->clientSecret = $_ENV['GITHUB_CLIENT_SECRET'] ?? '';
-        $this->redirectUri = $_ENV['GITHUB_REDIRECT_URI'] ?? '';
+        $this->clientId = $_ENV['GITHUB_CLIENT_ID'] ?? getenv('GITHUB_CLIENT_ID') ?? '';
+        $this->clientSecret = $_ENV['GITHUB_CLIENT_SECRET'] ?? getenv('GITHUB_CLIENT_SECRET') ?? '';
+        $this->redirectUri = $_ENV['GITHUB_REDIRECT_URI'] ?? getenv('GITHUB_REDIRECT_URI') ?? '';
     }
 
     public function getAuthorizationUrl() {

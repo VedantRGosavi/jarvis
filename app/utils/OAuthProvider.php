@@ -121,6 +121,45 @@ abstract class OAuthProvider {
     }
 
     /**
+     * Debug environment variables related to the OAuth provider
+     *
+     * @return array Debug information about the environment variables
+     */
+    public function debugEnvironment() {
+        $providerName = strtolower($this->providerName ?? get_class($this));
+        $debug = [
+            'provider' => $providerName,
+            'is_configured' => $this->isConfigured(),
+            'client_id' => [
+                'env_key' => strtoupper($providerName) . '_CLIENT_ID',
+                'value' => $this->clientId,
+                'from_env' => !empty($_ENV[strtoupper($providerName) . '_CLIENT_ID']),
+                'from_getenv' => !empty(getenv(strtoupper($providerName) . '_CLIENT_ID')),
+            ],
+            'client_secret' => [
+                'env_key' => strtoupper($providerName) . '_CLIENT_SECRET',
+                'value' => substr($this->clientSecret, 0, 4) . '****' . substr($this->clientSecret, -4),
+                'from_env' => !empty($_ENV[strtoupper($providerName) . '_CLIENT_SECRET']),
+                'from_getenv' => !empty(getenv(strtoupper($providerName) . '_CLIENT_SECRET')),
+            ],
+            'redirect_uri' => [
+                'env_key' => strtoupper($providerName) . '_REDIRECT_URI',
+                'value' => $this->redirectUri,
+                'from_env' => !empty($_ENV[strtoupper($providerName) . '_REDIRECT_URI']),
+                'from_getenv' => !empty(getenv(strtoupper($providerName) . '_REDIRECT_URI')),
+            ],
+            'frontend_url' => [
+                'env_key' => 'FRONTEND_URL',
+                'value' => $_ENV['FRONTEND_URL'] ?? getenv('FRONTEND_URL') ?? 'not set',
+                'from_env' => isset($_ENV['FRONTEND_URL']),
+                'from_getenv' => (bool)getenv('FRONTEND_URL'),
+            ]
+        ];
+
+        return $debug;
+    }
+
+    /**
      * Make an HTTP GET request
      *
      * @param string $url The URL to request

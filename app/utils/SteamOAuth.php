@@ -6,9 +6,9 @@ class SteamOAuth extends OAuthProvider {
     protected $providerName = 'steam';
 
     protected function loadConfig() {
-        $this->clientId = getenv('STEAM_CLIENT_ID') ?? '';
-        $this->redirectUri = getenv('STEAM_REDIRECT_URI') ?? '';
-        $this->apiKey = getenv('STEAM_API_KEY') ?? '';
+        $this->clientId = $_ENV['STEAM_CLIENT_ID'] ?? getenv('STEAM_CLIENT_ID') ?? '';
+        $this->redirectUri = $_ENV['STEAM_REDIRECT_URI'] ?? getenv('STEAM_REDIRECT_URI') ?? '';
+        $this->apiKey = $_ENV['STEAM_API_KEY'] ?? getenv('STEAM_API_KEY') ?? '';
     }
 
     public function getAuthorizationUrl() {

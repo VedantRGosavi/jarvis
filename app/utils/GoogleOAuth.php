@@ -3,9 +3,9 @@ namespace App\Utils;
 
 class GoogleOAuth extends OAuthProvider {
     protected function loadConfig() {
-        $this->clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? '';
-        $this->clientSecret = $_ENV['GOOGLE_CLIENT_SECRET'] ?? '';
-        $this->redirectUri = $_ENV['GOOGLE_REDIRECT_URI'] ?? '';
+        $this->clientId = $_ENV['GOOGLE_CLIENT_ID'] ?? getenv('GOOGLE_CLIENT_ID') ?? '';
+        $this->clientSecret = $_ENV['GOOGLE_CLIENT_SECRET'] ?? getenv('GOOGLE_CLIENT_SECRET') ?? '';
+        $this->redirectUri = $_ENV['GOOGLE_REDIRECT_URI'] ?? getenv('GOOGLE_REDIRECT_URI') ?? '';
     }
 
     public function getAuthorizationUrl() {

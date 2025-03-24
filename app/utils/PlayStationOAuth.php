@@ -8,10 +8,10 @@ class PlayStationOAuth extends OAuthProvider {
     protected $npsso = null;
 
     protected function loadConfig() {
-        $this->clientId = getenv('PLAYSTATION_CLIENT_ID') ?? '';
-        $this->clientSecret = getenv('PLAYSTATION_CLIENT_SECRET') ?? '';
-        $this->redirectUri = getenv('PLAYSTATION_REDIRECT_URI') ?? '';
-        $this->npsso = getenv('PLAYSTATION_NPSSO') ?? '';
+        $this->clientId = $_ENV['PLAYSTATION_CLIENT_ID'] ?? getenv('PLAYSTATION_CLIENT_ID') ?? '';
+        $this->clientSecret = $_ENV['PLAYSTATION_CLIENT_SECRET'] ?? getenv('PLAYSTATION_CLIENT_SECRET') ?? '';
+        $this->redirectUri = $_ENV['PLAYSTATION_REDIRECT_URI'] ?? getenv('PLAYSTATION_REDIRECT_URI') ?? '';
+        $this->npsso = $_ENV['PLAYSTATION_NPSSO'] ?? getenv('PLAYSTATION_NPSSO') ?? '';
     }
 
     public function getAuthorizationUrl() {
