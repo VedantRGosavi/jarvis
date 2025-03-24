@@ -221,3 +221,24 @@ If you need to deploy manually, follow these steps:
 
 - Always make sure to build your CSS locally (`npm run build:css`) before pushing if you've made changes to `tailwind.config.js` or CSS source files
 - For theme changes to take effect, ensure that `tailwind.css` is regenerated with `npm run build:css`
+
+## Security Best Practices
+
+To ensure the security of this application, please follow these guidelines:
+
+1. **Never commit sensitive data**: API keys, passwords, and tokens should never be committed to the repository
+2. **Use environment variables**: 
+   - Copy `.env.example` to `.env` 
+   - Add your real keys to `.env` (this file is git-ignored)
+   - Only commit placeholder values in `.env.example`
+
+3. **Install pre-commit hooks**:
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+   This will help prevent accidental commits of sensitive data
+
+4. **Report security issues**: If you discover a security vulnerability, please report it by email to security@fridayai.me
+
+For more information, see the [SECURITY.md](SECURITY.md) file.
