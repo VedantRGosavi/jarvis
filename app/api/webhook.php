@@ -38,13 +38,13 @@ try {
         $sigHeader,
         $_ENV['STRIPE_WEBHOOK_SECRET']
     );
-    
+
     error_log("Event constructed successfully: " . $event->type);
-    
+
     // Handle the event using WebhookHandler
     $handler = new WebhookHandler($event);
     $result = $handler->handle();
-    
+
     error_log("Event handled successfully: " . json_encode($result));
     Response::success($result);
 } catch(\UnexpectedValueException $e) {
@@ -56,4 +56,4 @@ try {
 } catch(\Exception $e) {
     error_log("Webhook error: " . $e->getMessage());
     Response::error('Webhook error: ' . $e->getMessage(), 500);
-} 
+}

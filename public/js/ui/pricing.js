@@ -21,12 +21,12 @@ class PricingSection {
             },
             onPurchase: options.onPurchase || null
         };
-        
+
         if (!this.container) {
             console.error(`Container with ID "${containerId}" not found.`);
             return;
         }
-        
+
         this.render();
         this.setupListeners();
     }
@@ -39,7 +39,7 @@ class PricingSection {
                     <div class="absolute -top-24 -left-24 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl"></div>
                     <div class="absolute top-1/2 right-0 w-80 h-80 bg-blue-500 rounded-full filter blur-3xl"></div>
                 </div>
-            
+
                 <div class="relative mx-auto max-w-7xl px-6 lg:px-8">
                     <div class="text-center mb-16">
                         <h2 class="text-4xl font-bold tracking-tight text-${this.options.theme.primary} sm:text-5xl fade-in-element">
@@ -58,7 +58,7 @@ class PricingSection {
         `;
 
         this.container.innerHTML = sectionContent;
-        
+
         // Trigger animation on load
         if (this.options.animation.enabled) {
             const elements = this.container.querySelectorAll('.fade-in-element');
@@ -95,7 +95,7 @@ class PricingSection {
                 "hover:scale-[1.02]",
                 "hover:shadow-2xl",
             ];
-            
+
             // Add a glow effect for highlighted cards
             if (isHighlighted) {
                 cardClasses.push(`ring-2`);
@@ -180,7 +180,7 @@ class PricingSection {
             card.addEventListener('mouseenter', () => {
                 card.classList.add('is-hovered');
             });
-            
+
             card.addEventListener('mouseleave', () => {
                 card.classList.remove('is-hovered');
             });
@@ -190,14 +190,14 @@ class PricingSection {
     handlePurchase(tier) {
         // Here you would typically integrate with a payment processor
         console.log(`User selected the ${tier.name} pack`);
-        
+
         // Check authentication
         if (!window.authService || !window.authService.isAuthenticated()) {
             // Redirect to login
             if (window.notifications) {
                 window.notifications.warning('Please log in to make a purchase');
             }
-            
+
             // Scroll to auth section
             const authSection = document.getElementById('auth');
             if (authSection) {
@@ -205,14 +205,14 @@ class PricingSection {
             }
             return;
         }
-        
+
         // Check if payment UI is available
         if (!window.paymentUI) {
             console.error('Payment UI not loaded');
             alert(`Thank you for choosing the ${tier.name}!\nPayment system is currently unavailable. Please try again later.`);
             return;
         }
-        
+
         // Handle subscription vs one-time purchase
         if (tier.type === 'subscription') {
             window.paymentUI.showSubscriptionForm(
@@ -223,7 +223,7 @@ class PricingSection {
                 },
                 (result) => {
                     console.log('Subscription success:', result);
-                    
+
                     // Call custom onPurchase handler if provided
                     if (typeof this.options.onPurchase === 'function') {
                         this.options.onPurchase(tier, result);
@@ -243,7 +243,7 @@ class PricingSection {
                 },
                 (result) => {
                     console.log('Purchase success:', result);
-                    
+
                     // Call custom onPurchase handler if provided
                     if (typeof this.options.onPurchase === 'function') {
                         this.options.onPurchase(tier, result);

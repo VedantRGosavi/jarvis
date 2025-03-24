@@ -46,4 +46,4 @@ The OAuth test tool (`oauth-test.php`) helps you verify that your OAuth provider
   ```
 - When testing is complete, remember to remove test redirect URIs from production applications
 
-For complete OAuth setup instructions, see the main documentation at `documentation/oauth-setup.md`. 
+For complete OAuth setup instructions, see the main documentation at `documentation/oauth-setup.md`.

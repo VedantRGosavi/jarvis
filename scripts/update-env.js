@@ -27,4 +27,4 @@ commands.forEach(cmd => console.log(cmd));
 console.log('\n');
 console.log('After setting all variables, run this to deploy the variables:');
 console.log('vercel env pull .env.production');
-console.log('vercel --prod'); 
+console.log('vercel --prod');

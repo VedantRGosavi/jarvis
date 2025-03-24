@@ -7,31 +7,31 @@ class AccountUI {
   constructor() {
     this.accountContainer = null;
     this.isVisible = false;
-    
+
     // Templates
     this.accountTemplate = `
       <div class="account-section bg-gaming-gray-800 rounded-lg p-6 max-w-md mx-auto">
         <h2 class="text-2xl font-bold mb-6 text-center">My Account</h2>
-        
+
         <div class="user-info bg-gaming-gray-700 p-4 rounded mb-6">
           <p><span class="font-medium">Name:</span> <span id="account-name">Loading...</span></p>
           <p><span class="font-medium">Email:</span> <span id="account-email">Loading...</span></p>
         </div>
-        
+
         <div class="subscription-info mb-6">
           <h3 class="text-lg font-semibold mb-2">Subscription</h3>
           <div id="subscription-details" class="bg-gaming-gray-700 p-4 rounded">
             <p class="text-center text-sm text-gaming-gray-400">Loading subscription details...</p>
           </div>
         </div>
-        
+
         <div class="purchase-history">
           <h3 class="text-lg font-semibold mb-2">Purchase History</h3>
           <div id="purchase-list" class="bg-gaming-gray-700 p-4 rounded">
             <p class="text-center text-sm text-gaming-gray-400">Loading purchase history...</p>
           </div>
         </div>
-        
+
         <div class="mt-6 flex justify-between">
           <button id="account-close" class="border border-gaming-gray-600 hover:border-gaming-gray-500 text-white font-bold py-2 px-4 rounded transition">
             Close
@@ -43,7 +43,7 @@ class AccountUI {
       </div>
     `;
   }
-  
+
   /**
    * Show account UI
    */
@@ -55,35 +55,35 @@ class AccountUI {
       }
       return;
     }
-    
+
     // Create account container if it doesn't exist
     if (!this.accountContainer) {
       this.accountContainer = document.createElement('div');
       this.accountContainer.className = 'account-container fixed inset-0 bg-gaming-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden';
       document.body.appendChild(this.accountContainer);
     }
-    
+
     // Render account UI
     this.accountContainer.innerHTML = `
       <div class="account-modal relative max-w-lg w-full rounded-lg overflow-auto max-h-90vh">
         ${this.accountTemplate}
       </div>
     `;
-    
+
     // Show container
     this.accountContainer.classList.remove('hidden');
     this.isVisible = true;
-    
+
     // Add event listeners
     const closeButton = this.accountContainer.querySelector('#account-close');
     const logoutButton = this.accountContainer.querySelector('#account-logout');
-    
+
     if (closeButton) {
       closeButton.addEventListener('click', () => {
         this.hide();
       });
     }
-    
+
     if (logoutButton) {
       logoutButton.addEventListener('click', () => {
         if (window.authService) {
@@ -92,11 +92,11 @@ class AccountUI {
         this.hide();
       });
     }
-    
+
     // Load account data
     this.loadAccountData();
   }
-  
+
   /**
    * Hide account UI
    */
@@ -106,7 +106,7 @@ class AccountUI {
     }
     this.isVisible = false;
   }
-  
+
   /**
    * Toggle account UI visibility
    */
@@ -117,7 +117,7 @@ class AccountUI {
       this.show();
     }
   }
-  
+
   /**
    * Load account data
    */
@@ -126,29 +126,29 @@ class AccountUI {
     const user = window.authService.getCurrentUser();
     const nameEl = this.accountContainer.querySelector('#account-name');
     const emailEl = this.accountContainer.querySelector('#account-email');
-    
+
     if (nameEl && user) nameEl.textContent = user.username || user.name || 'User';
     if (emailEl && user) emailEl.textContent = user.email || '';
-    
+
     // Load subscription data
     await this.loadSubscriptionDetails();
-    
+
     // Load purchase history
     await this.loadPurchaseHistory();
   }
-  
+
   /**
    * Load subscription details
    */
   async loadSubscriptionDetails() {
     if (!window.paymentService) return;
-    
+
     const subscriptionContainer = this.accountContainer.querySelector('#subscription-details');
     if (!subscriptionContainer) return;
-    
+
     try {
       const subscription = await window.paymentService.getSubscription();
-      
+
       if (subscription) {
         // Format date
         const endDate = new Date(subscription.current_period_end);
@@ -157,7 +157,7 @@ class AccountUI {
           month: 'long',
           day: 'numeric'
         });
-        
+
         // Display active subscription
         subscriptionContainer.innerHTML = `
           <div class="text-center">
@@ -169,7 +169,7 @@ class AccountUI {
             </button>
           </div>
         `;
-        
+
         // Add event listener to manage subscription button
         const manageButton = subscriptionContainer.querySelector('#manage-subscription');
         if (manageButton) {
@@ -192,13 +192,13 @@ class AccountUI {
             </button>
           </div>
         `;
-        
+
         // Add event listener to subscribe button
         const subscribeButton = subscriptionContainer.querySelector('#subscribe-button');
         if (subscribeButton) {
           subscribeButton.addEventListener('click', () => {
             this.hide();
-            
+
             // Scroll to pricing section
             const pricingSection = document.getElementById('pricing');
             if (pricingSection) {
@@ -214,19 +214,19 @@ class AccountUI {
       `;
     }
   }
-  
+
   /**
    * Load purchase history
    */
   async loadPurchaseHistory() {
     if (!window.paymentService) return;
-    
+
     const purchaseListContainer = this.accountContainer.querySelector('#purchase-list');
     if (!purchaseListContainer) return;
-    
+
     try {
       const purchases = await window.paymentService.getPurchases();
-      
+
       if (purchases && purchases.length > 0) {
         // Display purchase history
         const purchaseItems = purchases.map(purchase => {
@@ -237,10 +237,10 @@ class AccountUI {
             month: 'short',
             day: 'numeric'
           });
-          
+
           // Format price
           const price = (purchase.amount / 100).toFixed(2);
-          
+
           return `
             <div class="purchase-item flex justify-between py-2 border-b border-gaming-gray-600 last:border-0">
               <div>
@@ -251,7 +251,7 @@ class AccountUI {
             </div>
           `;
         }).join('');
-        
+
         purchaseListContainer.innerHTML = `
           <div class="purchases-list space-y-1">
             ${purchaseItems}
@@ -275,10 +275,10 @@ class AccountUI {
 // Initialize account UI
 document.addEventListener('DOMContentLoaded', () => {
   const accountUI = new AccountUI();
-  
+
   // Expose to global scope
   window.accountUI = accountUI;
-  
+
   // Add listener to user button in overlay
   const userButton = document.getElementById('user-btn');
   if (userButton) {
@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
       accountUI.toggle();
     });
   }
-  
+
   // Add listener to account links
   document.querySelectorAll('.account-link').forEach(link => {
     link.addEventListener('click', (e) => {
@@ -294,4 +294,4 @@ document.addEventListener('DOMContentLoaded', () => {
       accountUI.show();
     });
   });
-}); 
+});

@@ -196,4 +196,4 @@ CREATE INDEX idx_items_quest_related ON items(quest_related);
 CREATE INDEX idx_npcs_default_location ON npcs(default_location_id);
 CREATE INDEX idx_npc_locations_npc_id ON npc_locations(npc_id);
 CREATE INDEX idx_npc_locations_location_id ON npc_locations(location_id);
-CREATE INDEX idx_quest_prerequisites_quest_id ON quest_prerequisites(quest_id); 
+CREATE INDEX idx_quest_prerequisites_quest_id ON quest_prerequisites(quest_id);

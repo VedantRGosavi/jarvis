@@ -15,7 +15,7 @@ const resolveEnvVar = (varName) => {
   const isProd = process.env.APP_ENV === 'production';
   const prodVarName = `${varName}_PROD`;
   const devVarName = `${varName}_DEV`;
-  
+
   return isProd ? process.env[prodVarName] : process.env[devVarName];
 };
 
@@ -26,10 +26,10 @@ module.exports = {
   environment: process.env.APP_ENV || 'development',
   isProduction: process.env.APP_ENV === 'production',
   debug: process.env.APP_DEBUG === 'true',
-  
+
   // Frontend URLs
-  frontendUrl: resolveEnvVar('FRONTEND_URL') || (process.env.APP_ENV === 'production' 
-    ? process.env.PROD_FRONTEND_URL 
+  frontendUrl: resolveEnvVar('FRONTEND_URL') || (process.env.APP_ENV === 'production'
+    ? process.env.PROD_FRONTEND_URL
     : process.env.DEV_FRONTEND_URL),
 
   // OAuth Configuration
@@ -47,7 +47,7 @@ module.exports = {
     playstation: {
       clientId: process.env.PLAYSTATION_CLIENT_ID,
       clientSecret: process.env.PLAYSTATION_CLIENT_SECRET,
-      redirectUri: resolveEnvVar('PLAYSTATION_REDIRECT_URI') 
+      redirectUri: resolveEnvVar('PLAYSTATION_REDIRECT_URI')
     },
     steam: {
       clientId: process.env.STEAM_CLIENT_ID,
@@ -55,16 +55,16 @@ module.exports = {
       redirectUri: resolveEnvVar('STEAM_REDIRECT_URI')
     }
   },
-  
+
   // Webhook URL
   webhookUrl: resolveEnvVar('WEBHOOK_URL'),
-  
+
   // Google Cloud Platform
   gcp: {
     projectId: process.env.GCP_PROJECT_ID,
     serviceAccountPath: process.env.GCP_SERVICE_ACCOUNT_PATH
   },
-  
+
   // Stripe
   stripe: {
     publicKey: process.env.STRIPE_PUBLIC_KEY,
@@ -72,4 +72,4 @@ module.exports = {
     connectAccountId: process.env.STRIPE_CONNECT_ACCOUNT_ID,
     webhookSecret: process.env.STRIPE_WEBHOOK_SECRET
   }
-}; 
+};

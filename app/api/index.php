@@ -27,4 +27,4 @@ if (file_exists($handler_file)) {
     require_once $handler_file;
 } else {
     Response::error('API endpoint not found', 404);
-} 
+}

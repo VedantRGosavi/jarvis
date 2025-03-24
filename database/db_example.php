@@ -1,10 +1,10 @@
 <?php
 /**
  * Database Interaction Example Script
- * 
+ *
  * This script demonstrates how to interact with the SQLite databases
  * for the Gaming Companion Overlay Tool.
- * 
+ *
  * It shows how to use both the system database and game-specific databases
  * according to our new multi-database architecture.
  */
@@ -15,37 +15,37 @@ define('BASE_PATH', dirname(__DIR__));
 // Function to run examples
 function runExamples() {
     echo "=== Gaming Companion Overlay Tool Database Examples ===\n\n";
-    
+
     // System database examples
     echo "=== SYSTEM DATABASE EXAMPLES ===\n";
-    
+
     // Create a new user
     echo "Creating a test user...\n";
-    
+
     // Using the Database utility class for system database
     $systemDb = Database::getSystemInstance();
-    
+
     try {
         $stmt = $systemDb->prepare("
             INSERT INTO users (name, email, password, created_at)
             VALUES (:name, :email, :password, :created_at)
         ");
-        
+
         $name = 'Test User';
         $email = 'test@example.com';
         $hashedPassword = password_hash('password123', PASSWORD_DEFAULT);
         $createdAt = date('Y-m-d H:i:s');
-        
+
         $stmt->bindValue(':name', $name, SQLITE3_TEXT);
         $stmt->bindValue(':email', $email, SQLITE3_TEXT);
         $stmt->bindValue(':password', $hashedPassword, SQLITE3_TEXT);
         $stmt->bindValue(':created_at', $createdAt, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
-        
+
         $userId = $systemDb->db->lastInsertRowID();
         echo "User created with ID: $userId\n";
-        
+
         // Update user settings
         $settings = [
             'position' => 'top-right',
@@ -54,15 +54,15 @@ function runExamples() {
             'theme' => 'dark',
             'show_spoilers' => 0
         ];
-        
+
         // Check if settings already exist
         $existingSettings = $systemDb->fetchOne("
             SELECT id FROM user_settings
             WHERE user_id = :user_id
         ", [':user_id' => $userId]);
-        
+
         $updatedAt = date('Y-m-d H:i:s');
-        
+
         if ($existingSettings) {
             // Update existing settings
             $systemDb->fetchAll("
@@ -105,29 +105,29 @@ function runExamples() {
                 ':updated_at' => $updatedAt
             ]);
         }
-        
+
         echo "User settings updated successfully\n";
-        
+
         // Get user by email
         $user = $systemDb->fetchOne("
             SELECT id, name, email, created_at, last_login, subscription_status
             FROM users
             WHERE email = :email
         ", [':email' => 'test@example.com']);
-        
+
         if ($user) {
             echo "Retrieved user: " . $user['name'] . " (" . $user['email'] . ")\n";
         }
     } catch (Exception $e) {
         echo "Error with system database: " . $e->getMessage() . "\n";
     }
-    
+
     // Game database examples
     echo "\n=== ELDEN RING DATABASE EXAMPLES ===\n";
-    
+
     // Create Elden Ring database instance
     $eldenRingDb = Database::getGameInstance('elden_ring');
-    
+
     // Add a test location
     echo "Adding a test location...\n";
     $locationData = [
@@ -140,7 +140,7 @@ function runExamples() {
         'difficulty_level' => 'beginner',
         'recommended_level' => '1-10'
     ];
-    
+
     try {
         $stmt = $eldenRingDb->prepare("
             INSERT INTO locations (
@@ -154,7 +154,7 @@ function runExamples() {
                 :difficulty_level, :recommended_level, :notable_items, :notable_npcs
             )
         ");
-        
+
         $stmt->bindValue(':location_id', $locationData['location_id'], SQLITE3_TEXT);
         $stmt->bindValue(':name', $locationData['name'], SQLITE3_TEXT);
         $stmt->bindValue(':description', $locationData['description'], SQLITE3_TEXT);
@@ -167,13 +167,13 @@ function runExamples() {
         $stmt->bindValue(':recommended_level', $locationData['recommended_level'], SQLITE3_TEXT);
         $stmt->bindValue(':notable_items', null, SQLITE3_TEXT);
         $stmt->bindValue(':notable_npcs', null, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         echo "Location added successfully\n";
     } catch (Exception $e) {
         echo "Error adding location: " . $e->getMessage() . "\n";
     }
-    
+
     // Add a test quest
     echo "Adding a test quest...\n";
     $questData = [
@@ -188,7 +188,7 @@ function runExamples() {
         'rewards' => 'Access to Mohgwyn Palace, Bloody Finger',
         'spoiler_level' => 1
     ];
-    
+
     try {
         $stmt = $eldenRingDb->prepare("
             INSERT INTO quests (
@@ -202,7 +202,7 @@ function runExamples() {
                 :rewards, :related_quests, :spoiler_level, :version_added, :last_updated
             )
         ");
-        
+
         $stmt->bindValue(':quest_id', $questData['quest_id'], SQLITE3_TEXT);
         $stmt->bindValue(':name', $questData['name'], SQLITE3_TEXT);
         $stmt->bindValue(':description', $questData['description'], SQLITE3_TEXT);
@@ -217,10 +217,10 @@ function runExamples() {
         $stmt->bindValue(':spoiler_level', $questData['spoiler_level'], SQLITE3_INTEGER);
         $stmt->bindValue(':version_added', '1.0.0', SQLITE3_TEXT);
         $stmt->bindValue(':last_updated', date('Y-m-d'), SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         echo "Quest added successfully\n";
-        
+
         // Add quest steps
         echo "Adding quest steps...\n";
         $stepData1 = [
@@ -234,7 +234,7 @@ function runExamples() {
             'location_id' => 'loc_limgrave_chapel',
             'spoiler_level' => 0
         ];
-        
+
         $stepData2 = [
             'step_id' => 'qs_varre_2',
             'quest_id' => 'q_white_mask_varre',
@@ -247,7 +247,7 @@ function runExamples() {
             'next_step_id' => 'qs_varre_3',
             'spoiler_level' => 1
         ];
-        
+
         // Add step 1
         $stmt = $eldenRingDb->prepare("
             INSERT INTO quest_steps (
@@ -263,7 +263,7 @@ function runExamples() {
                 :alternative_paths, :spoiler_level
             )
         ");
-        
+
         $stmt->bindValue(':step_id', $stepData1['step_id'], SQLITE3_TEXT);
         $stmt->bindValue(':quest_id', $stepData1['quest_id'], SQLITE3_TEXT);
         $stmt->bindValue(':step_number', $stepData1['step_number'], SQLITE3_INTEGER);
@@ -278,9 +278,9 @@ function runExamples() {
         $stmt->bindValue(':next_step_id', null, SQLITE3_TEXT);
         $stmt->bindValue(':alternative_paths', null, SQLITE3_TEXT);
         $stmt->bindValue(':spoiler_level', $stepData1['spoiler_level'], SQLITE3_INTEGER);
-        
+
         $result = $stmt->execute();
-        
+
         // Add step 2
         $stmt = $eldenRingDb->prepare("
             INSERT INTO quest_steps (
@@ -296,7 +296,7 @@ function runExamples() {
                 :alternative_paths, :spoiler_level
             )
         ");
-        
+
         $stmt->bindValue(':step_id', $stepData2['step_id'], SQLITE3_TEXT);
         $stmt->bindValue(':quest_id', $stepData2['quest_id'], SQLITE3_TEXT);
         $stmt->bindValue(':step_number', $stepData2['step_number'], SQLITE3_INTEGER);
@@ -311,16 +311,16 @@ function runExamples() {
         $stmt->bindValue(':next_step_id', $stepData2['next_step_id'], SQLITE3_TEXT);
         $stmt->bindValue(':alternative_paths', null, SQLITE3_TEXT);
         $stmt->bindValue(':spoiler_level', $stepData2['spoiler_level'], SQLITE3_INTEGER);
-        
+
         $result = $stmt->execute();
         echo "Quest steps added successfully\n";
     } catch (Exception $e) {
         echo "Error with quest data: " . $e->getMessage() . "\n";
     }
-    
+
     // Search for quests
     echo "\nSearching for quests containing 'Varré'...\n";
-    
+
     try {
         $searchResults = $eldenRingDb->fetchAll("
             SELECT * FROM search_index
@@ -331,19 +331,19 @@ function runExamples() {
             )
             LIMIT 10
         ", [':search' => '%Varré%']);
-        
+
         $quests = [];
         foreach ($searchResults as $row) {
             $quest = $eldenRingDb->fetchOne("
                 SELECT * FROM quests
                 WHERE quest_id = :quest_id
             ", [':quest_id' => $row['content_id']]);
-            
+
             if ($quest) {
                 $quests[] = $quest;
             }
         }
-        
+
         if (count($quests) > 0) {
             foreach ($quests as $quest) {
                 echo "Found quest: " . $quest['name'] . "\n";
@@ -355,13 +355,13 @@ function runExamples() {
     } catch (Exception $e) {
         echo "Error searching quests: " . $e->getMessage() . "\n";
     }
-    
+
     // Baldur's Gate 3 example
     echo "\n=== BALDUR'S GATE 3 DATABASE EXAMPLES ===\n";
-    
+
     // Create Baldur's Gate 3 database instance
     $bg3Db = Database::getGameInstance('baldurs_gate3');
-    
+
     // Add a test location
     echo "Adding a test location...\n";
     $locationData = [
@@ -373,7 +373,7 @@ function runExamples() {
         'difficulty_level' => 'beginner',
         'recommended_level' => '1-2'
     ];
-    
+
     try {
         $stmt = $bg3Db->prepare("
             INSERT INTO locations (
@@ -387,7 +387,7 @@ function runExamples() {
                 :difficulty_level, :recommended_level, :notable_items, :notable_npcs
             )
         ");
-        
+
         $stmt->bindValue(':location_id', $locationData['location_id'], SQLITE3_TEXT);
         $stmt->bindValue(':name', $locationData['name'], SQLITE3_TEXT);
         $stmt->bindValue(':description', $locationData['description'], SQLITE3_TEXT);
@@ -400,13 +400,13 @@ function runExamples() {
         $stmt->bindValue(':recommended_level', $locationData['recommended_level'], SQLITE3_TEXT);
         $stmt->bindValue(':notable_items', null, SQLITE3_TEXT);
         $stmt->bindValue(':notable_npcs', null, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         echo "Location added successfully\n";
     } catch (Exception $e) {
         echo "Error adding location: " . $e->getMessage() . "\n";
     }
-    
+
     echo "\nExamples completed!\n";
 }
 
@@ -417,13 +417,13 @@ class Database {
     private static $systemInstance = null;
     private static $gameInstances = [];
     public $db = null;
-    
+
     // Private constructor for singleton pattern
     private function __construct($databasePath) {
         $this->db = new SQLite3($databasePath);
         $this->db->enableExceptions(true);
     }
-    
+
     // Get system database instance
     public static function getSystemInstance() {
         if (self::$systemInstance === null) {
@@ -431,66 +431,66 @@ class Database {
         }
         return self::$systemInstance;
     }
-    
+
     // Get game database instance
     public static function getGameInstance($game) {
         // Validate game ID to prevent directory traversal
         if (!in_array($game, ['elden_ring', 'baldurs_gate3'])) {
             throw new Exception("Invalid game identifier");
         }
-        
+
         if (!isset(self::$gameInstances[$game])) {
             self::$gameInstances[$game] = new self(BASE_PATH . "/data/game_data/{$game}.sqlite");
         }
         return self::$gameInstances[$game];
     }
-    
+
     // Query execution methods
     public function query($sql) {
         return $this->db->query($sql);
     }
-    
+
     public function prepare($sql) {
         return $this->db->prepare($sql);
     }
-    
+
     public function exec($sql) {
         return $this->db->exec($sql);
     }
-    
+
     // Fetch methods
     public function fetchAll($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
-        
+
         foreach ($params as $param => $value) {
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
             $stmt->bindValue($param, $value, $type);
         }
-        
+
         $result = $stmt->execute();
-        
+
         $rows = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             $rows[] = $row;
         }
-        
+
         return $rows;
     }
-    
+
     public function fetchOne($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
-        
+
         foreach ($params as $param => $value) {
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
             $stmt->bindValue($param, $value, $type);
         }
-        
+
         $result = $stmt->execute();
-        
+
         return $result->fetchArray(SQLITE3_ASSOC);
     }
 }
 
 // Run the examples
 // Comment out this line if you want to include this file without running examples
-runExamples(); 
+runExamples();

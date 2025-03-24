@@ -22,7 +22,7 @@ This guide provides step-by-step instructions for setting up each OAuth provider
    ```
    # For local development
    FRONTEND_URL=http://localhost:8000
-   
+
    # For production
    # FRONTEND_URL=https://fridayai.me
    ```
@@ -174,4 +174,4 @@ For testing purposes, you should set up these testing redirect URIs in each prov
    - Ensure you've requested the correct scopes for each provider.
    - Check the provider's documentation for any API changes.
 
-For further assistance, check the PHP error logs and contact support. 
+For further assistance, check the PHP error logs and contact support.

@@ -8,7 +8,7 @@
    - Elden Ring Data Pack (prod_Rzrfd6mQejXRe9)
    - Baldur's Gate 3 Data Pack (prod_Rzrf1wcie1AQVY)
    - Kingdom Come: Deliverance Data Pack (prod_RzrfcbcODmPqJl)
-   
+
    Each pack includes:
    - Complete quest information
    - Item locations
@@ -85,7 +85,7 @@ All products are implemented in Stripe with:
 
 For integration code examples and product IDs, refer to the API documentation.
 
-Stripe Setup : 
+Stripe Setup :
 Your setup
 Funds flow
 Buyers will purchase from you

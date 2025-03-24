@@ -10,16 +10,16 @@ export class AuthService {
     this.userKey = 'fridayai_user';
     this.token = localStorage.getItem(this.tokenKey);
     this.user = JSON.parse(localStorage.getItem(this.userKey) || 'null');
-    
+
     // Check if token exists and validate it
     if (this.token) {
       this.validateToken();
     }
-    
+
     // Check for OAuth callback token
     this.handleOAuthCallback();
   }
-  
+
   /**
    * Check if user is authenticated
    * @returns {boolean} Authentication status
@@ -27,7 +27,7 @@ export class AuthService {
   isAuthenticated() {
     return !!this.token;
   }
-  
+
   /**
    * Get current user data
    * @returns {Object|null} User data or null if not authenticated
@@ -35,7 +35,7 @@ export class AuthService {
   getCurrentUser() {
     return this.user;
   }
-  
+
   /**
    * Get authentication token
    * @returns {string|null} JWT token or null if not authenticated
@@ -43,7 +43,7 @@ export class AuthService {
   getToken() {
     return this.token;
   }
-  
+
   /**
    * Handle OAuth callback if present in URL
    */
@@ -51,22 +51,22 @@ export class AuthService {
     if (window.location.pathname.includes('/auth/callback')) {
       const urlParams = new URLSearchParams(window.location.search);
       const token = urlParams.get('token');
-      
+
       if (token) {
         // Store token
         this.token = token;
         localStorage.setItem(this.tokenKey, token);
-        
+
         // Get user info
         this.fetchUserInfo(token);
-        
+
         // Remove callback parameters from URL
         const newUrl = window.location.origin;
         window.history.replaceState({}, document.title, newUrl);
       }
     }
   }
-  
+
   /**
    * Fetch user info using token
    * @param {string} token - JWT token
@@ -79,18 +79,18 @@ export class AuthService {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to get user info');
       }
-      
+
       const data = await response.json();
       this.user = data.user;
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
-      
+
       // Dispatch login event
       document.dispatchEvent(new CustomEvent('userLogin', { detail: this.user }));
-      
+
       // Redirect to home if needed
       setTimeout(() => {
         window.location.href = '/index.html';
@@ -100,7 +100,7 @@ export class AuthService {
       this.logout();
     }
   }
-  
+
   /**
    * Validate the current token
    * @returns {Promise<boolean>} Whether token is valid
@@ -113,12 +113,12 @@ export class AuthService {
           'Authorization': `Bearer ${this.token}`
         }
       });
-      
+
       if (!response.ok) {
         this.logout();
         return false;
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error validating token:', error);
@@ -126,7 +126,7 @@ export class AuthService {
       return false;
     }
   }
-  
+
   /**
    * Get OAuth authorization URL
    * @param {string} provider - OAuth provider (google, github, etc.)
@@ -137,13 +137,13 @@ export class AuthService {
       const response = await fetch(`${this.baseUrl}/oauth/${provider}`, {
         method: 'GET'
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || `Failed to get ${provider} authentication URL`);
       }
-      
+
       return {
         success: true,
         auth_url: data.auth_url
@@ -156,7 +156,7 @@ export class AuthService {
       };
     }
   }
-  
+
   /**
    * Login with email and password
    * @param {string} email - User email
@@ -172,20 +172,20 @@ export class AuthService {
         },
         body: JSON.stringify({ email, password })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
-      
+
       // Store authentication data
       this.token = data.token;
       this.user = data.user;
-      
+
       localStorage.setItem(this.tokenKey, this.token);
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
-      
+
       return {
         success: true,
         user: this.user
@@ -198,7 +198,7 @@ export class AuthService {
       };
     }
   }
-  
+
   /**
    * Register a new user
    * @param {string} name - User name
@@ -215,20 +215,20 @@ export class AuthService {
         },
         body: JSON.stringify({ name, email, password })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
       }
-      
+
       // Store authentication data
       this.token = data.token;
       this.user = data.user;
-      
+
       localStorage.setItem(this.tokenKey, this.token);
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
-      
+
       return {
         success: true,
         user: this.user
@@ -241,7 +241,7 @@ export class AuthService {
       };
     }
   }
-  
+
   /**
    * Logout the current user
    */
@@ -250,12 +250,12 @@ export class AuthService {
     this.user = null;
     localStorage.removeItem(this.tokenKey);
     localStorage.removeItem(this.userKey);
-    
+
     // Redirect to login page if needed
     if (window.location.pathname.includes('/overlay.html')) {
       window.location.href = '/index.html';
     }
-    
+
     // Dispatch logout event
     document.dispatchEvent(new CustomEvent('userLogout'));
   }
@@ -264,4 +264,4 @@ export class AuthService {
 // Initialize authentication service and expose to window
 const authService = new AuthService();
 window.authService = authService;
-export default authService; 
+export default authService;

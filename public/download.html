@@ -26,12 +26,12 @@
                 </nav>
             </div>
         </header>
-        
+
         <!-- Download Section -->
         <section class="download-section py-32">
             <div class="container mx-auto px-6">
                 <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Download FridayAI</h2>
-                
+
                 <!-- Not Authenticated State -->
                 <div id="not-authenticated" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
                     <h3 class="text-2xl font-bold mb-4">Authentication Required</h3>
@@ -42,7 +42,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <!-- Trial/Free User State -->
                 <div id="trial-user" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
                     <h3 class="text-2xl font-bold mb-4">You're on a Trial Account</h3>
@@ -52,7 +52,7 @@
                     </div>
                     <p class="text-sm text-gaming-gray-400">Your trial expires in <span id="trial-days">14</span> days.</p>
                 </div>
-                
+
                 <!-- Premium User State -->
                 <div id="premium-user" class="max-w-lg mx-auto bg-gaming-gray-800 p-8 rounded-lg text-center hidden">
                     <h3 class="text-2xl font-bold mb-4">Premium Downloads</h3>
@@ -71,7 +71,7 @@
             </div>
         </section>
     </div>
-    
+
     <!-- Scripts -->
     <script src="js/data/authService.js"></script>
     <script>
@@ -79,7 +79,7 @@
             // Check authentication
             if (window.authService && window.authService.isAuthenticated()) {
                 const user = window.authService.getCurrentUser();
-                
+
                 if (user && (user.subscription_status === 'trial' || user.subscription_status === 'active' || user.subscription_status === 'admin')) {
                     // User has access to downloads
                     if (user.subscription_status === 'trial' || user.subscription_status === 'admin') {
@@ -100,28 +100,28 @@
                 // Not authenticated
                 document.getElementById('not-authenticated').classList.remove('hidden');
             }
-            
+
             // Populate download options based on version and container ID
             function populateDownloadOptions(containerId, version) {
                 const container = document.getElementById(containerId);
                 if (!container) return;
-                
+
                 const platforms = [
                     { name: 'Windows', icon: 'windows', ext: 'zip' },
                     { name: 'macOS', icon: 'apple', ext: 'dmg' },
                     { name: 'Linux', icon: 'linux', ext: 'tar.gz' }
                 ];
-                
+
                 let html = '';
                 platforms.forEach(platform => {
                     const platformKey = platform.name.toLowerCase();
                     if (platform.name === 'macOS') {
                         platformKey = 'mac';
                     }
-                    
+
                     html += `
                         <div class="download-option flex flex-col items-center">
-                            <a href="/api/download/${version}?platform=${platformKey}" 
+                            <a href="/api/download/${version}?platform=${platformKey}"
                                class="download-button flex flex-col items-center p-4 rounded-lg bg-gaming-gray-700 hover:bg-gaming-gray-600 transition w-full">
                                 <i class="fab fa-${platform.icon} text-3xl mb-2"></i>
                                 <span class="font-medium">${platform.name}</span>
@@ -130,10 +130,10 @@
                         </div>
                     `;
                 });
-                
+
                 container.innerHTML = html;
             }
         });
     </script>
 </body>
-</html> 
+</html>

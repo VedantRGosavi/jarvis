@@ -36,14 +36,14 @@ if (file_exists($file_path) && is_file($file_path)) {
         'jpeg' => 'image/jpeg',
         'ico' => 'image/x-icon',
     ];
-    
+
     if (isset($mime_types[$extension])) {
         header('Content-Type: ' . $mime_types[$extension]);
     }
-    
+
     readfile($file_path);
     exit;
 }
 
 // Default to serving the SPA entry point
-require_once BASE_PATH . '/public/index.html'; 
+require_once BASE_PATH . '/public/index.html';

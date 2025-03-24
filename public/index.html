@@ -16,7 +16,7 @@
         <header class="navbar-container relative">
             <div class="container mx-auto px-4 sm:px-6 flex justify-between items-center">
                 <h1 class="text-xl sm:text-2xl font-bold text-gaming-light">FridayAI</h1>
-                
+
                 <!-- Mobile menu button -->
                 <button id="mobile-menu-button" class="md:hidden text-gaming-light hover:text-gaming-gray-200 focus:outline-none">
                     <i class="fas fa-bars text-2xl"></i>
@@ -53,7 +53,7 @@
                 </div>
             </div>
         </header>
-        
+
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-image">
@@ -74,7 +74,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Features Section -->
         <section id="features" class="features-section py-16 sm:py-24 lg:py-32">
             <div class="container mx-auto px-4 sm:px-6">
@@ -95,12 +95,12 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Games Section -->
         <section id="games" class="games-section py-16 sm:py-24 lg:py-32">
             <div class="container mx-auto px-4 sm:px-6">
                 <h2 class="games-title text-3xl sm:text-4xl font-bold text-center mb-12 fade-in-element">Supported Games</h2>
-                
+
                 <!-- Current Games -->
                 <div class="games-grid grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 mb-16">
                     <div class="game-card bg-gaming-gray-800 p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
@@ -183,7 +183,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Documentation Section -->
         <section id="docs" class="docs-section py-16 sm:py-24 lg:py-32">
             <div class="container mx-auto px-4 sm:px-6">
@@ -254,12 +254,12 @@
                         </form>
                         <div class="mt-4 text-center">
                             <p class="text-sm text-gaming-gray-400">
-                                Already have an account? 
+                                Already have an account?
                                 <button id="show-login" class="text-gaming-accent hover:text-gaming-accent-hover">Login</button>
                             </p>
                         </div>
                     </div>
-                    
+
                     <div id="login-form" class="auth-form hidden">
                         <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-center">Login to Your Account</h3>
                         <form class="space-y-4">
@@ -277,7 +277,7 @@
                         </form>
                         <div class="mt-4 text-center">
                             <p class="text-sm text-gaming-gray-400">
-                                Don't have an account? 
+                                Don't have an account?
                                 <button id="show-register" class="text-gaming-accent hover:text-gaming-accent-hover">Create an Account</button>
                             </p>
                         </div>
@@ -391,7 +391,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Pricing Section -->
         <section id="pricing" class="pricing-section py-16 sm:py-24 lg:py-32">
             <div class="container mx-auto px-4 sm:px-6">
@@ -436,7 +436,7 @@
             </div>
         </section>
     </div>
-    
+
     <!-- Footer -->
     <footer class="footer-section py-12 sm:py-16 bg-gaming-primary text-gaming-gray-300">
         <div class="container mx-auto px-4 sm:px-6">
@@ -472,18 +472,18 @@
             </div>
         </div>
     </footer>
-    
+
     <!-- Core scripts -->
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/app.js"></script>
-    
+
     <!-- Authentication Scripts -->
     <script type="module" src="js/data/authService.js"></script>
     <script type="module" src="js/ui/icons.js"></script>
     <script type="module" src="js/ui/authForms.js"></script>
     <script type="module" src="js/ui/accountUI.js"></script>
     <script type="module" src="js/ui/accountPage.js"></script>
-    
+
     <!-- Payment Scripts -->
     <script src="https://js.stripe.com/v3/"></script>
     <script>
@@ -503,7 +503,7 @@
             const mobileMenu = document.getElementById('mobile-menu');
             const authButton = document.getElementById('auth-button');
             const mobileAuthButton = document.getElementById('mobile-auth-button');
-            
+
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
@@ -564,11 +564,11 @@
                     e.preventDefault();
                     const targetId = this.getAttribute('href');
                     const targetElement = document.querySelector(targetId);
-                    
+
                     if (targetElement) {
                         const navbarHeight = navbar.offsetHeight;
                         const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-                        
+
                         window.scrollTo({
                             top: targetPosition,
                             behavior: 'smooth'
@@ -579,22 +579,22 @@
 
             // Fade in elements on scroll
             const fadeElements = document.querySelectorAll('.fade-in-element');
-            
+
             function checkFade() {
                 fadeElements.forEach(element => {
                     const elementTop = element.getBoundingClientRect().top;
                     const elementBottom = element.getBoundingClientRect().bottom;
                     const windowHeight = window.innerHeight;
-                    
+
                     if (elementTop < windowHeight - 100 && elementBottom > 0) {
                         element.classList.add('visible');
                     }
                 });
             }
-            
+
             // Check elements on load
             setTimeout(checkFade, 100);
-            
+
             // Check elements on scroll
             window.addEventListener('scroll', checkFade);
 
@@ -603,31 +603,31 @@
             const showRegisterBtn = document.getElementById('show-register');
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
-            
+
             // Define the showRegisterForm function for global access
             window.showRegisterForm = function() {
                 loginForm.classList.add('hidden');
                 registerForm.classList.remove('hidden');
             };
-            
+
             // Define the showLoginForm function for global access
             window.showLoginForm = function() {
                 registerForm.classList.add('hidden');
                 loginForm.classList.remove('hidden');
             };
-            
+
             if (showLoginBtn) {
                 showLoginBtn.addEventListener('click', function() {
                     window.showLoginForm();
                 });
             }
-            
+
             if (showRegisterBtn) {
                 showRegisterBtn.addEventListener('click', function() {
                     window.showRegisterForm();
                 });
             }
-            
+
             // Check if there's a data-form attribute on the button that was clicked
             const authButtons = document.querySelectorAll('[data-form]');
             authButtons.forEach(button => {

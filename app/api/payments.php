@@ -64,12 +64,12 @@ switch ($action) {
             Response::error('Method not allowed', 405);
             exit;
         }
-        
+
         try {
             // Create Stripe customer if not exists
             $subscriptionModel = new Subscription();
             $stripeCustomerId = $subscriptionModel->getStripeCustomerId($userId);
-            
+
             if (!$stripeCustomerId) {
                 $customer = \Stripe\Customer::create([
                     'email' => $user['email'],
@@ -78,11 +78,11 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 $stripeCustomerId = $customer->id;
                 $subscriptionModel->saveStripeCustomerId($userId, $stripeCustomerId);
             }
-            
+
             // Create subscription
             $subscription = \Stripe\Subscription::create([
                 'customer' => $stripeCustomerId,
@@ -93,55 +93,55 @@ switch ($action) {
                 'expand' => ['latest_invoice.payment_intent'],
                 'trial_period_days' => $stripeConfig['trial_period_days'] ?? 7
             ]);
-            
+
             $subscriptionModel->createSubscription(
                 $userId,
                 $subscription->id,
                 'trialing',
                 date('Y-m-d H:i:s', $subscription->current_period_end)
             );
-            
+
             // Update user status
             $userModel->updateSubscription($userId, 'trialing');
-            
+
             Response::success([
                 'subscription_id' => $subscription->id,
                 'client_secret' => $subscription->latest_invoice->payment_intent->client_secret,
                 'status' => $subscription->status
             ]);
-            
+
         } catch (\Exception $e) {
             Response::error('Subscription creation failed: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     case 'purchase-game':
         if ($method !== 'POST') {
             Response::error('Method not allowed', 405);
             exit;
         }
-        
+
         if (!isset($data['game_id'])) {
             Response::error('Game ID required', 400);
             exit;
         }
-        
+
         try {
             $gameId = $data['game_id'];
             $appConfig = require BASE_PATH . '/app/config/app.php';
-            
+
             // Validate game ID
             if (!isset($appConfig['supported_games'][$gameId])) {
                 Response::error('Invalid game ID', 400);
                 exit;
             }
-            
+
             $gamePrice = $appConfig['supported_games'][$gameId]['price'];
-            
+
             // Create Stripe customer if not exists
             $subscriptionModel = new Subscription();
             $stripeCustomerId = $subscriptionModel->getStripeCustomerId($userId);
-            
+
             if (!$stripeCustomerId) {
                 $customer = \Stripe\Customer::create([
                     'email' => $user['email'],
@@ -150,11 +150,11 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 $stripeCustomerId = $customer->id;
                 $subscriptionModel->saveStripeCustomerId($userId, $stripeCustomerId);
             }
-            
+
             // Create payment intent
             $paymentIntent = \Stripe\PaymentIntent::create([
                 'amount' => $gamePrice,
@@ -165,7 +165,7 @@ switch ($action) {
                     'game_id' => $gameId
                 ]
             ]);
-            
+
             // Create purchase record
             $purchaseModel = new Purchase();
             $purchaseModel->createPurchase(
@@ -175,55 +175,55 @@ switch ($action) {
                 'pending',
                 $gamePrice
             );
-            
+
             Response::success([
                 'client_secret' => $paymentIntent->client_secret
             ]);
-            
+
         } catch (\Exception $e) {
             Response::error('Payment creation failed: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     case 'subscription':
         if ($method !== 'GET') {
             Response::error('Method not allowed', 405);
             exit;
         }
-        
+
         try {
             $subscriptionModel = new Subscription();
             $subscription = $subscriptionModel->getUserSubscription($userId);
-            
+
             if (!$subscription) {
                 Response::success(['subscription' => null]);
                 exit;
             }
-            
+
             Response::success(['subscription' => $subscription]);
-            
+
         } catch (\Exception $e) {
             Response::error('Failed to get subscription: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     case 'purchases':
         if ($method !== 'GET') {
             Response::error('Method not allowed', 405);
             exit;
         }
-        
+
         try {
             $purchaseModel = new Purchase();
             $purchases = $purchaseModel->getUserPurchases($userId);
-            
+
             Response::success(['purchases' => $purchases]);
-            
+
         } catch (\Exception $e) {
             Response::error('Failed to get purchases: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     default:
         Response::error('Payment endpoint not found', 404);
-} 
+}

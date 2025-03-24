@@ -38,7 +38,7 @@ app.get('/auth/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })
 );
 
-app.get('/api/auth/callback/google', 
+app.get('/api/auth/callback/google',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
     // Successful authentication, redirect home
@@ -51,7 +51,7 @@ app.get('/auth/github',
   passport.authenticate('github', { scope: ['user:email'] })
 );
 
-app.get('/api/auth/callback/github', 
+app.get('/api/auth/callback/github',
   passport.authenticate('github', { failureRedirect: '/login' }),
   (req, res) => {
     // Successful authentication, redirect home
@@ -68,4 +68,4 @@ console.log('Using GitHub redirect URI:', process.env.GITHUB_REDIRECT_URI);
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});

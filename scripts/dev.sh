@@ -11,4 +11,4 @@ fi
 
 # Start PHP development server
 echo "Starting development server at http://localhost:8000"
-php -S localhost:8000 -t public 
+php -S localhost:8000 -t public

@@ -27,4 +27,4 @@ RewriteRule ^download$ download.html [L]
 RewriteRule ^$ index.php [L]
 
 # Redirect all other requests to the index.php entrypoint
-RewriteRule ^(.*)$ index.php [L,QSA] 
+RewriteRule ^(.*)$ index.php [L,QSA]

@@ -104,4 +104,4 @@ For local webhook testing, use the Stripe CLI to forward events:
 stripe listen --forward-to http://localhost:8000/api/webhook
 ```
 
-Then run the webhook test to simulate events: 
+Then run the webhook test to simulate events:

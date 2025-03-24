@@ -44,7 +44,7 @@ class WebhookHandler {
     // Checkout Events
     protected function checkout_session_completed(): array {
         $session = $this->event->data->object;
-        
+
         $this->purchaseModel->createPurchase(
             $session->metadata->user_id ?? null,
             $session->metadata->product_id ?? null,
@@ -58,7 +58,7 @@ class WebhookHandler {
 
     protected function checkout_session_async_payment_failed(): array {
         $session = $this->event->data->object;
-        
+
         $this->purchaseModel->updatePurchaseStatus(
             $session->payment_intent,
             'failed'
@@ -69,7 +69,7 @@ class WebhookHandler {
 
     protected function checkout_session_async_payment_succeeded(): array {
         $session = $this->event->data->object;
-        
+
         $this->purchaseModel->updatePurchaseStatus(
             $session->payment_intent,
             'completed'
@@ -80,7 +80,7 @@ class WebhookHandler {
 
     protected function checkout_session_expired(): array {
         $session = $this->event->data->object;
-        
+
         $this->purchaseModel->updatePurchaseStatus(
             $session->payment_intent,
             'expired'
@@ -92,7 +92,7 @@ class WebhookHandler {
     // Customer Events
     protected function customer_created(): array {
         $customer = $this->event->data->object;
-        
+
         if (isset($customer->metadata->user_id)) {
             $this->userModel->updateStripeCustomerId(
                 $customer->metadata->user_id,
@@ -105,14 +105,14 @@ class WebhookHandler {
 
     protected function customer_deleted(): array {
         $customer = $this->event->data->object;
-        
+
         $this->userModel->removeStripeCustomerId($customer->id);
         return ['status' => 'success'];
     }
 
     protected function customer_updated(): array {
         $customer = $this->event->data->object;
-        
+
         if (isset($customer->metadata->user_id)) {
             $this->userModel->updateCustomerDetails(
                 $customer->metadata->user_id,
@@ -127,7 +127,7 @@ class WebhookHandler {
     // Subscription Events
     protected function customer_subscription_created(): array {
         $subscription = $this->event->data->object;
-        
+
         if (isset($subscription->metadata->user_id)) {
             $this->subscriptionModel->createSubscription(
                 $subscription->metadata->user_id,
@@ -142,7 +142,7 @@ class WebhookHandler {
 
     protected function customer_subscription_updated(): array {
         $subscription = $this->event->data->object;
-        
+
         $this->subscriptionModel->updateSubscriptionStatus(
             $subscription->id,
             $subscription->status
@@ -153,7 +153,7 @@ class WebhookHandler {
 
     protected function customer_subscription_deleted(): array {
         $subscription = $this->event->data->object;
-        
+
         $userId = $this->subscriptionModel->getUserIdFromSubscription($subscription->id);
         if ($userId) {
             $this->userModel->updateSubscription($userId, 'cancelled');
@@ -165,7 +165,7 @@ class WebhookHandler {
 
     protected function customer_subscription_trial_will_end(): array {
         $subscription = $this->event->data->object;
-        
+
         // Notify user about trial ending
         if (isset($subscription->metadata->user_id)) {
             // TODO: Implement notification system
@@ -178,10 +178,10 @@ class WebhookHandler {
     // Invoice Events
     protected function invoice_paid(): array {
         $invoice = $this->event->data->object;
-        
+
         if ($invoice->subscription) {
             $this->subscriptionModel->updateSubscriptionStatus($invoice->subscription, 'active');
-            
+
             $userId = $this->subscriptionModel->getUserIdFromSubscription($invoice->subscription);
             if ($userId) {
                 $this->userModel->updateSubscription($userId, 'active');
@@ -193,7 +193,7 @@ class WebhookHandler {
 
     protected function invoice_payment_failed(): array {
         $invoice = $this->event->data->object;
-        
+
         if ($invoice->subscription) {
             $userId = $this->subscriptionModel->getUserIdFromSubscription($invoice->subscription);
             if ($userId) {
@@ -207,7 +207,7 @@ class WebhookHandler {
 
     protected function invoice_upcoming(): array {
         $invoice = $this->event->data->object;
-        
+
         if (isset($invoice->customer)) {
             // TODO: Notify customer about upcoming invoice
             error_log("Upcoming invoice for customer: " . $invoice->customer);
@@ -219,7 +219,7 @@ class WebhookHandler {
     // Payment Intent Events
     protected function payment_intent_succeeded(): array {
         $paymentIntent = $this->event->data->object;
-        
+
         $this->purchaseModel->updatePurchaseStatus(
             $paymentIntent->id,
             'completed'
@@ -230,7 +230,7 @@ class WebhookHandler {
 
     protected function payment_intent_payment_failed(): array {
         $paymentIntent = $this->event->data->object;
-        
+
         $this->purchaseModel->updatePurchaseStatus(
             $paymentIntent->id,
             'failed'
@@ -276,4 +276,4 @@ class WebhookHandler {
         error_log("Price deleted: " . $price->id);
         return ['status' => 'success'];
     }
-} 
+}

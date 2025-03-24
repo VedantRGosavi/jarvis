@@ -13,7 +13,7 @@ Never commit real API keys, tokens, or other sensitive information to this repos
 ### Environment Variables
 - Use environment variables to store sensitive configurations
 - Copy `.env.example` to `.env` and add your real keys to the `.env` file
-- `.env` files are already ignored by git (check `.gitignore`) 
+- `.env` files are already ignored by git (check `.gitignore`)
 - `.env.example` files should only contain placeholder values like `your_api_key_here`
 
 ### Pre-commit Hooks
@@ -57,4 +57,4 @@ Never commit real API keys, tokens, or other sensitive information to this repos
 
 ## Dependency Security
 
-We regularly update dependencies to ensure we're not using packages with known vulnerabilities. If you notice outdated dependencies with security issues, please open a pull request with the necessary updates. 
+We regularly update dependencies to ensure we're not using packages with known vulnerabilities. If you notice outdated dependencies with security issues, please open a pull request with the necessary updates.

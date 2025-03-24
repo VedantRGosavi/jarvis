@@ -72,4 +72,4 @@ app.get('/debug-env', (req, res) => {
 1. **Never commit .env files to version control**
 2. **Rotate secrets regularly**
 3. **Use secret management services for production**
-4. **Restrict access to your environment variables to only necessary personnel** 
+4. **Restrict access to your environment variables to only necessary personnel**

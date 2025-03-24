@@ -67,10 +67,10 @@ fi
 run_test() {
     test_name=$1
     script_path=$2
-    
+
     echo -e "\n${BOLD}${BLUE}Running Test: $test_name${NC}"
     echo -e "${BLUE}$(printf '=%.0s' {1..50})${NC}"
-    
+
     if php "$script_path"; then
         echo -e "${GREEN}✓ $test_name test passed${NC}"
         return 0
@@ -127,4 +127,4 @@ fi
 echo -e "\n${YELLOW}Note: Test data has been preserved in your Stripe account for review.${NC}"
 echo -e "See scripts/README-payment-tests.md for cleanup instructions."
 
-exit $exit_code 
+exit $exit_code

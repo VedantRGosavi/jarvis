@@ -25,7 +25,7 @@ class AuthForms {
             <a href="#" id="showRegistration" class="text-sm text-gaming-gray-400 hover:text-gaming-gray-300">Need an account?</a>
           </div>
         </form>
-        
+
         <div class="mt-6 pt-6 border-t border-gaming-gray-700">
           <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
           <div class="grid grid-cols-2 gap-2">
@@ -49,7 +49,7 @@ class AuthForms {
         </div>
       </div>
     `;
-    
+
     this.registrationFormTemplate = `
       <div class="auth-form bg-gaming-gray-800 rounded-lg p-6 max-w-md mx-auto">
         <h2 class="text-2xl font-bold mb-6 text-center">Create Account</h2>
@@ -75,7 +75,7 @@ class AuthForms {
             <a href="#" id="showLogin" class="text-sm text-gaming-gray-400 hover:text-gaming-gray-300">Already have an account?</a>
           </div>
         </form>
-        
+
         <div class="mt-6 pt-6 border-t border-gaming-gray-700">
           <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
           <div class="grid grid-cols-2 gap-2">
@@ -99,7 +99,7 @@ class AuthForms {
         </div>
       </div>
     `;
-    
+
     this.userProfileTemplate = `
       <div class="user-profile bg-gaming-gray-800 rounded-lg p-6 max-w-md mx-auto">
         <h2 class="text-2xl font-bold mb-6 text-center">My Account</h2>
@@ -120,121 +120,121 @@ class AuthForms {
       </div>
     `;
   }
-  
+
   /**
    * Render authentication UI based on authentication state
    * @param {HTMLElement} container - Container element to render in
    */
   renderAuthUI(container) {
     if (!container) return;
-    
+
     if (window.authService && window.authService.isAuthenticated()) {
       this.renderUserProfile(container);
     } else {
       this.renderRegistrationForm(container);
     }
   }
-  
+
   /**
    * Render login form
    * @param {HTMLElement} container - Container element to render in
    */
   renderLoginForm(container) {
     container.innerHTML = this.loginFormTemplate;
-    
+
     // Set up form event handlers
     const loginForm = document.getElementById('loginForm');
     const showRegistrationLink = document.getElementById('showRegistration');
-    
+
     if (loginForm) {
       loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.handleLogin();
       });
     }
-    
+
     if (showRegistrationLink) {
       showRegistrationLink.addEventListener('click', (e) => {
         e.preventDefault();
         this.renderRegistrationForm(container);
       });
     }
-    
+
     // Set up OAuth buttons
     this.setupOAuthButtons();
   }
-  
+
   /**
    * Render registration form
    * @param {HTMLElement} container - Container element to render in
    */
   renderRegistrationForm(container) {
     container.innerHTML = this.registrationFormTemplate;
-    
+
     // Set up form event handlers
     const registrationForm = document.getElementById('registrationForm');
     const showLoginLink = document.getElementById('showLogin');
-    
+
     if (registrationForm) {
       registrationForm.addEventListener('submit', (e) => {
         e.preventDefault();
         this.handleRegistration();
       });
     }
-    
+
     if (showLoginLink) {
       showLoginLink.addEventListener('click', (e) => {
         e.preventDefault();
         this.renderLoginForm(container);
       });
     }
-    
+
     // Set up OAuth buttons
     this.setupOAuthButtons(true);
   }
-  
+
   /**
    * Set up OAuth provider buttons
    * @param {boolean} isRegistration - Whether this is for the registration form
    */
   setupOAuthButtons(isRegistration = false) {
     const suffix = isRegistration ? 'Reg' : '';
-    
+
     // Google
     const googleAuthBtn = document.getElementById(`googleAuthBtn${suffix}`);
     if (googleAuthBtn) {
       googleAuthBtn.addEventListener('click', () => this.handleOAuthLogin('google'));
     }
-    
+
     // GitHub
     const githubAuthBtn = document.getElementById(`githubAuthBtn${suffix}`);
     if (githubAuthBtn) {
       githubAuthBtn.addEventListener('click', () => this.handleOAuthLogin('github'));
     }
-    
+
     // PlayStation
     const psnAuthBtn = document.getElementById(`psnAuthBtn${suffix}`);
     if (psnAuthBtn) {
       psnAuthBtn.addEventListener('click', () => this.handleOAuthLogin('playstation'));
     }
-    
+
     // Steam
     const steamAuthBtn = document.getElementById(`steamAuthBtn${suffix}`);
     if (steamAuthBtn) {
       steamAuthBtn.addEventListener('click', () => this.handleOAuthLogin('steam'));
     }
   }
-  
+
   /**
    * Handle OAuth login
    * @param {string} provider - OAuth provider (google, github, playstation, steam)
    */
   async handleOAuthLogin(provider) {
     if (!window.authService) return;
-    
+
     try {
       const result = await window.authService.getOAuthUrl(provider);
-      
+
       if (result.success && result.auth_url) {
         // Redirect to provider's authorization page
         window.location.href = result.auth_url;
@@ -248,39 +248,39 @@ class AuthForms {
       this.showFormError(errorDisplay, `An error occurred connecting to ${provider}`);
     }
   }
-  
+
   /**
    * Render user profile
    * @param {HTMLElement} container - Container element to render in
    */
   renderUserProfile(container) {
     container.innerHTML = this.userProfileTemplate;
-    
+
     // Get current user
     const user = window.authService.getCurrentUser();
-    
+
     // Populate user data
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
-    
+
     if (profileName && user) {
       profileName.textContent = user.username || user.name || 'User';
     }
-    
+
     if (profileEmail && user) {
       profileEmail.textContent = user.email || '';
     }
-    
+
     // Set up event handlers
     const launchAppBtn = document.getElementById('launchAppBtn');
     const logoutBtn = document.getElementById('logoutBtn');
-    
+
     if (launchAppBtn) {
       launchAppBtn.addEventListener('click', () => {
         window.location.href = '/overlay.html';
       });
     }
-    
+
     if (logoutBtn) {
       logoutBtn.addEventListener('click', () => {
         window.authService.logout();
@@ -288,41 +288,41 @@ class AuthForms {
       });
     }
   }
-  
+
   /**
    * Handle login form submission
    */
   async handleLogin() {
     if (!window.authService) return;
-    
+
     const emailInput = document.getElementById('loginEmail');
     const passwordInput = document.getElementById('loginPassword');
     const errorDisplay = document.getElementById('loginError');
-    
+
     if (!emailInput || !passwordInput) return;
-    
+
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    
+
     if (!email || !password) {
       this.showFormError(errorDisplay, 'Please fill in all fields');
       return;
     }
-    
+
     // Clear any previous errors
     this.hideFormError(errorDisplay);
-    
+
     // Show loading state
     const submitButton = document.querySelector('#loginForm button[type="submit"]');
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.textContent = 'Logging in...';
     }
-    
+
     // Attempt login
     try {
       const result = await window.authService.login(email, password);
-      
+
       if (result.success) {
         // Render user profile on success
         const container = document.querySelector('#loginForm').closest('.auth-form').parentElement;
@@ -340,48 +340,48 @@ class AuthForms {
       }
     }
   }
-  
+
   /**
    * Handle registration form submission
    */
   async handleRegistration() {
     if (!window.authService) return;
-    
+
     const nameInput = document.getElementById('registerName');
     const emailInput = document.getElementById('registerEmail');
     const passwordInput = document.getElementById('registerPassword');
     const errorDisplay = document.getElementById('registrationError');
-    
+
     if (!nameInput || !emailInput || !passwordInput) return;
-    
+
     const name = nameInput.value.trim();
     const email = emailInput.value.trim();
     const password = passwordInput.value;
-    
+
     if (!name || !email || !password) {
       this.showFormError(errorDisplay, 'Please fill in all fields');
       return;
     }
-    
+
     if (password.length < 8) {
       this.showFormError(errorDisplay, 'Password must be at least 8 characters');
       return;
     }
-    
+
     // Clear any previous errors
     this.hideFormError(errorDisplay);
-    
+
     // Show loading state
     const submitButton = document.querySelector('#registrationForm button[type="submit"]');
     if (submitButton) {
       submitButton.disabled = true;
       submitButton.textContent = 'Creating account...';
     }
-    
+
     // Attempt registration
     try {
       const result = await window.authService.register(name, email, password);
-      
+
       if (result.success) {
         // Render user profile on success
         const container = document.querySelector('#registrationForm').closest('.auth-form').parentElement;
@@ -399,7 +399,7 @@ class AuthForms {
       }
     }
   }
-  
+
   /**
    * Show error message in form
    * @param {HTMLElement} errorElement - Error display element
@@ -407,18 +407,18 @@ class AuthForms {
    */
   showFormError(errorElement, message) {
     if (!errorElement) return;
-    
+
     errorElement.textContent = message;
     errorElement.classList.remove('hidden');
   }
-  
+
   /**
    * Hide error message in form
    * @param {HTMLElement} errorElement - Error display element
    */
   hideFormError(errorElement) {
     if (!errorElement) return;
-    
+
     errorElement.textContent = '';
     errorElement.classList.add('hidden');
   }
@@ -427,13 +427,13 @@ class AuthForms {
 // Initialize auth forms
 document.addEventListener('DOMContentLoaded', () => {
   const authForms = new AuthForms();
-  
+
   // Expose to global scope
   window.authForms = authForms;
-  
+
   // Render auth UI if container exists
   const authContainer = document.getElementById('auth-container');
   if (authContainer) {
     authForms.renderAuthUI(authContainer);
   }
-}); 
+});

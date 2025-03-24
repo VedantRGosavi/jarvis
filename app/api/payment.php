@@ -55,7 +55,7 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 // Create setup intent for future payments
                 $setupIntent = \Stripe\SetupIntent::create([
                     'customer' => $customer->id,
@@ -64,7 +64,7 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 Response::success([
                     'client_secret' => $setupIntent->client_secret,
                     'customer_id' => $customer->id
@@ -76,20 +76,20 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'subscribe':
         if ($method === 'POST') {
             if (!isset($data['payment_method']) || !isset($data['game_id'])) {
                 Response::error('Payment method and game ID required', 400);
                 break;
             }
-            
+
             // Validate game ID
             if (!isset($config['games'][$data['game_id']])) {
                 Response::error('Invalid game ID', 400);
                 break;
             }
-            
+
             try {
                 // Get or create customer
                 $customer = null;
@@ -101,7 +101,7 @@ switch ($action) {
                 } catch (ApiErrorException $e) {
                     // Ignore search errors
                 }
-                
+
                 if (!$customer) {
                     $customer = Customer::create([
                         'email' => $user['email'],
@@ -121,7 +121,7 @@ switch ($action) {
                         ]
                     ]);
                 }
-                
+
                 // Create subscription
                 $subscription = Subscription::create([
                     'customer' => $customer->id,
@@ -135,11 +135,11 @@ switch ($action) {
                         'game_id' => $data['game_id']
                     ]
                 ]);
-                
+
                 // Update user subscription status
                 $endDate = date('Y-m-d H:i:s', strtotime('+1 month'));
                 $userModel->updateSubscription($userId, 'active', $endDate);
-                
+
                 Response::success([
                     'subscription_id' => $subscription->id,
                     'client_secret' => $subscription->latest_invoice->payment_intent->client_secret
@@ -151,30 +151,30 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'cancel':
         if ($method === 'POST') {
             if (!isset($data['subscription_id'])) {
                 Response::error('Subscription ID required', 400);
                 break;
             }
-            
+
             try {
                 $subscription = Subscription::retrieve($data['subscription_id']);
-                
+
                 // Verify subscription belongs to user
                 if ($subscription->metadata['user_id'] !== $userId) {
                     Response::error('Unauthorized', 401);
                     break;
                 }
-                
+
                 // Cancel subscription at period end
                 $subscription->cancel_at_period_end = true;
                 $subscription->save();
-                
+
                 // Update user subscription status
                 $userModel->updateSubscription($userId, 'cancelled');
-                
+
                 Response::success(['message' => 'Subscription cancelled']);
             } catch (ApiErrorException $e) {
                 Response::error('Failed to cancel subscription: ' . $e->getMessage(), 500);
@@ -183,19 +183,19 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'webhook':
         if ($method === 'POST') {
             $payload = @file_get_contents('php://input');
             $sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
-            
+
             try {
                 $event = \Stripe\Webhook::constructEvent(
                     $payload,
                     $sigHeader,
                     $_ENV['STRIPE_WEBHOOK_SECRET']
                 );
-                
+
                 // Handle webhook events
                 switch ($event->type) {
                     case 'customer.subscription.deleted':
@@ -205,7 +205,7 @@ switch ($action) {
                             $userModel->updateSubscription($userId, 'expired');
                         }
                         break;
-                        
+
                     case 'invoice.payment_failed':
                         $invoice = $event->data->object;
                         $subscription = Subscription::retrieve($invoice->subscription);
@@ -215,7 +215,7 @@ switch ($action) {
                         }
                         break;
                 }
-                
+
                 Response::success(['message' => 'Webhook processed']);
             } catch (\UnexpectedValueException $e) {
                 Response::error('Invalid payload', 400);
@@ -228,7 +228,7 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     default:
         Response::error('Payment endpoint not found', 404);
 }

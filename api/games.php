@@ -10,4 +10,4 @@ $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
 
 // Forward to the actual app API handler
-require_once BASE_PATH . '/app/api/games.php'; 
+require_once BASE_PATH . '/app/api/games.php';

@@ -23,19 +23,19 @@ document.addEventListener('DOMContentLoaded', function() {
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
             const tabId = button.getAttribute('data-tab');
-            
+
             // Remove active class from all buttons
             tabButtons.forEach(btn => {
                 btn.classList.remove('active');
                 btn.classList.add('text-gaming-gray-400');
                 btn.classList.remove('text-gaming-light');
             });
-            
+
             // Add active class to clicked button
             button.classList.add('active');
             button.classList.remove('text-gaming-gray-400');
             button.classList.add('text-gaming-light');
-            
+
             // Handle content switching with proper transitions
             tabContents.forEach(content => {
                 if (content.id === tabId) {
@@ -94,4 +94,4 @@ document.addEventListener('DOMContentLoaded', function() {
             tiers: PRICING_TIERS
         });
     }
-}); 
+});

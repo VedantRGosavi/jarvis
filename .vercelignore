@@ -17,4 +17,4 @@ composer.phar
 
 # Large data files that should be stored elsewhere
 # If you have large database dumps, exclude them here
-# and use Vercel environment variables to configure database connections 
+# and use Vercel environment variables to configure database connections

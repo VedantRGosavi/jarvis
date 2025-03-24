@@ -19,7 +19,7 @@ fi
 # Function to check required environment variables
 check_env_vars() {
     echo -e "\n${BLUE}=== Checking OAuth Configuration ===${NC}"
-    
+
     # Check Frontend URL
     FRONTEND_URL=$(grep -E "^FRONTEND_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
     if [ -z "$FRONTEND_URL" ]; then
@@ -27,40 +27,40 @@ check_env_vars() {
     else
         echo -e "${GREEN}✓ FRONTEND_URL is set to: $FRONTEND_URL${NC}"
     fi
-    
+
     # Check Google OAuth
     GOOGLE_CLIENT_ID=$(grep -E "^GOOGLE_CLIENT_ID=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
     GOOGLE_CLIENT_SECRET=$(grep -E "^GOOGLE_CLIENT_SECRET=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    
+
     if [ -z "$GOOGLE_CLIENT_ID" ] || [ "$GOOGLE_CLIENT_ID" = "your_google_client_id" ]; then
         echo -e "${RED}✗ Google OAuth is not configured${NC}"
     else
         echo -e "${GREEN}✓ Google OAuth is configured${NC}"
     fi
-    
+
     # Check GitHub OAuth
     GITHUB_CLIENT_ID=$(grep -E "^GITHUB_CLIENT_ID=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
     GITHUB_CLIENT_SECRET=$(grep -E "^GITHUB_CLIENT_SECRET=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    
+
     if [ -z "$GITHUB_CLIENT_ID" ] || [ "$GITHUB_CLIENT_ID" = "your_github_client_id" ]; then
         echo -e "${RED}✗ GitHub OAuth is not configured${NC}"
     else
         echo -e "${GREEN}✓ GitHub OAuth is configured${NC}"
     fi
-    
+
     # Check PlayStation OAuth
     PLAYSTATION_CLIENT_ID=$(grep -E "^PLAYSTATION_CLIENT_ID=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
     PLAYSTATION_CLIENT_SECRET=$(grep -E "^PLAYSTATION_CLIENT_SECRET=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    
+
     if [ -z "$PLAYSTATION_CLIENT_ID" ] || [ "$PLAYSTATION_CLIENT_ID" = "your_playstation_client_id" ]; then
         echo -e "${RED}✗ PlayStation OAuth is not configured${NC}"
     else
         echo -e "${GREEN}✓ PlayStation OAuth is configured${NC}"
     fi
-    
+
     # Check Steam OAuth
     STEAM_API_KEY=$(grep -E "^STEAM_API_KEY=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
-    
+
     if [ -z "$STEAM_API_KEY" ] || [ "$STEAM_API_KEY" = "your_steam_api_key" ]; then
         echo -e "${RED}✗ Steam OAuth is not configured${NC}"
     else
@@ -71,33 +71,33 @@ check_env_vars() {
 # Function to launch the OAuth test tool
 launch_test_tool() {
     echo -e "\n${BLUE}=== OAuth Test Tool ===${NC}"
-    
+
     # Check if PHP is available
     if ! command -v php &> /dev/null; then
         echo -e "${RED}Error: PHP is not installed or not in PATH${NC}"
         exit 1
     fi
-    
+
     # Set development mode for testing
     export APP_ENV=development
-    
+
     # Get the server URL
     FRONTEND_URL=$(grep -E "^FRONTEND_URL=" .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
     if [ -z "$FRONTEND_URL" ]; then
         FRONTEND_URL="http://localhost:8000"
     fi
-    
+
     # Extract the port from FRONTEND_URL
     PORT=$(echo $FRONTEND_URL | sed -E 's/.*:([0-9]+).*/\1/')
     if [ "$PORT" = "$FRONTEND_URL" ]; then
         # If no port specified, use default
         PORT=8000
     fi
-    
+
     echo -e "${YELLOW}Starting PHP development server on port $PORT...${NC}"
     echo -e "${GREEN}OAuth Test Tool will be available at: $FRONTEND_URL/app/tools/oauth-test.php${NC}"
     echo -e "${YELLOW}Press Ctrl+C to stop the server${NC}"
-    
+
     # Start PHP development server
     php -S "0.0.0.0:$PORT" -t .
 }
@@ -130,4 +130,4 @@ else
     exit 1
 fi
 
-exit 0 
+exit 0

@@ -13,4 +13,4 @@ composer install --no-dev --optimize-autoloader
 echo "Deploying to Vercel..."
 vercel --prod
 
-echo "Done!" 
+echo "Done!"

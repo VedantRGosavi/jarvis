@@ -1,4 +1,4 @@
-/* 
+/*
  * IMPORTANT: If any changes are made to this backend architecture,
  * please ensure that corresponding updates are applied throughout
  * the entire codebase to maintain consistency and prevent integration issues.
@@ -93,11 +93,11 @@ if (file_exists($file_path) && is_file($file_path)) {
         'jpeg' => 'image/jpeg',
         'ico' => 'image/x-icon',
     ];
-    
+
     if (isset($mime_types[$extension])) {
         header('Content-Type: ' . $mime_types[$extension]);
     }
-    
+
     readfile($file_path);
     exit;
 }
@@ -150,13 +150,13 @@ class Database {
     private static $systemInstance = null;
     private static $gameInstances = [];
     private $db = null;
-    
+
     // Private constructor for singleton pattern
     private function __construct($databasePath) {
         $this->db = new SQLite3($databasePath);
         $this->db->enableExceptions(true);
     }
-    
+
     // Get system database instance
     public static function getSystemInstance() {
         if (self::$systemInstance === null) {
@@ -164,62 +164,62 @@ class Database {
         }
         return self::$systemInstance;
     }
-    
+
     // Get game database instance
     public static function getGameInstance($game) {
         // Validate game ID to prevent directory traversal
         if (!in_array($game, ['elden_ring', 'baldurs_gate3'])) {
             throw new Exception("Invalid game identifier");
         }
-        
+
         if (!isset(self::$gameInstances[$game])) {
             self::$gameInstances[$game] = new self(BASE_PATH . "/data/game_data/{$game}.sqlite");
         }
         return self::$gameInstances[$game];
     }
-    
+
     // Query execution methods
     public function query($sql) {
         return $this->db->query($sql);
     }
-    
+
     public function prepare($sql) {
         return $this->db->prepare($sql);
     }
-    
+
     public function exec($sql) {
         return $this->db->exec($sql);
     }
-    
+
     // Fetch methods
     public function fetchAll($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
-        
+
         foreach ($params as $param => $value) {
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
             $stmt->bindValue($param, $value, $type);
         }
-        
+
         $result = $stmt->execute();
-        
+
         $rows = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             $rows[] = $row;
         }
-        
+
         return $rows;
     }
-    
+
     public function fetchOne($sql, $params = []) {
         $stmt = $this->db->prepare($sql);
-        
+
         foreach ($params as $param => $value) {
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
             $stmt->bindValue($param, $value, $type);
         }
-        
+
         $result = $stmt->execute();
-        
+
         return $result->fetchArray(SQLITE3_ASSOC);
     }
 }
@@ -247,15 +247,15 @@ switch ($action) {
             Response::error('Method not allowed', 405);
             break;
         }
-        
+
         if (!isset($data['email']) || !isset($data['password'])) {
             Response::error('Email and password required', 400);
             break;
         }
-        
+
         $user = new User();
         $result = $user->authenticate($data['email'], $data['password']);
-        
+
         if ($result['success']) {
             Response::success([
                 'token' => $result['token'],
@@ -265,21 +265,21 @@ switch ($action) {
             Response::error('Invalid credentials', 401);
         }
         break;
-        
+
     case 'register':
         if ($method !== 'POST') {
             Response::error('Method not allowed', 405);
             break;
         }
-        
+
         if (!isset($data['email']) || !isset($data['password']) || !isset($data['name'])) {
             Response::error('Name, email and password required', 400);
             break;
         }
-        
+
         $user = new User();
         $result = $user->register($data['name'], $data['email'], $data['password']);
-        
+
         if ($result['success']) {
             Response::success([
                 'token' => $result['token'],
@@ -289,7 +289,7 @@ switch ($action) {
             Response::error($result['message'], 400);
         }
         break;
-        
+
     default:
         Response::error('Auth endpoint not found', 404);
 }
@@ -306,55 +306,55 @@ require_once BASE_PATH . '/utils/Auth.php';
 
 class User {
     private $db;
-    
+
     public function __construct() {
         $this->db = Database::getInstance();
     }
-    
+
     public function authenticate($email, $password) {
         $user = $this->db->fetchOne(
             "SELECT * FROM users WHERE email = :email",
             ['email' => $email]
         );
-        
+
         if (!$user) {
             return ['success' => false];
         }
-        
+
         if (!password_verify($password, $user['password'])) {
             return ['success' => false];
         }
-        
+
         // Generate JWT token
         $token = Auth::generateToken($user['id']);
-        
+
         // Remove password from user data
         unset($user['password']);
-        
+
         return [
             'success' => true,
             'token' => $token,
             'user' => $user
         ];
     }
-    
+
     public function register($name, $email, $password) {
         // Check if user already exists
         $existingUser = $this->db->fetchOne(
             "SELECT id FROM users WHERE email = :email",
             ['email' => $email]
         );
-        
+
         if ($existingUser) {
             return [
                 'success' => false,
                 'message' => 'User with this email already exists'
             ];
         }
-        
+
         // Hash password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        
+
         // Insert new user
         $userId = $this->db->insert('users', [
             'name' => $name,
@@ -363,30 +363,30 @@ class User {
             'created_at' => date('Y-m-d H:i:s'),
             'subscription_status' => 'none'
         ]);
-        
+
         // Generate JWT token
         $token = Auth::generateToken($userId);
-        
+
         // Get user data
         $user = $this->db->fetchOne(
             "SELECT id, name, email, created_at, subscription_status FROM users WHERE id = :id",
             ['id' => $userId]
         );
-        
+
         return [
             'success' => true,
             'token' => $token,
             'user' => $user
         ];
     }
-    
+
     public function getById($id) {
         return $this->db->fetchOne(
             "SELECT id, name, email, created_at, subscription_status FROM users WHERE id = :id",
             ['id' => $id]
         );
     }
-    
+
     public function updateSubscription($userId, $status) {
         return $this->db->update(
             'users',
@@ -452,14 +452,14 @@ switch ($resource) {
             Response::success($quests);
         }
         break;
-        
+
     case 'regions':
     case 'areas':
         // List all regions/areas
         $areas = $gameModel->listRegions($game);
         Response::success($areas);
         break;
-        
+
     case 'items':
         if ($resourceId) {
             // Get specific item
@@ -475,7 +475,7 @@ switch ($resource) {
             Response::success($items);
         }
         break;
-        
+
     case 'search':
         // Search across game data
         $query = $_GET['q'] ?? '';
@@ -483,11 +483,11 @@ switch ($resource) {
             Response::error('Search query required', 400);
             break;
         }
-        
+
         $results = $gameModel->search($game, $query);
         Response::success($results);
         break;
-        
+
     default:
         // Get game overview data
         $gameData = $gameModel->getGameOverview($game);
@@ -509,18 +509,18 @@ class Response {
     public static function success($data = null, $code = 200) {
         header('Content-Type: application/json');
         http_response_code($code);
-        
+
         echo json_encode([
             'success' => true,
             'data' => $data
         ]);
         exit;
     }
-    
+
     public static function error($message, $code = 400) {
         header('Content-Type: application/json');
         http_response_code($code);
-        
+
         echo json_encode([
             'success' => false,
             'error' => $message
@@ -539,35 +539,35 @@ This file handles JWT token generation and validation:
 class Auth {
     private static $secretKey = 'your-secret-key'; // Move to config in production
     private static $tokenExpiration = 86400; // 24 hours
-    
+
     public static function generateToken($userId) {
         $issuedAt = time();
         $expirationTime = $issuedAt + self::$tokenExpiration;
-        
+
         $payload = [
             'iat' => $issuedAt,
             'exp' => $expirationTime,
             'user_id' => $userId
         ];
-        
+
         return self::encodeToken($payload);
     }
-    
+
     public static function validateToken($token) {
         try {
             $payload = self::decodeToken($token);
-            
+
             // Check if token is expired
             if (isset($payload['exp']) && $payload['exp'] < time()) {
                 return false;
             }
-            
+
             return true;
         } catch (\Exception $e) {
             return false;
         }
     }
-    
+
     public static function getUserIdFromToken($token) {
         try {
             $payload = self::decodeToken($token);
@@ -576,40 +576,40 @@ class Auth {
             return null;
         }
     }
-    
+
     private static function encodeToken($payload) {
         // Header
         $header = ['typ' => 'JWT', 'alg' => 'HS256'];
         $header = self::base64UrlEncode(json_encode($header));
-        
+
         // Payload
         $payload = self::base64UrlEncode(json_encode($payload));
-        
+
         // Signature
         $signature = hash_hmac('sha256', "$header.$payload", self::$secretKey, true);
         $signature = self::base64UrlEncode($signature);
-        
+
         return "$header.$payload.$signature";
     }
-    
+
     private static function decodeToken($token) {
         list($header, $payload, $signature) = explode('.', $token);
-        
+
         // Verify signature
         $expectedSignature = hash_hmac('sha256', "$header.$payload", self::$secretKey, true);
         $expectedSignature = self::base64UrlEncode($expectedSignature);
-        
+
         if (!hash_equals($expectedSignature, $signature)) {
             throw new \Exception('Invalid signature');
         }
-        
+
         return json_decode(self::base64UrlDecode($payload), true);
     }
-    
+
     private static function base64UrlEncode($data) {
         return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
     }
-    
+
     private static function base64UrlDecode($data) {
         return base64_decode(strtr($data, '-_', '+/'));
     }
@@ -664,12 +664,12 @@ switch ($action) {
             Response::error('Method not allowed', 405);
             break;
         }
-        
+
         try {
             // Create Stripe customer if not exists
             $subscriptionModel = new Subscription();
             $stripeCustomerId = $subscriptionModel->getStripeCustomerId($userId);
-            
+
             if (!$stripeCustomerId) {
                 $customer = \Stripe\Customer::create([
                     'email' => $user['email'],
@@ -678,11 +678,11 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 $stripeCustomerId = $customer->id;
                 $subscriptionModel->saveStripeCustomerId($userId, $stripeCustomerId);
             }
-            
+
             // Create subscription
             $subscription = \Stripe\Subscription::create([
                 'customer' => $stripeCustomerId,
@@ -693,46 +693,46 @@ switch ($action) {
                 'expand' => ['latest_invoice.payment_intent'],
                 'trial_period_days' => 7
             ]);
-            
+
             $subscriptionModel->createSubscription(
                 $userId,
                 $subscription->id,
                 'trialing',
                 date('Y-m-d H:i:s', $subscription->current_period_end)
             );
-            
+
             // Update user status
             $userModel->updateSubscription($userId, 'trialing');
-            
+
             Response::success([
                 'subscription_id' => $subscription->id,
                 'client_secret' => $subscription->latest_invoice->payment_intent->client_secret,
                 'status' => $subscription->status
             ]);
-            
+
         } catch (\Exception $e) {
             Response::error('Subscription creation failed: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     case 'one-time-purchase':
         if ($method !== 'POST') {
             Response::error('Method not allowed', 405);
             break;
         }
-        
+
         if (!isset($data['game_id'])) {
             Response::error('Game ID required', 400);
             break;
         }
-        
+
         try {
             $gameId = $data['game_id'];
-            
+
             // Create Stripe customer if not exists
             $subscriptionModel = new Subscription();
             $stripeCustomerId = $subscriptionModel->getStripeCustomerId($userId);
-            
+
             if (!$stripeCustomerId) {
                 $customer = \Stripe\Customer::create([
                     'email' => $user['email'],
@@ -741,11 +741,11 @@ switch ($action) {
                         'user_id' => $userId
                     ]
                 ]);
-                
+
                 $stripeCustomerId = $customer->id;
                 $subscriptionModel->saveStripeCustomerId($userId, $stripeCustomerId);
             }
-            
+
             // Create payment intent
             $paymentIntent = \Stripe\PaymentIntent::create([
                 'amount' => 1999, // $19.99
@@ -756,7 +756,7 @@ switch ($action) {
                     'game_id' => $gameId
                 ]
             ]);
-            
+
             // Create purchase record
             $purchaseModel = new Purchase();
             $purchaseModel->createPurchase(
@@ -766,26 +766,26 @@ switch ($action) {
                 'pending',
                 1999
             );
-            
+
             Response::success([
                 'client_secret' => $paymentIntent->client_secret
             ]);
-            
+
         } catch (\Exception $e) {
             Response::error('Payment creation failed: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     case 'webhook':
         // Handle Stripe webhooks
         $payload = @file_get_contents('php://input');
         $sigHeader = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
-        
+
         try {
             $event = \Stripe\Webhook::constructEvent(
                 $payload, $sigHeader, $stripeConfig['webhook_secret']
             );
-            
+
             // Handle the event
             switch ($event->type) {
                 case 'payment_intent.succeeded':
@@ -793,24 +793,24 @@ switch ($action) {
                     $purchaseModel = new Purchase();
                     $purchaseModel->updatePurchaseStatus($paymentIntent->id, 'completed');
                     break;
-                    
+
                 case 'invoice.paid':
                     $invoice = $event->data->object;
                     $subscriptionModel = new Subscription();
                     $subscriptionModel->updateSubscriptionStatus($invoice->subscription, 'active');
-                    
+
                     // Update user status from Stripe customer ID
                     $userId = $subscriptionModel->getUserIdFromSubscription($invoice->subscription);
                     if ($userId) {
                         $userModel->updateSubscription($userId, 'subscribed');
                     }
                     break;
-                    
+
                 case 'customer.subscription.deleted':
                     $subscription = $event->data->object;
                     $subscriptionModel = new Subscription();
                     $subscriptionModel->updateSubscriptionStatus($subscription->id, 'cancelled');
-                    
+
                     // Update user status
                     $userId = $subscriptionModel->getUserIdFromSubscription($subscription->id);
                     if ($userId) {
@@ -818,9 +818,9 @@ switch ($action) {
                     }
                     break;
             }
-            
+
             Response::success(['status' => 'success']);
-            
+
         } catch (\UnexpectedValueException $e) {
             Response::error('Invalid payload', 400);
         } catch (\Stripe\Exception\SignatureVerificationException $e) {
@@ -829,7 +829,7 @@ switch ($action) {
             Response::error('Webhook error: ' . $e->getMessage(), 400);
         }
         break;
-        
+
     default:
         Response::error('Payment endpoint not found', 404);
 }
@@ -845,26 +845,26 @@ require_once BASE_PATH . '/utils/Database.php';
 class Game {
     private $db;
     private $game;
-    
+
     public function __construct($game) {
         $this->game = $game;
         $this->db = Database::getGameInstance($game);
     }
-    
+
     // Get quest information with steps
     public function getQuest($questId, $spoilerLevel = 0) {
         $quest = $this->db->fetchOne("
-            SELECT * FROM quests 
+            SELECT * FROM quests
             WHERE quest_id = :id AND spoiler_level <= :spoiler_level
         ", [
             ':id' => $questId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         if (!$quest) {
             return null;
         }
-        
+
         // Fetch quest steps
         $steps = $this->db->fetchAll("
             SELECT * FROM quest_steps
@@ -874,34 +874,34 @@ class Game {
             ':quest_id' => $questId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         $quest['steps'] = $steps;
-        
+
         return $quest;
     }
-    
+
     // Search game content
     public function search($term, $contentType = null, $limit = 10) {
         $sql = "
             SELECT * FROM search_index
             WHERE (name LIKE :term OR description LIKE :term OR keywords LIKE :term)
         ";
-        
+
         if ($contentType) {
             $sql .= " AND content_type = :content_type";
         }
-        
+
         $sql .= " LIMIT :limit";
-        
+
         $params = [
             ':term' => '%' . $term . '%',
             ':limit' => $limit
         ];
-        
+
         if ($contentType) {
             $params[':content_type'] = $contentType;
         }
-        
+
         return $this->db->fetchAll($sql, $params);
     }
 }

@@ -8,9 +8,9 @@ class BaldursGate3Module {
     this.gameId = 'baldurs_gate3';
     this.gameName = "Baldur's Gate 3";
     this.regions = [
-      'Act 1 - The Wilderness', 
-      'Act 1 - The Underdark', 
-      'Act 2 - Shadow-Cursed Lands', 
+      'Act 1 - The Wilderness',
+      'Act 1 - The Underdark',
+      'Act 2 - Shadow-Cursed Lands',
       'Act 3 - Baldur\'s Gate'
     ];
     this.contentTypes = {
@@ -21,14 +21,14 @@ class BaldursGate3Module {
       classes: 'Classes',
       spells: 'Spells'
     };
-    
+
     this.initialize();
   }
-  
+
   initialize() {
     // Initialize the module
     console.log(`Initializing ${this.gameName} module`);
-    
+
     // Register with overlay (if it exists)
     if (window.gameOverlay) {
       this.registerWithOverlay();
@@ -39,12 +39,12 @@ class BaldursGate3Module {
       });
     }
   }
-  
+
   registerWithOverlay() {
     // Add game-specific elements to the overlay
     console.log(`Registering ${this.gameName} with overlay`);
   }
-  
+
   async loadQuestData(questId) {
     try {
       // In a real implementation, this would fetch from an API
@@ -55,7 +55,7 @@ class BaldursGate3Module {
       return null;
     }
   }
-  
+
   getMockQuestData(questId) {
     // Mock data for demonstration
     const mockQuests = {
@@ -116,10 +116,10 @@ class BaldursGate3Module {
         ]
       }
     };
-    
+
     return mockQuests[questId] || null;
   }
-  
+
   formatQuestData(data) {
     // Format quest data for display
     return {
@@ -133,17 +133,17 @@ class BaldursGate3Module {
       }))
     };
   }
-  
+
   renderQuestDetails(questData) {
     if (!questData) return '<p class="text-gaming-gray-400">Quest not found</p>';
-    
+
     const formattedData = this.formatQuestData(questData);
-    
+
     return `
       <div class="quest-details">
         <h3 class="text-lg font-semibold mb-2">${formattedData.title}</h3>
         <p class="text-sm text-gaming-gray-300 mb-4">${formattedData.description}</p>
-        
+
         <h4 class="text-sm font-semibold mb-2">Quest Steps:</h4>
         <div class="space-y-3">
           ${formattedData.steps.map((step, index) => `
@@ -168,7 +168,7 @@ class BaldursGate3Module {
       </div>
     `;
   }
-  
+
   // Additional methods for Baldur's Gate 3-specific functionality
   searchContent(query, type = null) {
     // Search implementation
@@ -193,19 +193,19 @@ class BaldursGate3Module {
         description: "A reserved cleric of Shar with a forgotten past and a mysterious artifact."
       }
     ];
-    
+
     // Filter by type if specified
     const filtered = type ? results.filter(item => item.type === type) : results;
-    
+
     // Filter by query text
     if (query && query.trim() !== '') {
       const lowerQuery = query.toLowerCase();
-      return filtered.filter(item => 
-        item.title.toLowerCase().includes(lowerQuery) || 
+      return filtered.filter(item =>
+        item.title.toLowerCase().includes(lowerQuery) ||
         item.description.toLowerCase().includes(lowerQuery)
       );
     }
-    
+
     return filtered;
   }
 }
@@ -213,7 +213,7 @@ class BaldursGate3Module {
 // Initialize Baldur's Gate 3 module
 document.addEventListener('DOMContentLoaded', () => {
   const baldursGate3Module = new BaldursGate3Module();
-  
+
   // Expose to global scope for other scripts
   window.baldursGate3Module = baldursGate3Module;
-}); 
+});

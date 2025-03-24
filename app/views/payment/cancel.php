@@ -20,13 +20,13 @@ require_once BASE_PATH . '/app/utils/Response.php';
             </div>
             <h2 class="text-2xl font-bold mb-4">Payment Cancelled</h2>
             <p class="text-gaming-gray-200 mb-8">Your payment was cancelled. No charges were made.</p>
-            
+
             <div class="space-y-4">
-                <a href="/games" 
+                <a href="/games"
                    class="block w-full px-4 py-2 bg-gaming-accent hover:bg-gaming-gray-600 rounded transition duration-150">
                     Return to Games
                 </a>
-                <a href="/support" 
+                <a href="/support"
                    class="block w-full px-4 py-2 border border-gaming-accent hover:bg-gaming-accent rounded transition duration-150">
                     Need Help?
                 </a>
@@ -40,4 +40,4 @@ require_once BASE_PATH . '/app/utils/Response.php';
         sessionStorage.removeItem('payment_method');
     </script>
 </body>
-</html> 
+</html>

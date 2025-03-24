@@ -7,13 +7,13 @@ class GameHotkeys {
   constructor() {
     this.hotkeys = {};
     this.isEnabled = true;
-    
+
     // Initialize keyboard event listeners
     document.addEventListener('keydown', (e) => {
       this.handleKeyDown(e);
     });
   }
-  
+
   /**
    * Register a new hotkey
    * @param {string} keys - Keyboard shortcut (e.g., 'Ctrl+S', 'Alt+F')
@@ -30,12 +30,12 @@ class GameHotkeys {
         ...options
       }
     };
-    
+
     this.hotkeys[keys] = hotkeyConfig;
-    
+
     console.log(`Registered hotkey: ${keys}`);
   }
-  
+
   /**
    * Unregister a hotkey
    * @param {string} keys - Keyboard shortcut to unregister
@@ -46,7 +46,7 @@ class GameHotkeys {
       console.log(`Unregistered hotkey: ${keys}`);
     }
   }
-  
+
   /**
    * Enable or disable all hotkeys
    * @param {boolean} enabled - Whether hotkeys should be enabled
@@ -54,14 +54,14 @@ class GameHotkeys {
   setEnabled(enabled) {
     this.isEnabled = enabled;
   }
-  
+
   /**
    * Handle keydown event
    * @param {KeyboardEvent} event - Keyboard event
    */
   handleKeyDown(event) {
     if (!this.isEnabled) return;
-    
+
     // Get active keys
     const activeKeys = {
       ctrl: event.ctrlKey,
@@ -70,28 +70,28 @@ class GameHotkeys {
       meta: event.metaKey,
       key: event.key.toLowerCase()
     };
-    
+
     // Check each registered hotkey
     for (const hotkeyStr in this.hotkeys) {
       const hotkey = this.hotkeys[hotkeyStr];
-      
+
       // Check if overlay visibility condition is met
       if (hotkey.options.onlyWhenOverlayVisible && window.gameOverlay && !window.gameOverlay.visible) {
         continue;
       }
-      
+
       // Check if the keys match
       if (this.keysMatch(activeKeys, hotkey.keys)) {
         if (hotkey.options.preventDefault) {
           event.preventDefault();
         }
-        
+
         hotkey.callback(event);
         return;
       }
     }
   }
-  
+
   /**
    * Parse a hotkey string into components
    * @param {string} keyStr - Hotkey string (e.g., 'Ctrl+S')
@@ -106,10 +106,10 @@ class GameHotkeys {
       meta: false,
       key: null
     };
-    
+
     parts.forEach(part => {
       const lowered = part.toLowerCase().trim();
-      
+
       if (lowered === 'ctrl' || lowered === 'control') {
         result.ctrl = true;
       } else if (lowered === 'alt') {
@@ -138,10 +138,10 @@ class GameHotkeys {
         }
       }
     });
-    
+
     return result;
   }
-  
+
   /**
    * Check if the pressed keys match a hotkey configuration
    * @param {Object} activeKeys - Currently active keys
@@ -162,7 +162,7 @@ class GameHotkeys {
 // Initialize hotkeys
 document.addEventListener('DOMContentLoaded', () => {
   const gameHotkeys = new GameHotkeys();
-  
+
   // Register default hotkeys
   gameHotkeys.registerHotkey('Ctrl+Shift+J', () => {
     if (window.gameOverlay) {
@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   gameHotkeys.registerHotkey('Escape', () => {
     // Only handle Escape when overlay is visible
     if (window.gameOverlay && window.gameOverlay.visible) {
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }, { onlyWhenOverlayVisible: true });
-  
+
   // Expose to global scope for other scripts
   window.gameHotkeys = gameHotkeys;
-}); 
+});

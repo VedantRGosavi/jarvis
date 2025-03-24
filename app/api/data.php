@@ -36,7 +36,7 @@ switch ($action) {
         if ($method === 'GET') {
             // Get quest list or specific quest details
             $questId = $_GET['quest_id'] ?? null;
-            
+
             if ($questId) {
                 $quest = $gameModel->getQuestDetails($gameId, $questId);
                 if ($quest) {
@@ -54,12 +54,12 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'items':
         if ($method === 'GET') {
             // Get item list or specific item details
             $itemId = $_GET['item_id'] ?? null;
-            
+
             if ($itemId) {
                 $item = $gameModel->getItemDetails($gameId, $itemId);
                 if ($item) {
@@ -77,12 +77,12 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'locations':
         if ($method === 'GET') {
             // Get location list or specific location details
             $locationId = $_GET['location_id'] ?? null;
-            
+
             if ($locationId) {
                 $location = $gameModel->getLocationDetails($gameId, $locationId);
                 if ($location) {
@@ -100,12 +100,12 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'npcs':
         if ($method === 'GET') {
             // Get NPC list or specific NPC details
             $npcId = $_GET['npc_id'] ?? null;
-            
+
             if ($npcId) {
                 $npc = $gameModel->getNpcDetails($gameId, $npcId);
                 if ($npc) {
@@ -123,7 +123,7 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'search':
         if ($method === 'GET') {
             // Global search across all game data
@@ -132,17 +132,17 @@ switch ($action) {
                 Response::error('Search term required', 400);
                 break;
             }
-            
+
             $types = $_GET['types'] ?? null;
             $typeArray = $types ? explode(',', $types) : null;
-            
+
             $results = $gameModel->search($gameId, $searchTerm, $typeArray);
             Response::success(['results' => $results]);
         } else {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'categories':
         if ($method === 'GET') {
             // Get categories for a specific data type
@@ -151,14 +151,14 @@ switch ($action) {
                 Response::error('Data type required', 400);
                 break;
             }
-            
+
             $categories = $gameModel->getCategories($gameId, $type);
             Response::success(['categories' => $categories]);
         } else {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     default:
         Response::error('Data endpoint not found', 404);
 }

@@ -26,4 +26,4 @@ if (strpos($request_uri, '/api/') === 0) {
 }
 
 // If no API route matched, check for public files
-include_once BASE_PATH . '/public/index.html'; 
+include_once BASE_PATH . '/public/index.html';

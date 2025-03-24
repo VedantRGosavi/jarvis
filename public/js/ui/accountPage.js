@@ -179,4 +179,4 @@ class AccountPage {
 }
 
 // Export the AccountPage class
-window.accountPage = new AccountPage(); 
+window.accountPage = new AccountPage();

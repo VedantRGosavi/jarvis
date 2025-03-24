@@ -10,11 +10,11 @@ class NotificationSystem {
     this.maxNotifications = 3;
     this.defaultDuration = 5000; // 5 seconds
     this.enabled = this.loadSettings().enabled;
-    
+
     // Create notification container
     this.initialize();
   }
-  
+
   /**
    * Initialize the notification system
    */
@@ -27,7 +27,7 @@ class NotificationSystem {
       document.body.appendChild(this.container);
     }
   }
-  
+
   /**
    * Show a notification
    * @param {string} message - Notification message
@@ -37,15 +37,15 @@ class NotificationSystem {
    */
   show(message, type = 'info', duration = this.defaultDuration) {
     if (!this.enabled) return null;
-    
+
     // Generate unique ID
     const id = 'notification-' + Date.now();
-    
+
     // Create notification element
     const notification = document.createElement('div');
     notification.id = id;
     notification.className = `notification bg-gaming-gray-800 border-l-4 rounded p-3 shadow-lg transform transition-all duration-300 translate-x-full`;
-    
+
     // Add appropriate border color based on type
     switch (type) {
       case 'success':
@@ -60,7 +60,7 @@ class NotificationSystem {
       default:
         notification.classList.add('border-gaming-gray-500');
     }
-    
+
     // Add content
     notification.innerHTML = `
       <div class="flex justify-between items-start">
@@ -70,23 +70,23 @@ class NotificationSystem {
         <button class="text-gaming-gray-400 hover:text-gaming-gray-200 text-xs notification-close" data-id="${id}">×</button>
       </div>
     `;
-    
+
     // Add to container
     this.container.appendChild(notification);
-    
+
     // Add to notifications array
     this.notifications.push({
       id,
       element: notification,
       timer: duration > 0 ? setTimeout(() => this.dismiss(id), duration) : null
     });
-    
+
     // Remove oldest notifications if we exceed the maximum
     if (this.notifications.length > this.maxNotifications) {
       const oldest = this.notifications.shift();
       this.dismiss(oldest.id);
     }
-    
+
     // Add close button event listener
     const closeBtn = notification.querySelector('.notification-close');
     if (closeBtn) {
@@ -94,15 +94,15 @@ class NotificationSystem {
         this.dismiss(id);
       });
     }
-    
+
     // Animate in
     setTimeout(() => {
       notification.classList.remove('translate-x-full');
     }, 10);
-    
+
     return id;
   }
-  
+
   /**
    * Show a success notification
    * @param {string} message - Notification message
@@ -112,7 +112,7 @@ class NotificationSystem {
   success(message, duration = this.defaultDuration) {
     return this.show(message, 'success', duration);
   }
-  
+
   /**
    * Show a warning notification
    * @param {string} message - Notification message
@@ -122,7 +122,7 @@ class NotificationSystem {
   warning(message, duration = this.defaultDuration) {
     return this.show(message, 'warning', duration);
   }
-  
+
   /**
    * Show an error notification
    * @param {string} message - Notification message
@@ -132,7 +132,7 @@ class NotificationSystem {
   error(message, duration = this.defaultDuration) {
     return this.show(message, 'error', duration);
   }
-  
+
   /**
    * Dismiss a notification
    * @param {string} id - Notification ID
@@ -140,28 +140,28 @@ class NotificationSystem {
   dismiss(id) {
     const index = this.notifications.findIndex(n => n.id === id);
     if (index === -1) return;
-    
+
     const notification = this.notifications[index];
-    
+
     // Clear timer if exists
     if (notification.timer) {
       clearTimeout(notification.timer);
     }
-    
+
     // Animate out
     notification.element.classList.add('translate-x-full');
-    
+
     // Remove after animation
     setTimeout(() => {
       if (notification.element.parentNode) {
         notification.element.parentNode.removeChild(notification.element);
       }
     }, 300);
-    
+
     // Remove from array
     this.notifications.splice(index, 1);
   }
-  
+
   /**
    * Dismiss all notifications
    */
@@ -170,7 +170,7 @@ class NotificationSystem {
       this.dismiss(notification.id);
     });
   }
-  
+
   /**
    * Enable notifications
    */
@@ -178,7 +178,7 @@ class NotificationSystem {
     this.enabled = true;
     this.saveSettings();
   }
-  
+
   /**
    * Disable notifications
    */
@@ -187,7 +187,7 @@ class NotificationSystem {
     this.dismissAll();
     this.saveSettings();
   }
-  
+
   /**
    * Toggle notifications
    * @returns {boolean} New enabled state
@@ -195,14 +195,14 @@ class NotificationSystem {
   toggle() {
     this.enabled = !this.enabled;
     this.saveSettings();
-    
+
     if (!this.enabled) {
       this.dismissAll();
     }
-    
+
     return this.enabled;
   }
-  
+
   /**
    * Load notification settings
    * @returns {Object} Settings
@@ -216,7 +216,7 @@ class NotificationSystem {
       return { enabled: true };
     }
   }
-  
+
   /**
    * Save notification settings
    */
@@ -234,17 +234,17 @@ class NotificationSystem {
 // Initialize notification system
 document.addEventListener('DOMContentLoaded', () => {
   const notifications = new NotificationSystem();
-  
+
   // Expose to global scope
   window.notifications = notifications;
-  
+
   // Link to settings panel
   if (window.settingsPanel) {
     document.addEventListener('settingsPanelReady', () => {
       const notificationToggle = document.getElementById('show-notifications');
       if (notificationToggle) {
         notificationToggle.checked = notifications.enabled;
-        
+
         notificationToggle.addEventListener('change', (e) => {
           if (e.target.checked) {
             notifications.enable();
@@ -255,7 +255,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-  
+
   // Test notifications (for development only)
   if (window.location.search.includes('test-notifications')) {
     setTimeout(() => {
@@ -271,4 +271,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1000);
     }, 1000);
   }
-}); 
+});

@@ -16,4 +16,4 @@ class OAuthFactory {
                 throw new \Exception("Unsupported OAuth provider: $provider");
         }
     }
-} 
+}

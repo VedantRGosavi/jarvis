@@ -1,7 +1,7 @@
 <?php
 /**
  * OAuth Test Tool
- * 
+ *
  * This tool is designed to test OAuth provider connections and verify their functionality.
  * It displays connection status and relevant debugging information without affecting the main application.
  */
@@ -20,14 +20,14 @@ if (file_exists($dotenv)) {
             list($key, $value) = explode('=', $line, 2);
             $key = trim($key);
             $value = trim($value);
-            
+
             // Remove quotes if present
             if (strpos($value, '"') === 0 && strrpos($value, '"') === strlen($value) - 1) {
                 $value = substr($value, 1, -1);
             } elseif (strpos($value, "'") === 0 && strrpos($value, "'") === strlen($value) - 1) {
                 $value = substr($value, 1, -1);
             }
-            
+
             putenv("$key=$value");
             $_ENV[$key] = $value;
         }
@@ -74,11 +74,11 @@ $providers = [
  */
 function getProvider($providerName) {
     global $providers;
-    
+
     if (!isset($providers[$providerName])) {
         return null;
     }
-    
+
     $className = '\\App\\Utils\\' . $providers[$providerName]['class'];
     return new $className();
 }
@@ -88,18 +88,18 @@ function getProvider($providerName) {
  */
 function displayCallbackResult($provider, $result) {
     global $providers;
-    
+
     $userInfo = $result['user_info'] ?? null;
     $accessToken = $result['access_token'] ?? null;
     $idToken = $result['id_token'] ?? null;
     $rawResponse = $result['raw_response'] ?? null;
-    
+
     echo '<div class="result-container">';
     echo '<h2>Authentication Result for ' . $providers[$provider]['name'] . '</h2>';
-    
+
     if (!empty($userInfo)) {
         echo '<div class="success-message">Authentication successful! User information retrieved.</div>';
-        
+
         echo '<div class="user-info">';
         echo '<div class="user-avatar">';
         if (isset($userInfo['picture'])) {
@@ -115,7 +115,7 @@ function displayCallbackResult($provider, $result) {
         }
         echo '</div>';
         echo '</div>';
-        
+
         echo '<h3>User Information</h3>';
         echo '<table>';
         foreach ($userInfo as $key => $value) {
@@ -129,7 +129,7 @@ function displayCallbackResult($provider, $result) {
     } else {
         echo '<div class="error-message">Authentication failed or user information not retrieved.</div>';
     }
-    
+
     if ($accessToken) {
         echo '<h3>Access Token</h3>';
         echo '<div class="token-container">';
@@ -138,7 +138,7 @@ function displayCallbackResult($provider, $result) {
         echo '<div class="token-value">' . htmlspecialchars($maskedToken) . '</div>';
         echo '</div>';
     }
-    
+
     if ($idToken) {
         echo '<h3>ID Token</h3>';
         echo '<div class="token-container">';
@@ -147,12 +147,12 @@ function displayCallbackResult($provider, $result) {
         echo '<div class="token-value">' . htmlspecialchars($maskedToken) . '</div>';
         echo '</div>';
     }
-    
+
     if ($rawResponse) {
         echo '<h3>Raw Response Data</h3>';
         echo '<pre>' . htmlspecialchars(json_encode($rawResponse, JSON_PRETTY_PRINT)) . '</pre>';
     }
-    
+
     echo '<a href="oauth-test.php" class="back-link">← Back to provider list</a>';
     echo '</div>';
 }
@@ -177,11 +177,11 @@ if ($action === 'authorize' && !empty($provider)) {
         if (!$providerInstance) {
             throw new Exception("Unknown provider: $provider");
         }
-        
+
         // Set test callback URL
         $callbackUrl = "$baseUrl?action=callback&provider=$provider";
         $providerInstance->setRedirectUri($callbackUrl);
-        
+
         // Get authorization URL and redirect
         $authUrl = $providerInstance->getAuthorizationUrl();
         header("Location: $authUrl");
@@ -195,15 +195,15 @@ if ($action === 'authorize' && !empty($provider)) {
         if (!$providerInstance) {
             throw new Exception("Unknown provider: $provider");
         }
-        
+
         // Set test callback URL
         $callbackUrl = "$baseUrl?action=callback&provider=$provider";
         $providerInstance->setRedirectUri($callbackUrl);
-        
+
         // Process the callback
         $code = $_GET['code'] ?? null;
         $state = $_GET['state'] ?? null;
-        
+
         if (empty($code) && $provider === 'steam') {
             // Steam uses a different flow
             $steamId = $providerInstance->validateCallback($_GET);
@@ -222,17 +222,17 @@ if ($action === 'authorize' && !empty($provider)) {
             if (empty($code)) {
                 throw new Exception("No authorization code provided");
             }
-            
+
             $accessToken = $providerInstance->getAccessToken($code, $state);
             if (empty($accessToken)) {
                 throw new Exception("Failed to get access token");
             }
-            
+
             $userInfo = $providerInstance->getUserInfo();
             if (empty($userInfo)) {
                 throw new Exception("Failed to get user information");
             }
-            
+
             $processingResult = [
                 'user_info' => $userInfo,
                 'access_token' => $accessToken,
@@ -256,11 +256,11 @@ if ($action === 'authorize' && !empty($provider)) {
 </head>
 <body>
     <h1>FridayAI OAuth Test Tool</h1>
-    
+
     <?php if (!empty($error)): ?>
         <div class="error-message"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
-    
+
     <?php if ($processingResult): ?>
         <?php displayCallbackResult($provider, $processingResult); ?>
     <?php else: ?>
@@ -268,9 +268,9 @@ if ($action === 'authorize' && !empty($provider)) {
             <p>This tool helps you test the OAuth integration for FridayAI. It shows the configuration status for each provider and allows you to test the authentication flow.</p>
             <p>Make sure you have the necessary environment variables set in your <code>.env</code> file before testing.</p>
         </div>
-        
+
         <h2>OAuth Provider Status</h2>
-        
+
         <div class="provider-grid">
             <?php foreach ($providers as $providerKey => $providerInfo): ?>
                 <?php
@@ -284,14 +284,14 @@ if ($action === 'authorize' && !empty($provider)) {
                         <span class="status-indicator <?= $isConfigured ? 'status-configured' : 'status-not-configured' ?>"></span>
                     </h3>
                     <p>
-                        Status: 
+                        Status:
                         <?php if ($isConfigured): ?>
                             <strong style="color: #2ecc71;">Configured</strong>
                         <?php else: ?>
                             <strong style="color: #e74c3c;">Not Configured</strong>
                         <?php endif; ?>
                     </p>
-                    
+
                     <?php if ($isConfigured): ?>
                         <a href="oauth-test.php?action=authorize&provider=<?= $providerKey ?>" class="test-button">Test Authentication</a>
                     <?php else: ?>
@@ -300,12 +300,12 @@ if ($action === 'authorize' && !empty($provider)) {
                 </div>
             <?php endforeach; ?>
         </div>
-        
+
         <h2>Required Environment Variables</h2>
-        
+
         <div class="result-container">
             <p>Make sure the following environment variables are set in your <code>.env</code> file:</p>
-            
+
             <h3>Google OAuth</h3>
             <pre>GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_CLIENT_SECRET=your_client_secret
@@ -324,12 +324,12 @@ PLAYSTATION_REDIRECT_URI=${FRONTEND_URL}/api/auth/callback/playstation</pre>
             <h3>Steam OAuth</h3>
             <pre>STEAM_API_KEY=your_api_key
 STEAM_REDIRECT_URI=${FRONTEND_URL}/api/auth/callback/steam</pre>
-            
+
             <p>For testing purposes, you should also add the following testing redirect URIs to your provider developer consoles:</p>
             <pre><?= $baseUrl ?>?action=callback&provider=[provider_name]</pre>
-            
+
             <p>For more information, see the <a href="../../documentation/oauth-setup.md">OAuth Setup Documentation</a>.</p>
         </div>
     <?php endif; ?>
 </body>
-</html> 
+</html>

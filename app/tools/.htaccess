@@ -9,4 +9,4 @@ RewriteRule ^oauth-test/(.*)$ oauth-test.php?$1 [L,QSA]
 RewriteCond %{REQUEST_URI} !^/app/tools/oauth-test
 RewriteCond %{HTTP_REFERER} !^http://(www\.)?localhost [NC]
 RewriteCond %{HTTP_REFERER} !^https://(www\.)?fridayai\.me [NC]
-RewriteRule .* - [F] 
+RewriteRule .* - [F]

@@ -10,4 +10,4 @@
     { "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico))", "dest": "/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
-} 
+}

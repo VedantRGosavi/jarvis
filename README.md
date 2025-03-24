@@ -227,8 +227,8 @@ If you need to deploy manually, follow these steps:
 To ensure the security of this application, please follow these guidelines:
 
 1. **Never commit sensitive data**: API keys, passwords, and tokens should never be committed to the repository
-2. **Use environment variables**: 
-   - Copy `.env.example` to `.env` 
+2. **Use environment variables**:
+   - Copy `.env.example` to `.env`
    - Add your real keys to `.env` (this file is git-ignored)
    - Only commit placeholder values in `.env.example`
 

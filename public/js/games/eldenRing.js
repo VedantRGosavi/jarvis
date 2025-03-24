@@ -8,8 +8,8 @@ class EldenRingModule {
     this.gameId = 'elden-ring';
     this.gameName = 'Elden Ring';
     this.regions = [
-      'Limgrave', 'Weeping Peninsula', 'Liurnia', 
-      'Caelid', 'Altus Plateau', 'Mt. Gelmir', 
+      'Limgrave', 'Weeping Peninsula', 'Liurnia',
+      'Caelid', 'Altus Plateau', 'Mt. Gelmir',
       'Mountaintops of the Giants', 'Consecrated Snowfield'
     ];
     this.contentTypes = {
@@ -20,14 +20,14 @@ class EldenRingModule {
       weapons: 'Weapons',
       armor: 'Armor'
     };
-    
+
     this.initialize();
   }
-  
+
   initialize() {
     // Initialize the module
     console.log(`Initializing ${this.gameName} module`);
-    
+
     // Register with overlay (if it exists)
     if (window.gameOverlay) {
       this.registerWithOverlay();
@@ -38,12 +38,12 @@ class EldenRingModule {
       });
     }
   }
-  
+
   registerWithOverlay() {
     // Add game-specific elements to the overlay
     console.log(`Registering ${this.gameName} with overlay`);
   }
-  
+
   async loadQuestData(questId) {
     try {
       // In a real implementation, this would fetch from an API
@@ -54,7 +54,7 @@ class EldenRingModule {
       return null;
     }
   }
-  
+
   getMockQuestData(questId) {
     // Mock data for demonstration
     const mockQuests = {
@@ -108,10 +108,10 @@ class EldenRingModule {
         ]
       }
     };
-    
+
     return mockQuests[questId] || null;
   }
-  
+
   formatQuestData(data) {
     // Format quest data for display
     return {
@@ -125,17 +125,17 @@ class EldenRingModule {
       }))
     };
   }
-  
+
   renderQuestDetails(questData) {
     if (!questData) return '<p class="text-gaming-gray-400">Quest not found</p>';
-    
+
     const formattedData = this.formatQuestData(questData);
-    
+
     return `
       <div class="quest-details">
         <h3 class="text-lg font-semibold mb-2">${formattedData.title}</h3>
         <p class="text-sm text-gaming-gray-300 mb-4">${formattedData.description}</p>
-        
+
         <h4 class="text-sm font-semibold mb-2">Quest Steps:</h4>
         <div class="space-y-3">
           ${formattedData.steps.map((step, index) => `
@@ -160,7 +160,7 @@ class EldenRingModule {
       </div>
     `;
   }
-  
+
   // Additional methods for Elden Ring-specific functionality
   searchContent(query, type = null) {
     // Search implementation
@@ -185,19 +185,19 @@ class EldenRingModule {
         description: "Optional endgame boss located in the Haligtree."
       }
     ];
-    
+
     // Filter by type if specified
     const filtered = type ? results.filter(item => item.type === type) : results;
-    
+
     // Filter by query text
     if (query && query.trim() !== '') {
       const lowerQuery = query.toLowerCase();
-      return filtered.filter(item => 
-        item.title.toLowerCase().includes(lowerQuery) || 
+      return filtered.filter(item =>
+        item.title.toLowerCase().includes(lowerQuery) ||
         item.description.toLowerCase().includes(lowerQuery)
       );
     }
-    
+
     return filtered;
   }
 }
@@ -205,7 +205,7 @@ class EldenRingModule {
 // Initialize Elden Ring module
 document.addEventListener('DOMContentLoaded', () => {
   const eldenRingModule = new EldenRingModule();
-  
+
   // Expose to global scope for other scripts
   window.eldenRingModule = eldenRingModule;
-}); 
+});

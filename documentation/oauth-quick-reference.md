@@ -13,7 +13,7 @@ FridayAI supports multiple OAuth providers to give users flexible authentication
 ```
 app/utils/
 ├── OAuthProvider.php           # Base abstract class for all providers
-├── GoogleOAuth.php             # Google implementation 
+├── GoogleOAuth.php             # Google implementation
 ├── GithubOAuth.php             # GitHub implementation
 ├── PlayStationOAuth.php        # PlayStation Network implementation
 ├── SteamOAuth.php              # Steam implementation (OpenID + API)
@@ -98,4 +98,4 @@ STEAM_REDIRECT_URI=${FRONTEND_URL}/api/auth/steam/callback
 - **JWT Tokens**: After successful authentication, a JWT token is generated for the user
 - **Validation**: All user information is validated before storing or returning
 
-For detailed setup instructions, see [OAuth Provider Setup Guide](./oauth-setup.md). 
+For detailed setup instructions, see [OAuth Provider Setup Guide](./oauth-setup.md).

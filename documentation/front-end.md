@@ -1,4 +1,4 @@
-/* 
+/*
  * IMPORTANT: If any changes are made to this frontend architecture,
  * please ensure that corresponding updates are applied throughout
  * the entire codebase to maintain consistency and prevent integration issues.
@@ -30,7 +30,7 @@ The frontend uses a lightweight, framework-free approach:
   /* Primary Colors */
   --color-black: #121212;
   --color-white: #f8f8f8;
-  
+
   /* Gray Scale */
   --color-gray-100: #e5e5e5;
   --color-gray-200: #c7c7c7;
@@ -40,7 +40,7 @@ The frontend uses a lightweight, framework-free approach:
   --color-gray-600: #404040;
   --color-gray-700: #282828;
   --color-gray-800: #1c1c1c;
-  
+
   /* Accent Colors (Used sparingly) */
   --color-accent: #404040;
   --color-success: #1f8c3b;
@@ -107,7 +107,7 @@ export class GameOverlay {
     this.size = config.size || { width: 320, height: 480 };
     this.initializeOverlay();
   }
-  
+
   initializeOverlay() {
     // Create overlay container
     this.container = document.createElement('div');
@@ -120,21 +120,21 @@ export class GameOverlay {
     this.container.style.borderRadius = '4px';
     this.container.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
     this.container.style.overflow = 'hidden';
-    
+
     // Position and size
     this.updatePosition(this.position);
     this.updateSize(this.size);
-    
+
     // Initial visibility
     this.setVisibility(this.visible);
-    
+
     // Add to document
     document.body.appendChild(this.container);
-    
+
     // Initialize draggable behavior
     this.initializeDraggable();
   }
-  
+
   // Additional methods for overlay manipulation
   // ...
 }
@@ -192,17 +192,17 @@ export class EldenRingModule extends GameModule {
   constructor() {
     super('elden-ring');
     this.regions = [
-      'Limgrave', 'Weeping Peninsula', 'Liurnia', 
-      'Caelid', 'Altus Plateau', 'Mt. Gelmir', 
+      'Limgrave', 'Weeping Peninsula', 'Liurnia',
+      'Caelid', 'Altus Plateau', 'Mt. Gelmir',
       'Mountaintops of the Giants', 'Consecrated Snowfield'
     ];
   }
-  
+
   async loadQuestData(questId) {
     const data = await this.fetchData(`quests/${questId}`);
     return this.formatQuestData(data);
   }
-  
+
   formatQuestData(data) {
     // Elden Ring-specific formatting
     return {
@@ -216,7 +216,7 @@ export class EldenRingModule extends GameModule {
       }))
     };
   }
-  
+
   // Additional Elden Ring-specific methods
   // ...
 }
@@ -232,16 +232,16 @@ export class BaldursGate3Module extends GameModule {
     super('baldurs-gate-3');
     this.acts = ['Act 1', 'Act 2', 'Act 3'];
     this.companions = [
-      'Shadowheart', 'Astarion', 'Gale', 
+      'Shadowheart', 'Astarion', 'Gale',
       'Lae\'zel', 'Wyll', 'Karlach'
     ];
   }
-  
+
   async loadQuestData(questId) {
     const data = await this.fetchData(`quests/${questId}`);
     return this.formatQuestData(data);
   }
-  
+
   formatQuestData(data) {
     // Baldur's Gate 3-specific formatting
     return {
@@ -257,7 +257,7 @@ export class BaldursGate3Module extends GameModule {
       }))
     };
   }
-  
+
   // Additional Baldur's Gate 3-specific methods
   // ...
 }
@@ -274,7 +274,7 @@ export class ApiClient {
     this.baseUrl = baseUrl || '/api';
     this.authToken = localStorage.getItem('auth_token');
   }
-  
+
   async get(endpoint) {
     try {
       const response = await fetch(`${this.baseUrl}/${endpoint}`, {
@@ -284,18 +284,18 @@ export class ApiClient {
           'Authorization': this.authToken ? `Bearer ${this.authToken}` : ''
         }
       });
-      
+
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
       }
-      
+
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
       throw error;
     }
   }
-  
+
   // Additional methods (post, put, etc.)
   // ...
 }
@@ -310,13 +310,13 @@ export class DataCache {
     this.cache = {};
     this.ttl = ttl;
   }
-  
+
   set(key, data) {
     this.cache[key] = {
       data,
       timestamp: Date.now()
     };
-    
+
     // Also persist to localStorage for session persistence
     try {
       localStorage.setItem(`cache_${key}`, JSON.stringify({
@@ -327,19 +327,19 @@ export class DataCache {
       console.warn('localStorage caching failed:', e);
     }
   }
-  
+
   get(key) {
     // Check memory cache first
     const item = this.cache[key];
-    
+
     if (item && Date.now() - item.timestamp < this.ttl) {
       return item.data;
     }
-    
+
     // Try localStorage as fallback
     try {
       const storedItem = JSON.parse(localStorage.getItem(`cache_${key}`));
-      
+
       if (storedItem && Date.now() - storedItem.timestamp < this.ttl) {
         // Refresh memory cache
         this.cache[key] = storedItem;
@@ -348,10 +348,10 @@ export class DataCache {
     } catch (e) {
       console.warn('localStorage retrieval failed:', e);
     }
-    
+
     return null;
   }
-  
+
   // Additional cache methods
   // ...
 }

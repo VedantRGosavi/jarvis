@@ -10,12 +10,12 @@
   - ::task:: This represents general tasks
   - ::missable:: This represents time sensitive tasks that can be failed if you perform a long rest
   - ::ability:: This represents missable or limited skills, spells or abilities
-  - ::item_common:: This represents missable or limited common items 
-  - ::item_uncommon:: This represents missable or limited uncommon items 
-  - ::item_rare:: This represents missable or limited rare items 
+  - ::item_common:: This represents missable or limited common items
+  - ::item_uncommon:: This represents missable or limited uncommon items
+  - ::item_rare:: This represents missable or limited rare items
   - ::item_veryrare:: This represents missable or limited very rare items
   - ::item_legendary:: This represents missable or limited legendary items
-  - ::item_story:: This represents missable or limited story items 
+  - ::item_story:: This represents missable or limited story items
   - ::item_ordinary:: This represents missable or limited ordinary items -- ordinary items may be unique in name, but are not different from regular items
 - ::task:: Tips for obtaining equipped weapons from NPC's, a variety of these may or may not work depnding on the NPC:
   - ::task:: Steal another item to make NPC's temporarily hostile, use [non-lethal damage](https://bg3.wiki/wiki/Non-Lethal_Damage_%28Condition%29) to knock them out and loot them.  Long Resting resets them.
@@ -143,7 +143,7 @@
 - ::item_common:: [Broken Padded Armour](https://bg3.wiki/wiki/Broken%20Padded%20Armour)
 - Meet [Karlach](https://bg3.wiki/wiki/Karlach)
 - ::missable::[Deal with the paladins](https://bg3.wiki/wiki/Hunt_the_Devil) she brings up before going to Act 1.5, or deal with some permanent consequences
-- Find the [Silver Pendant](https://bg3.wiki/wiki/Silver_Pendant) 
+- Find the [Silver Pendant](https://bg3.wiki/wiki/Silver_Pendant)
 - ::missable::Protect [two](https://bg3.wiki/wiki/Rugan) [people](https://bg3.wiki/wiki/Olly) being attacked by furries to start the [missing shipment](https://bg3.wiki/wiki/Find_the_Missing_Shipment) quest (if you encounter them and long rest without saving them, they'll permanently die)
 # Blighted Village
 - ::item_story:: The first opportunity to find the [Bloody Amulet](https://bg3.wiki/wiki/Bloody%20Amulet).  It is not recommended to obtain this.
@@ -164,7 +164,7 @@
 - Climb the well into a dungeon ([Whispering Depths](https://bg3.wiki/wiki/Whispering_Depths)) which has decent loot
   - Find a [gem](https://bg3.wiki/wiki/Dark_Amethyst) that can be used to [open a certain book](https://bg3.wiki/wiki/Necromancy_of_Thay)
 - ::missable:: Rescue [Barcus](https://bg3.wiki/wiki/Rescue_the_Gnome) from the windmill (leaving for Act 1.5 will mean he can no longer be rescued)
-- [Scratch](https://bg3.wiki/wiki/Scratch) the dog 
+- [Scratch](https://bg3.wiki/wiki/Scratch) the dog
 - Kill the [ogres](https://bg3.wiki/wiki/Lump_the_Enlightened)
   - Nab the [Headband of Intellect](https://bg3.wiki/wiki/Warped_Headband_of_Intellect)
 - In one of the houses north of the village, there is a bugbear having a moment with their partner
@@ -229,16 +229,16 @@
 - ::item_uncommon:: [Exterminator's Axe](https://bg3.wiki/wiki/Exterminator's%20Axe)
 - ::item_uncommon:: [Shortsword of First Blood](https://bg3.wiki/wiki/Shortsword%20of%20First%20Blood)
 - Clear out the [outpost area that offers protection from monsters](https://bg3.wiki/wiki/Sel%C3%BBnite_Outpost)
-  - Light the sconces and braziers in the area to solve the wall puzzles 
+  - Light the sconces and braziers in the area to solve the wall puzzles
   - Find the "secret" chest available with mage hand, jump, or misty step
 - Reenact [the sword in the stone](https://bg3.wiki/wiki/Phalar_Aluve)
-- Check out the [fish people's cove](https://bg3.wiki/wiki/The_Festering_Cove)  
+- Check out the [fish people's cove](https://bg3.wiki/wiki/The_Festering_Cove)
 - Interact with [the petrified humanoid statues and the aberration](https://bg3.wiki/wiki/Underdark#Petrified_Battlefield) that appears
 - Help [the mushroom leader](https://bg3.wiki/wiki/Spaw)
   - ::missable::[Cure the sick humanoid](https://bg3.wiki/wiki/Cure_the_Poisoned_Gnome) before taking 3 long rests
-- Help [a friend that looks like a foe](https://bg3.wiki/wiki/Help_Omeluum_Investigate_the_Parasite) 
-- Save [a witless dwarf in dire straits](https://bg3.wiki/wiki/Find_the_Mushroom_Picker) 
-  - Choose what to do with [the reward from the gnome](https://bg3.wiki/wiki/Noblestalk) 
+- Help [a friend that looks like a foe](https://bg3.wiki/wiki/Help_Omeluum_Investigate_the_Parasite)
+- Save [a witless dwarf in dire straits](https://bg3.wiki/wiki/Find_the_Mushroom_Picker)
+  - Choose what to do with [the reward from the gnome](https://bg3.wiki/wiki/Noblestalk)
 - Go and [defeat the duergars](https://bg3.wiki/wiki/Defeat_the_Duergar_Intruders)
 - ["Help" Glut](https://bg3.wiki/wiki/Avenge_Glut%27s_Circle), but you probably want to betray him
 - Eliminate Nere (which brings you to Grymforge) -- if you've come across the trapped gnomes, don't rest, or this quest will be lost
@@ -299,8 +299,8 @@
   - Find and dig on a dog's grave on the Underdark Road to find the necessary item
 - Meet Bernard
 - Find a [perfectly normal chest](https://bg3.wiki/wiki/Chest_of_the_Mundane) filled with perfectly normal items.
-- Don't forget to read all notes and be a good soul 
-- There is a gith disk, don't forget to interact with it after picking it up, and show it to Lae'zel 
+- Don't forget to read all notes and be a good soul
+- There is a gith disk, don't forget to interact with it after picking it up, and show it to Lae'zel
 - Use the [Stool of Mysterious Strength](https://bg3.wiki/wiki/Club_of_Hill_Giant_Strength) to get a one-of-a-kind item
 # Grymforge
 - ::item_veryrare:: [Disintegrating Night Walkers](https://bg3.wiki/wiki/Disintegrating%20Night%20Walkers)
@@ -396,7 +396,7 @@
   - ::task:: Complete [Rescue the Druid Halsin](https://bg3.wiki/wiki/Rescue_the_Druid_Halsin) and [Save the Refugees](https://bg3.wiki/wiki/Save_the_Refugees).
   - ::task:: Long rest.
   - ::task:: Return to where Minthara and Sazza were defeated and ensure they are both alive.
-  - ::task:: If they are missing or dead, reload back to [Save the Goblin Sazza](https://bg3.wiki/wiki/Save_the_Goblin_Sazza). 
+  - ::task:: If they are missing or dead, reload back to [Save the Goblin Sazza](https://bg3.wiki/wiki/Save_the_Goblin_Sazza).
   - ::task:: If they are alive, congratualtions! It is highly recommended to make a new manual save.
 - ::task:: Minthara has the following items when defeated
   - ::task:: Minthara will be naked in cutscenes until you recruit her in Act 2 if you loot her. Nothing is lost if you chose not to.
@@ -442,7 +442,7 @@
 # Rosymorn Monastery
 - ::item_uncommon:: [Ceremonial Mace](https://bg3.wiki/wiki/Ceremonial%20Mace)
 - ::item_uncommon:: [Holy Lance Helm](https://bg3.wiki/wiki/Holy%20Lance%20Helm)
-- Solve a puzzle that involves the [blood of a god](https://bg3.wiki/wiki/Find_the_Blood_of_Lathander)  
+- Solve a puzzle that involves the [blood of a god](https://bg3.wiki/wiki/Find_the_Blood_of_Lathander)
 # Crèche Y'llek
 - ::item_legendary:: [The Blood of Lathander](https://bg3.wiki/wiki/The%20Blood%20of%20Lathander)
 - ::item_veryrare:: [Gloves of Dexterity](https://bg3.wiki/wiki/Gloves%20of%20Dexterity)
@@ -480,8 +480,8 @@
 - ::item_uncommon:: [Ring of Elemental Infusion](https://bg3.wiki/wiki/Ring%20of%20Elemental%20Infusion)
 # BEFORE CONTINUING TO ACT 2
 - Let a certain Dandy [shove an icepick in your eye](https://bg3.wiki/wiki/Volo%27s_Ersatz_Eye) for a permanent upgrade (unconfirmed that this has to be before Act 2)
-- Deluxe edition -- portraits: optionally find Fane in The Ruins, Lohse near Nettie in The Emerald Grove, Red Prince in the Waukeen's Rest, Ifan in the Blighted Village, Sebille in the Hag's house, and finally Beast in The Arcane Tower 
-- You will meet some hyenas near a broken cart in the upperworld (there will be a cutscene prompting you to react to the dead hyenas) 
+- Deluxe edition -- portraits: optionally find Fane in The Ruins, Lohse near Nettie in The Emerald Grove, Red Prince in the Waukeen's Rest, Ifan in the Blighted Village, Sebille in the Hag's house, and finally Beast in The Arcane Tower
+- You will meet some hyenas near a broken cart in the upperworld (there will be a cutscene prompting you to react to the dead hyenas)
 - [A particular demonic visitor](https://bg3.wiki/wiki/Raphael) will show up either during a long rest, or automatically if you haven't rested in a while
 - Clear anything remaining in your quest log for the area (some items will be unresolved, but do whatever's on your map) before going to Act 2
 # Act 2: First Things First
@@ -586,7 +586,7 @@
 - Get some more tadpoles
   - Convince the guard on the docks to let you investigate the shipping crates
   - Destroy the barrel with the tadpoles after investigating (you can move the crate out of sight of the guards)
-  - Gather 2 more tadpoles 
+  - Gather 2 more tadpoles
 - ::task:: [Lann Tarv](https://bg3.wiki/wiki/Lann_Tarv) offers merchant services.
   - If [Karlach](https://bg3.wiki/wiki/Karlach) is in the party, you can listen to some sad stories to get three [Soul Coins](https://bg3.wiki/wiki/Soul_Coin)
   - ::missable:: Impress him or get [Zrell's] approval to access his secret stock
@@ -629,7 +629,7 @@
 - Investigate the daughter's room to find [something that isn't as it appears](https://bg3.wiki/wiki/Moonrise_Towers#Isobel's_room)
 - [Save the gnomes](https://bg3.wiki/wiki/Rescue_Wulbren) (talk to them before freeing them)
   - ::item_uncommon:: [Wulbren's Hammer](https://bg3.wiki/wiki/Wulbren's%20Hammer), found in the same area, can be given to [Wulbren Bongle](https://bg3.wiki/wiki/Wulbren_Bongle).  It is possible to purchase this item back from him anytime (confirmed Act 3).
-- [Save the tieflings](https://bg3.wiki/wiki/Rescue_the_Tieflings) 
+- [Save the tieflings](https://bg3.wiki/wiki/Rescue_the_Tieflings)
   - Talk to [the aspiring Tiefling wizard](https://bg3.wiki/wiki/Rolan)
 # Oubliette
 - Enter [the area under the prisons](https://bg3.wiki/wiki/Oubliette)
@@ -641,7 +641,7 @@
 - ::item_uncommon:: [Helmet of Arcane Acuity](https://bg3.wiki/wiki/Helmet%20of%20Arcane%20Acuity)
 - ::item_uncommon:: [Ritual Dagger of Shar](https://bg3.wiki/wiki/Ritual%20Dagger%20of%20Shar)
 - ::item_uncommon:: [Shadow Blade Ring](https://bg3.wiki/wiki/Shadow%20Blade%20Ring)
-- Find [a young tiefling](https://bg3.wiki/wiki/Arabella#Act_Two) that needs help 
+- Find [a young tiefling](https://bg3.wiki/wiki/Arabella#Act_Two) that needs help
 - Interact with the center statue puzzle to [open a pathway down](https://bg3.wiki/wiki/Sharran_Sanctuary)
   - Complete the puzzle in the room for three temporary buffs ([1](https://bg3.wiki/wiki/Dark_Lady%27s_Grace_(Condition)), ([2](https://bg3.wiki/wiki/Dark_Lady%27s_Awareness_(Condition)), ([3](https://bg3.wiki/wiki/Dark_Lady%27s_Erudition_(Condition)) but DO NOT head further down and complete the area, freeing an important prisoner, or you'll lock yourself out of freeing prisoners at Moonrise
   - Deal with the gith patrol and [their leader](https://bg3.wiki/wiki/Tska%27an)
@@ -675,7 +675,7 @@
 - ::item_common:: [Syringe (C1)](https://bg3.wiki/wiki/Syringe%20(C1))
 - ::item_common:: [Trepan (C1)](https://bg3.wiki/wiki/Trepan%20(C1))
 - Find [the lost tiefling child's parents](https://bg3.wiki/wiki/Find_Arabella%27s_Parents)
-- Kill [a surgeon with questionable ethics](https://bg3.wiki/wiki/Malus_Thorm) and take his instrument 
+- Kill [a surgeon with questionable ethics](https://bg3.wiki/wiki/Malus_Thorm) and take his instrument
   - Keep him from stabbing you for an achievement
 # House of Healing Morgue
 - Check out [the morgue](https://bg3.wiki/wiki/House_of_Healing_Morgue) for some lore and good items
@@ -686,13 +686,13 @@
 - Have a [drinking contest](https://bg3.wiki/wiki/Thisobald_Thorm#Find_Ketheric_Thorm's_Relic)
   - Use [his key](https://bg3.wiki/wiki/Worn_Key) to open up the back
   - Grab [three purple guts](https://bg3.wiki/wiki/Purple_Worm_Gullet) from the area ([Reddit backup link until the wiki updates](https://www.reddit.com/r/BaldursGate3/comments/15po0hp/purple_worm_gullet/))
-  - Find [the bar notes](https://bg3.wiki/wiki/Madeline%27s_Ledger) for a quest about revenge 
+  - Find [the bar notes](https://bg3.wiki/wiki/Madeline%27s_Ledger) for a quest about revenge
 # Reithwin Tollhouse
 - ::item_rare:: [Gloves of Battlemage's Power](https://bg3.wiki/wiki/Gloves%20of%20Battlemage's%20Power)
 - ::item_rare:: [Twist of Fortune](https://bg3.wiki/wiki/Twist%20of%20Fortune)
 - ::item_uncommon:: [Fireheart](https://bg3.wiki/wiki/Fireheart)
 - ::item_uncommon:: [Ironvine Shield](https://bg3.wiki/wiki/Ironvine%20Shield)
-- Deal with [the "coin boss"](https://bg3.wiki/wiki/Gerringothe_Thorm) 
+- Deal with [the "coin boss"](https://bg3.wiki/wiki/Gerringothe_Thorm)
   - Keep her from doing anything to you for [an achievement](https://bg3.wiki/wiki/Achievements)
 # BEFORE CONTINUING TO THE TEMPLE
 - Clear anything remaining in your quest log for the area (some items will be unresolved, but do whatever's on your map) before entering the Temple
@@ -749,14 +749,14 @@
   - Complete the brain puzzle
 - Past the door, get the sword, green jar, and items on the corpse
   - Put the jar in the mind reader and gain [a permanent boon](https://bg3.wiki/wiki/Waking_Mind) (until the character with the buff dies)
-- [Free an old brain friend](https://bg3.wiki/wiki/Us#Act_Two), if you didn't kill them earlier, to get a new ability 
+- [Free an old brain friend](https://bg3.wiki/wiki/Us#Act_Two), if you didn't kill them earlier, to get a new ability
 - Find [the tadpole room](https://bg3.wiki/wiki/Mind_Flayer_Colony#Tadpoling_centre)
   - Collect a tadpole from the pool
   - Free [Wyll's captor](https://bg3.wiki/wiki/Mind_Flayer_Colony#Tadpoling_Centre)
 - Free [the captured citizens](https://bg3.wiki/wiki/Mind_Flayer_Colony#Tadpoling_Centre)
   - ::item_uncommon:: If [Svartlebee's Woundseeker](https://bg3.wiki/wiki/Svartlebee%27s_Woundseeker) was missed, it can be obtained by disarming [Gauntlet Yeva](https://bg3.wiki/wiki/Yeva) in combat without negative consequences.
 # BEFORE CONTINUING TO ACT 3
-- Get the Owlbear Cub (and pet him in the middle of the night, of course) 
+- Get the Owlbear Cub (and pet him in the middle of the night, of course)
 - Clear anything remaining in your quest log for the area (some items will be unresolved, but do whatever's on your map) before leaving
 
 
@@ -798,7 +798,7 @@
 
 
 # Rivington - Abandoned Windmill
-- ::item_rare:: [Ring of Truthfulness](https://bg3.wiki/wiki/Ring%20of%20Truthfulness) 
+- ::item_rare:: [Ring of Truthfulness](https://bg3.wiki/wiki/Ring%20of%20Truthfulness)
 - Decide whether or not to [help a newborn abberation](https://bg3.wiki/wiki/Feed%20the%20Mind%20Flayer)
   - If attack it, you can loot and consume [it's brain](https://bg3.wiki/wiki/Mind_Flayer_Brain) for a tadpole
   - If you help it, it will also ereward you with a tadpole (This will break your Paladin oath)
@@ -1029,7 +1029,7 @@
   - ::item_veryrare:: [Boots of Persistence](https://bg3.wiki/wiki/Boots%20of%20Persistence)
   - ::item_veryrare:: [Legacy of the Masters](https://bg3.wiki/wiki/Legacy%20of%20the%20Masters)
   - ::item_rare:: [Unwanted Masterwork Scalemail](https://bg3.wiki/wiki/Unwanted%20Masterwork%20Scalemail)
-  
+
 
 # Lower City - Graveyard
 - Save the kid from Myrkul's influence
@@ -1368,7 +1368,7 @@
 
 
 
-  
+
 # Items Obtained in Various Locations (WIP)
 - ::item_veryrare:: [Moon Devotion Robe](https://bg3.wiki/wiki/Moon%20Devotion%20Robe)
 - ::item_veryrare:: [Voss' Silver Sword](https://bg3.wiki/wiki/Voss'%20Silver%20Sword)

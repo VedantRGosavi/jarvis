@@ -62,4 +62,4 @@ Since Vercel doesn't natively support PHP, consider one of these options for the
 
 If using SQLite databases:
 1. For Vercel: Convert to a serverless database like Supabase or PlanetScale
-2. For separate hosting: Ensure the database directory is writable 
+2. For separate hosting: Ensure the database directory is writable

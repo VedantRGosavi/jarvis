@@ -126,4 +126,4 @@ CREATE INDEX idx_usage_logs_user_id ON usage_logs(user_id);
 CREATE INDEX idx_usage_logs_game_id ON usage_logs(game_id);
 CREATE INDEX idx_user_game_progress_user_game ON user_game_progress(user_id, game_id);
 CREATE INDEX idx_user_bookmarks_user_game ON user_bookmarks(user_id, game_id);
-CREATE INDEX idx_downloads_user_id ON downloads(user_id); 
+CREATE INDEX idx_downloads_user_id ON downloads(user_id);

@@ -60,4 +60,4 @@ const PRICING_TIERS = [
 ];
 
 // Export for use in main.js
-export { PRICING_TIERS }; 
+export { PRICING_TIERS };

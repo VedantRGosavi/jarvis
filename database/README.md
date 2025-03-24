@@ -125,4 +125,4 @@ There are several GUI tools available for working with SQLite databases:
 - [SQLiteStudio](https://sqlitestudio.pl/) (cross-platform)
 - [TablePlus](https://tableplus.com/) (Mac, Windows, Linux)
 
-These tools make it easier to browse, edit, and query the databases visually. 
+These tools make it easier to browse, edit, and query the databases visually.

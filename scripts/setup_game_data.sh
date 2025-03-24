@@ -37,4 +37,4 @@ echo "You now have fully populated databases for:"
 echo "- Elden Ring (data/game_data/elden_ring.sqlite)"
 echo "- Baldur's Gate 3 (data/game_data/baldurs_gate3.sqlite)"
 echo
-echo "You can now start the application and use all features." 
+echo "You can now start the application and use all features."

@@ -20,13 +20,13 @@ require_once BASE_PATH . '/app/utils/Response.php';
             </div>
             <h2 class="text-2xl font-bold mb-4">Payment Successful!</h2>
             <p class="text-gaming-gray-200 mb-8">Thank you for your purchase. Your game content is now available.</p>
-            
+
             <div class="space-y-4">
-                <a href="/dashboard" 
+                <a href="/dashboard"
                    class="block w-full px-4 py-2 bg-gaming-accent hover:bg-gaming-gray-600 rounded transition duration-150">
                     Go to Dashboard
                 </a>
-                <a href="/games" 
+                <a href="/games"
                    class="block w-full px-4 py-2 border border-gaming-accent hover:bg-gaming-accent rounded transition duration-150">
                     Browse More Games
                 </a>
@@ -40,4 +40,4 @@ require_once BASE_PATH . '/app/utils/Response.php';
         sessionStorage.removeItem('payment_method');
     </script>
 </body>
-</html> 
+</html>

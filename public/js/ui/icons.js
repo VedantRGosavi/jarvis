@@ -46,4 +46,4 @@ window.authIcons = {
   GithubIcon,
   PlayStationIcon,
   SteamIcon
-}; 
+};

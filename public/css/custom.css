@@ -91,7 +91,7 @@ h3 {
   margin-top: -20vh;
   padding-top: 20vh;
   padding-bottom: 10vh;
-  background: linear-gradient(180deg, 
+  background: linear-gradient(180deg,
     transparent 0%,
     rgba(18, 18, 18, 0.9) 10%,
     var(--color-black) 30%,
@@ -359,4 +359,4 @@ html {
 /* Add a CSS rule to properly show the overlay when not hidden */
 #auth-check-overlay:not(.hidden) {
   display: flex;
-} 
+}

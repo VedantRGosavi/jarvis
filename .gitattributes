@@ -11,4 +11,4 @@ scripts/test-oauth.sh linguist-documentation
 
 # Skip all content in these directories from being scanned for secrets
 scripts/** -diff
-config/.env.* -diff 
+config/.env.* -diff

@@ -44,7 +44,7 @@ switch ($action) {
                 Response::error('Invalid settings data', 400);
                 break;
             }
-            
+
             $result = $userModel->updateSettings($userId, $data['settings']);
             if ($result) {
                 Response::success(['message' => 'Settings updated']);
@@ -55,7 +55,7 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'progress':
         if ($method === 'GET') {
             // Get user progress for a specific game
@@ -64,7 +64,7 @@ switch ($action) {
                 Response::error('Game ID required', 400);
                 break;
             }
-            
+
             $progress = $userModel->getGameProgress($userId, $gameId);
             Response::success(['progress' => $progress]);
         } elseif ($method === 'POST') {
@@ -73,7 +73,7 @@ switch ($action) {
                 Response::error('Game ID and Quest ID required', 400);
                 break;
             }
-            
+
             $result = $userModel->updateGameProgress(
                 $userId,
                 $data['game_id'],
@@ -82,7 +82,7 @@ switch ($action) {
                 $data['completed'] ?? 0,
                 $data['status'] ?? 'in_progress'
             );
-            
+
             if ($result) {
                 Response::success(['message' => 'Progress updated']);
             } else {
@@ -92,7 +92,7 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     case 'bookmarks':
         if ($method === 'GET') {
             // Get user bookmarks for a specific game
@@ -101,7 +101,7 @@ switch ($action) {
                 Response::error('Game ID required', 400);
                 break;
             }
-            
+
             $bookmarks = $userModel->getBookmarks($userId, $gameId);
             Response::success(['bookmarks' => $bookmarks]);
         } elseif ($method === 'POST') {
@@ -110,7 +110,7 @@ switch ($action) {
                 Response::error('Game ID, resource type and resource ID required', 400);
                 break;
             }
-            
+
             $result = $userModel->addBookmark(
                 $userId,
                 $data['game_id'],
@@ -119,7 +119,7 @@ switch ($action) {
                 $data['display_name'] ?? null,
                 $data['group'] ?? 'default'
             );
-            
+
             if ($result) {
                 Response::success(['message' => 'Bookmark added']);
             } else {
@@ -131,7 +131,7 @@ switch ($action) {
                 Response::error('Bookmark ID required', 400);
                 break;
             }
-            
+
             $result = $userModel->removeBookmark($userId, $data['bookmark_id']);
             if ($result) {
                 Response::success(['message' => 'Bookmark removed']);
@@ -142,7 +142,7 @@ switch ($action) {
             Response::error('Method not allowed', 405);
         }
         break;
-        
+
     default:
         Response::error('User endpoint not found', 404);
 }

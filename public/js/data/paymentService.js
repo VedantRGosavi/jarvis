@@ -8,11 +8,11 @@ class PaymentService {
     this.baseUrl = '/api/payments';
     this.stripePromise = null;
     this.stripePublicKey = null; // Will be fetched from server
-    
+
     // Initialize Stripe asynchronously
     this.fetchStripeConfig();
   }
-  
+
   /**
    * Fetch Stripe configuration from server
    */
@@ -20,7 +20,7 @@ class PaymentService {
     try {
       const response = await fetch(`${this.baseUrl}/config`);
       const data = await response.json();
-      
+
       if (data && data.publishable_key) {
         this.stripePublicKey = data.publishable_key;
         this.initStripe();
@@ -31,7 +31,7 @@ class PaymentService {
       console.error('Error fetching Stripe config:', error);
     }
   }
-  
+
   /**
    * Initialize Stripe
    */
@@ -42,7 +42,7 @@ class PaymentService {
       console.warn('Stripe.js not loaded or key not available. Payment functionality will be limited.');
     }
   }
-  
+
   /**
    * Get Stripe instance
    * @returns {Promise<Stripe>} Stripe instance
@@ -53,19 +53,19 @@ class PaymentService {
       if (!this.stripePublicKey) {
         await this.fetchStripeConfig();
       }
-      
+
       if (this.stripePublicKey) {
         this.initStripe();
       }
     }
-    
+
     if (!this.stripePromise) {
       throw new Error('Stripe not initialized');
     }
-    
+
     return this.stripePromise;
   }
-  
+
   /**
    * Process a game purchase
    * @param {string} gameId - Game identifier
@@ -76,7 +76,7 @@ class PaymentService {
       if (!window.authService || !window.authService.isAuthenticated()) {
         throw new Error('Authentication required for purchases');
       }
-      
+
       // Request payment intent from server
       const response = await fetch(`${this.baseUrl}/purchase-game`, {
         method: 'POST',
@@ -86,16 +86,16 @@ class PaymentService {
         },
         body: JSON.stringify({ game_id: gameId })
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to initiate payment');
       }
-      
+
       // Get Stripe instance
       const stripe = await this.getStripe();
-      
+
       // Show payment form
       const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
         payment_method: {
@@ -106,11 +106,11 @@ class PaymentService {
           }
         }
       });
-      
+
       if (error) {
         throw new Error(error.message);
       }
-      
+
       // Payment successful
       return {
         success: true,
@@ -124,7 +124,7 @@ class PaymentService {
       };
     }
   }
-  
+
   /**
    * Create a subscription
    * @returns {Promise<Object>} Subscription result
@@ -134,7 +134,7 @@ class PaymentService {
       if (!window.authService || !window.authService.isAuthenticated()) {
         throw new Error('Authentication required for subscriptions');
       }
-      
+
       // Request subscription from server
       const response = await fetch(`${this.baseUrl}/create-subscription`, {
         method: 'POST',
@@ -143,16 +143,16 @@ class PaymentService {
           'Authorization': `Bearer ${window.authService.getToken()}`
         }
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to create subscription');
       }
-      
+
       // Get Stripe instance
       const stripe = await this.getStripe();
-      
+
       // Show payment form for subscription
       const { error, paymentIntent } = await stripe.confirmCardPayment(data.client_secret, {
         payment_method: {
@@ -163,11 +163,11 @@ class PaymentService {
           }
         }
       });
-      
+
       if (error) {
         throw new Error(error.message);
       }
-      
+
       // Subscription created successfully
       return {
         success: true,
@@ -182,7 +182,7 @@ class PaymentService {
       };
     }
   }
-  
+
   /**
    * Get user's current subscription
    * @returns {Promise<Object>} Subscription info
@@ -192,27 +192,27 @@ class PaymentService {
       if (!window.authService || !window.authService.isAuthenticated()) {
         throw new Error('Authentication required');
       }
-      
+
       const response = await fetch(`${this.baseUrl}/subscription`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${window.authService.getToken()}`
         }
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to get subscription');
       }
-      
+
       return data.subscription;
     } catch (error) {
       console.error('Error getting subscription:', error);
       return null;
     }
   }
-  
+
   /**
    * Get user's purchase history
    * @returns {Promise<Array>} Purchase history
@@ -222,27 +222,27 @@ class PaymentService {
       if (!window.authService || !window.authService.isAuthenticated()) {
         throw new Error('Authentication required');
       }
-      
+
       const response = await fetch(`${this.baseUrl}/purchases`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${window.authService.getToken()}`
         }
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.message || 'Failed to get purchases');
       }
-      
+
       return data.purchases;
     } catch (error) {
       console.error('Error getting purchases:', error);
       return [];
     }
   }
-  
+
   /**
    * Create a card element for Stripe (placeholder - would need an actual UI component)
    * @returns {Object} Card element
@@ -256,7 +256,7 @@ class PaymentService {
 // Initialize payment service
 document.addEventListener('DOMContentLoaded', () => {
   const paymentService = new PaymentService();
-  
+
   // Expose to global scope for other scripts
   window.paymentService = paymentService;
-}); 
+});

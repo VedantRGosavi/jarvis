@@ -7,45 +7,45 @@ class OverlayController {
   constructor() {
     this.currentGame = localStorage.getItem('friday_current_game') || 'elden_ring';
     this.isInitialized = false;
-    
+
     // Initialize components when DOM is loaded
     document.addEventListener('DOMContentLoaded', () => {
       this.initialize();
     });
   }
-  
+
   /**
    * Initialize the overlay controller and all components
    */
   initialize() {
     if (this.isInitialized) return;
-    
+
     // Wait for other components to be available
     if (!window.gameOverlay || !window.gameDataService || !window.viewManager) {
       console.log('Waiting for components to load...');
       setTimeout(() => this.initialize(), 100);
       return;
     }
-    
+
     console.log('Initializing Overlay Controller');
-    
+
     // Initialize UI elements
     this.initializeUI();
-    
+
     // Initialize event listeners
     this.initializeEventListeners();
-    
+
     // Set current game
     this.setCurrentGame(this.currentGame);
-    
+
     // Mark as initialized
     this.isInitialized = true;
-    
+
     // Dispatch initialization event
     const event = new CustomEvent('overlayControllerReady');
     document.dispatchEvent(event);
   }
-  
+
   /**
    * Initialize UI elements
    */
@@ -55,7 +55,7 @@ class OverlayController {
     if (gameSelector) {
       // Clear existing content
       gameSelector.innerHTML = '';
-      
+
       // Add game options
       gameSelector.innerHTML = `
         <div class="space-y-1">
@@ -68,14 +68,14 @@ class OverlayController {
         </div>
       `;
     }
-    
+
     // Ensure search input has an ID for the view manager
     const searchInput = document.querySelector('input[type="text"][placeholder="Search..."]');
     if (searchInput && !searchInput.id) {
       searchInput.id = 'search-input';
     }
   }
-  
+
   /**
    * Initialize event listeners
    */
@@ -88,7 +88,7 @@ class OverlayController {
         this.setCurrentGame(gameId);
       });
     });
-    
+
     // Menu navigation buttons
     document.querySelectorAll('.nav-button').forEach(button => {
       button.addEventListener('click', () => {
@@ -98,7 +98,7 @@ class OverlayController {
         }
       });
     });
-    
+
     // Initialize hotkeys if available
     if (window.gameHotkeys) {
       // Register platform-specific hotkey
@@ -116,7 +116,7 @@ class OverlayController {
           }
         });
       }
-      
+
       window.gameHotkeys.registerHotkey('Escape', () => {
         if (window.viewManager && window.viewManager.currentView !== 'home') {
           window.viewManager.showHomeView();
@@ -124,14 +124,14 @@ class OverlayController {
       });
     }
   }
-  
+
   /**
    * Set the current game
    * @param {string} gameId - Game identifier
    */
   setCurrentGame(gameId) {
     this.currentGame = gameId;
-    
+
     // Update game selectors
     const gameSelectors = document.querySelectorAll('.game-selector');
     gameSelectors.forEach(selector => {
@@ -143,12 +143,12 @@ class OverlayController {
         selector.classList.add('bg-gaming-gray-800');
       }
     });
-    
+
     // Update view manager
     if (window.viewManager) {
       window.viewManager.setGame(gameId);
     }
-    
+
     // Update theme classes on body
     document.body.classList.remove('elden-ring-theme', 'baldurs-gate-theme');
     if (gameId === 'elden_ring') {
@@ -156,11 +156,11 @@ class OverlayController {
     } else if (gameId === 'baldurs_gate3') {
       document.body.classList.add('baldurs-gate-theme');
     }
-    
+
     // Save current game to localStorage
     localStorage.setItem('friday_current_game', gameId);
   }
 }
 
 // Initialize the overlay controller
-const overlayController = new OverlayController(); 
+const overlayController = new OverlayController();

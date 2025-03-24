@@ -33,7 +33,7 @@
                 <button id="close-btn" class="text-xs hover:text-gaming-gray-200 transition">×</button>
             </div>
         </header>
-        
+
         <!-- User profile panel (hidden by default) -->
         <div id="user-panel" class="hidden p-3 bg-gaming-gray-800 border-b border-gaming-gray-700">
             <div class="user-info bg-gaming-gray-700 p-2 rounded mb-2 text-xs">
@@ -44,12 +44,12 @@
                 Log Out
             </button>
         </div>
-        
+
         <main class="p-3">
             <div class="mb-3">
                 <input id="search-input" type="text" placeholder="Search..." class="w-full px-2 py-1 bg-gaming-gray-700 border border-gaming-gray-600 rounded text-sm text-gaming-light placeholder-gaming-gray-400 focus:outline-none focus:border-gaming-gray-500">
             </div>
-            
+
             <div class="mb-4">
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="text-sm font-semibold">Games</h2>
@@ -64,7 +64,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="content-area" class="space-y-2">
                 <div class="bg-gaming-gray-800 p-2 rounded border border-gaming-gray-700">
                     <h3 class="text-sm font-semibold mb-1">Quick Navigation</h3>
@@ -75,18 +75,18 @@
                         <button data-content-type="npcs" class="nav-button bg-gaming-gray-700 hover:bg-gaming-gray-600 p-1 rounded transition">NPCs</button>
                     </div>
                 </div>
-                
+
                 <div class="text-xs text-gaming-gray-400">
                     <p>Press <span class="bg-gaming-gray-700 px-1 rounded" id="shortcut-key"></span> to toggle overlay visibility</p>
                 </div>
             </div>
         </main>
-        
+
         <footer class="p-2 bg-gaming-gray-800 border-t border-gaming-gray-700 text-xs text-gaming-gray-400 text-center">
             <p>FridayAI v1.0.0</p>
         </footer>
     </div>
-    
+
     <!-- Core scripts -->
     <script>
         // Set platform-specific shortcut key
@@ -102,7 +102,7 @@
 
     <!-- Authentication -->
     <script src="js/data/authService.js"></script>
-    
+
     <!-- Payment Scripts -->
     <script src="https://js.stripe.com/v3/"></script>
     <script>
@@ -115,24 +115,24 @@
     </script>
     <script src="js/data/paymentService.js"></script>
     <script src="js/ui/paymentUI.js"></script>
-    
+
     <!-- Data services -->
     <script src="js/data/gameDataService.js"></script>
-    
+
     <!-- UI components -->
     <script src="js/ui/components.js"></script>
     <script src="js/ui/viewManager.js"></script>
     <script src="js/ui/settingsPanel.js"></script>
     <script src="js/ui/notifications.js"></script>
     <script src="js/ui/accountUI.js"></script>
-    
+
     <!-- Game-specific scripts -->
     <script src="js/games/eldenRing.js"></script>
     <script src="js/games/baldursGate3.js"></script>
-    
+
     <!-- Main controller -->
     <script src="js/overlayController.js"></script>
-    
+
     <script>
         // Check authentication status on page load
         document.addEventListener('DOMContentLoaded', () => {
@@ -141,7 +141,7 @@
                     const isAuthenticated = window.authService.isAuthenticated();
                     const authCheckOverlay = document.getElementById('auth-check-overlay');
                     const fridayaiOverlay = document.getElementById('fridayai-overlay');
-                    
+
                     if (!isAuthenticated) {
                         // Show auth check overlay
                         if (authCheckOverlay) authCheckOverlay.classList.remove('hidden');
@@ -150,41 +150,41 @@
                         // Show gaming overlay
                         if (authCheckOverlay) authCheckOverlay.classList.add('hidden');
                         if (fridayaiOverlay) fridayaiOverlay.classList.remove('hidden');
-                        
+
                         // Update user info
                         updateUserInfo();
-                        
+
                         // Initialize user panel events
                         initializeUserPanel();
                     }
                 }
             }, 300); // Small delay to ensure auth service is loaded
         });
-        
+
         function updateUserInfo() {
             if (!window.authService) return;
-            
+
             const user = window.authService.getCurrentUser();
             if (!user) return;
-            
+
             const userNameEl = document.getElementById('user-name');
             const userEmailEl = document.getElementById('user-email');
-            
+
             if (userNameEl) userNameEl.textContent = user.username || user.name || 'User';
             if (userEmailEl) userEmailEl.textContent = user.email || '';
         }
-        
+
         function initializeUserPanel() {
             const userBtn = document.getElementById('user-btn');
             const userPanel = document.getElementById('user-panel');
             const logoutBtn = document.getElementById('logout-btn');
-            
+
             if (userBtn && userPanel) {
                 userBtn.addEventListener('click', () => {
                     userPanel.classList.toggle('hidden');
                 });
             }
-            
+
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
                     if (window.authService) {

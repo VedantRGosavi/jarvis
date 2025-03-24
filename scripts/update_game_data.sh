@@ -51,4 +51,4 @@ echo "The databases have been updated with new content:"
 echo "- Elden Ring: Added boss data from eldenring-api"
 echo "- Baldur's Gate 3: Added missable quests and items from bg3-missables"
 echo
-echo "You can now restart the application to see the new content." 
+echo "You can now restart the application to see the new content."

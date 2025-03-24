@@ -60,4 +60,4 @@ sqlite3 "$BG3_DB" "ALTER TABLE quests ADD COLUMN location_note TEXT;" 2>/dev/nul
 
 echo "Database schema update completed successfully!"
 echo
-echo "You can now run the data import scripts to populate the new fields." 
+echo "You can now run the data import scripts to populate the new fields."

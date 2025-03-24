@@ -1,4 +1,4 @@
-/* 
+/*
  * IMPORTANT: If any changes are made to this database schema,
  * please ensure that corresponding updates are applied throughout
  * the entire codebase to maintain consistency and prevent integration issues.
@@ -595,38 +595,38 @@ The schema incorporates several features specifically designed to prevent user c
 class GameData {
     private $db;
     private $game;
-    
+
     public function __construct($game) {
         $this->game = $game;
         // Use the Database utility class to get a game database instance
         $this->db = Database::getGameInstance($game);
     }
-    
+
     public function getQuest($questId, $spoilerLevel = 0) {
         $quest = $this->db->fetchOne("
-            SELECT * FROM quests 
+            SELECT * FROM quests
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
         ", [
             ':quest_id' => $questId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         if (!$quest) {
             return null;
         }
-        
+
         // Get quest steps
         $steps = $this->db->fetchAll("
-            SELECT * FROM quest_steps 
+            SELECT * FROM quest_steps
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
             ORDER BY step_number
         ", [
             ':quest_id' => $questId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         $quest['steps'] = $steps;
-        
+
         // Get prerequisites
         $prerequisites = $this->db->fetchAll("
             SELECT * FROM quest_prerequisites
@@ -634,34 +634,34 @@ class GameData {
         ", [
             ':quest_id' => $questId
         ]);
-        
+
         $quest['prerequisites'] = $prerequisites;
-        
+
         return $quest;
     }
-    
+
     public function getQuestsByLocation($locationId, $spoilerLevel = 0) {
         // Get quests that start at this location
         $quests = $this->db->fetchAll("
-            SELECT * FROM quests 
+            SELECT * FROM quests
             WHERE starting_location_id = :location_id AND spoiler_level <= :spoiler_level
         ", [
             ':location_id' => $locationId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         // Get quests with steps at this location
         $stepsAtLocation = $this->db->fetchAll("
             SELECT DISTINCT q.* FROM quests q
             JOIN quest_steps qs ON q.quest_id = qs.quest_id
-            WHERE qs.location_id = :location_id 
+            WHERE qs.location_id = :location_id
             AND q.spoiler_level <= :spoiler_level
             AND qs.spoiler_level <= :spoiler_level
         ", [
             ':location_id' => $locationId,
             ':spoiler_level' => $spoilerLevel
         ]);
-        
+
         // Merge the results, avoiding duplicates
         $questIds = array_column($quests, 'quest_id');
         foreach ($stepsAtLocation as $quest) {
@@ -670,10 +670,10 @@ class GameData {
                 $questIds[] = $quest['quest_id'];
             }
         }
-        
+
         return $quests;
     }
-    
+
     // Additional methods for other entity types...
 }
 ```
@@ -685,12 +685,12 @@ class GameData {
 // models/UserProgress.php
 class UserProgress {
     private $db;
-    
+
     public function __construct() {
         // Use the Database utility class to get the system database instance
         $this->db = Database::getSystemInstance();
     }
-    
+
     public function trackQuestProgress($userId, $gameId, $questId, $stepId = null, $completed = 0, $status = 'in_progress') {
         // Check if record exists
         $existing = $this->db->fetchOne("
@@ -701,9 +701,9 @@ class UserProgress {
             ':game_id' => $gameId,
             ':quest_id' => $questId
         ]);
-        
+
         $timestamp = date('Y-m-d H:i:s');
-        
+
         if ($existing) {
             // Update existing record
             $this->db->fetchAll("
@@ -722,7 +722,7 @@ class UserProgress {
                 ':updated_at' => $timestamp,
                 ':id' => $existing['id']
             ]);
-            
+
             return $existing['id'];
         } else {
             // Create new record
@@ -736,7 +736,7 @@ class UserProgress {
                     :status, :last_accessed, :created_at, :updated_at
                 )
             ");
-            
+
             $stmt->bindValue(':user_id', $userId, SQLITE3_INTEGER);
             $stmt->bindValue(':game_id', $gameId, SQLITE3_TEXT);
             $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
@@ -746,12 +746,12 @@ class UserProgress {
             $stmt->bindValue(':last_accessed', $timestamp, SQLITE3_TEXT);
             $stmt->bindValue(':created_at', $timestamp, SQLITE3_TEXT);
             $stmt->bindValue(':updated_at', $timestamp, SQLITE3_TEXT);
-            
+
             $stmt->execute();
             return $this->db->db->lastInsertRowID();
         }
     }
-    
+
     public function getUserQuestProgress($userId, $gameId, $questId) {
         return $this->db->fetchOne("
             SELECT * FROM user_game_progress
@@ -762,7 +762,7 @@ class UserProgress {
             ':quest_id' => $questId
         ]);
     }
-    
+
     public function addQuestNote($userId, $gameId, $questId, $notes) {
         $progress = $this->getUserQuestProgress($userId, $gameId, $questId);
         if ($progress) {
@@ -776,12 +776,12 @@ class UserProgress {
                 ':updated_at' => date('Y-m-d H:i:s'),
                 ':id' => $progress['id']
             ]);
-            
+
             return true;
         }
         return false;
     }
-    
+
     // Additional methods for other tracking functionality...
 }
 ```
@@ -838,15 +838,15 @@ $spoilerLevel = $showSpoilers ? 999 : 1; // 999 means show all spoilers
 if ($method === 'GET' && $questId) {
     // Get specific quest
     $quest = $gameData->getQuest($questId, $spoilerLevel);
-    
+
     if (!$quest) {
         Response::error('Quest not found', 404);
         exit;
     }
-    
+
     // Get user progress for this quest
     $progress = $userProgress->getUserQuestProgress($userId, $gameId, $questId);
-    
+
     // Log this access
     $usageLogs = Database::getSystemInstance();
     $usageLogs->prepare("
@@ -860,7 +860,7 @@ if ($method === 'GET' && $questId) {
         ':resource_id' => $questId,
         ':created_at' => date('Y-m-d H:i:s')
     ]);
-    
+
     // Return combined data
     Response::success([
         'quest' => $quest,
@@ -872,7 +872,7 @@ if ($method === 'GET' && $questId) {
     $quests = $gameDb->fetchAll("
         SELECT * FROM quests WHERE spoiler_level <= :spoiler_level
     ", [':spoiler_level' => $spoilerLevel]);
-    
+
     // Get user progress for these quests
     $progress = $userProgress->fetchAll("
         SELECT * FROM user_game_progress
@@ -881,47 +881,47 @@ if ($method === 'GET' && $questId) {
         ':user_id' => $userId,
         ':game_id' => $gameId
     ]);
-    
+
     // Convert to dictionary keyed by quest_id
     $progressDict = [];
     foreach ($progress as $item) {
         $progressDict[$item['quest_id']] = $item;
     }
-    
+
     // Combine quest data with progress
     foreach ($quests as &$quest) {
         $quest['user_progress'] = $progressDict[$quest['quest_id']] ?? null;
     }
-    
+
     Response::success($quests);
 } elseif ($method === 'POST' && $questId) {
     // Update user's progress on this quest
     $data = json_decode(file_get_contents('php://input'), true);
-    
+
     if (!isset($data['status'])) {
         Response::error('Status required', 400);
         exit;
     }
-    
+
     $stepId = $data['step_id'] ?? null;
     $completed = $data['completed'] ?? 0;
     $status = $data['status'];
     $notes = $data['notes'] ?? null;
-    
+
     $userProgress->trackQuestProgress(
-        $userId, 
-        $gameId, 
-        $questId, 
-        $stepId, 
-        $completed, 
+        $userId,
+        $gameId,
+        $questId,
+        $stepId,
+        $completed,
         $status
     );
-    
+
     // Update notes if provided
     if ($notes !== null) {
         $userProgress->addQuestNote($userId, $gameId, $questId, $notes);
     }
-    
+
     Response::success(['status' => 'updated']);
 } else {
     Response::error('Method not allowed', 405);
@@ -1050,37 +1050,37 @@ Game data can be exported and imported using a structured JSON format:
 class GameDataImporter {
     private $db;
     private $game;
-    
+
     public function __construct($game) {
         $this->game = $game;
         $this->db = new SQLite3(BASE_PATH . "/data/game_data/{$game}.sqlite");
         $this->db->enableExceptions(true);
     }
-    
+
     public function importFromJson($jsonFile) {
         // Read JSON file
         $jsonData = file_get_contents($jsonFile);
         $data = json_decode($jsonData, true);
-        
+
         if (!$data) {
             throw new Exception("Invalid JSON data");
         }
-        
+
         // Begin transaction
         $this->db->exec('BEGIN TRANSACTION');
-        
+
         try {
             // Import each entity type
             foreach ($data['entities'] as $entityType => $entities) {
                 $this->importEntities($entityType, $entities);
             }
-            
+
             // Rebuild search index
             $this->rebuildSearchIndex();
-            
+
             // Commit transaction
             $this->db->exec('COMMIT');
-            
+
             return true;
         } catch (Exception $e) {
             // Rollback on error
@@ -1088,23 +1088,23 @@ class GameDataImporter {
             throw $e;
         }
     }
-    
+
     private function importEntities($entityType, $entities) {
         foreach ($entities as $entity) {
             $this->insertOrUpdateEntity($entityType, $entity);
         }
     }
-    
+
     private function insertOrUpdateEntity($entityType, $entity) {
         // Determine primary key field
         $primaryKey = $this->getPrimaryKeyField($entityType);
         $primaryKeyValue = $entity[$primaryKey];
-        
+
         // Check if entity exists
         $stmt = $this->db->prepare("SELECT 1 FROM {$entityType} WHERE {$primaryKey} = :id");
         $stmt->bindValue(':id', $primaryKeyValue, SQLITE3_TEXT);
         $result = $stmt->execute();
-        
+
         if ($result->fetchArray()) {
             // Update existing entity
             $this->updateEntity($entityType, $primaryKey, $primaryKeyValue, $entity);
@@ -1113,27 +1113,27 @@ class GameDataImporter {
             $this->insertEntity($entityType, $entity);
         }
     }
-    
+
     private function insertEntity($entityType, $entity) {
         // Build column list and values
         $columns = array_keys($entity);
         $placeholders = array_map(function($col) {
             return ":{$col}";
         }, $columns);
-        
+
         $columnList = implode(', ', $columns);
         $placeholderList = implode(', ', $placeholders);
-        
+
         // Prepare and execute statement
         $stmt = $this->db->prepare("INSERT INTO {$entityType} ({$columnList}) VALUES ({$placeholderList})");
-        
+
         foreach ($entity as $column => $value) {
             $stmt->bindValue(":{$column}", $value, $this->getValueType($value));
         }
-        
+
         $stmt->execute();
     }
-    
+
     private function updateEntity($entityType, $primaryKey, $primaryKeyValue, $entity) {
         // Build SET clause
         $setParts = [];
@@ -1142,22 +1142,22 @@ class GameDataImporter {
                 $setParts[] = "{$column} = :{$column}";
             }
         }
-        
+
         $setClause = implode(', ', $setParts);
-        
+
         // Prepare and execute statement
         $stmt = $this->db->prepare("UPDATE {$entityType} SET {$setClause} WHERE {$primaryKey} = :id");
         $stmt->bindValue(':id', $primaryKeyValue, SQLITE3_TEXT);
-        
+
         foreach ($entity as $column => $value) {
             if ($column !== $primaryKey) {
                 $stmt->bindValue(":{$column}", $value, $this->getValueType($value));
             }
         }
-        
+
         $stmt->execute();
     }
-    
+
     private function getPrimaryKeyField($entityType) {
         switch ($entityType) {
             case 'quests':
@@ -1174,7 +1174,7 @@ class GameDataImporter {
                 return 'id';
         }
     }
-    
+
     private function getValueType($value) {
         if (is_null($value)) {
             return SQLITE3_NULL;
@@ -1186,11 +1186,11 @@ class GameDataImporter {
             return SQLITE3_TEXT;
         }
     }
-    
+
     private function rebuildSearchIndex() {
         // Clear existing index
         $this->db->exec('DELETE FROM search_index');
-        
+
         // Index quests
         $result = $this->db->query('SELECT quest_id, name, description, type FROM quests');
         while ($quest = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -1202,7 +1202,7 @@ class GameDataImporter {
                 $this->escapeString($quest['type'])
             ));
         }
-        
+
         // Index NPCs
         $result = $this->db->query('SELECT npc_id, name, description, role FROM npcs');
         while ($npc = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -1214,7 +1214,7 @@ class GameDataImporter {
                 $this->escapeString($npc['role'])
             ));
         }
-        
+
         // Index locations
         $result = $this->db->query('SELECT location_id, name, description, region FROM locations');
         while ($location = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -1226,7 +1226,7 @@ class GameDataImporter {
                 $this->escapeString($location['region'])
             ));
         }
-        
+
         // Index items
         $result = $this->db->query('SELECT item_id, name, description, type FROM items');
         while ($item = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -1239,7 +1239,7 @@ class GameDataImporter {
             ));
         }
     }
-    
+
     private function escapeString($str) {
         if (is_null($str)) return '';
         return SQLite3::escapeString($str);
@@ -1259,21 +1259,21 @@ The schema includes a dedicated search index using SQLite's FTS5 extension for e
 class GameSearch {
     private $db;
     private $game;
-    
+
     public function __construct($game) {
         $this->game = $game;
         $this->db = new SQLite3(BASE_PATH . "/data/game_data/{$game}.sqlite");
         $this->db->enableExceptions(true);
     }
-    
+
     public function search($query, $filters = [], $spoilerLevel = 0) {
         // Sanitize query
         $query = SQLite3::escapeString($query);
-        
+
         // Build WHERE clause for filters
         $whereClause = '';
         $params = [];
-        
+
         if (!empty($filters)) {
             $filterClauses = [];
             foreach ($filters as $key => $value) {
@@ -1282,13 +1282,13 @@ class GameSearch {
             }
             $whereClause = 'AND (' . implode(' OR ', $filterClauses) . ')';
         }
-        
+
         // Execute search query
         $sql = "
-            SELECT 
-                content_id, 
-                content_type, 
-                name, 
+            SELECT
+                content_id,
+                content_type,
+                name,
                 snippet(search_index, 2, '<b>', '</b>', '...', 10) AS snippet,
                 rank
             FROM search_index
@@ -1296,22 +1296,22 @@ class GameSearch {
             ORDER BY rank
             LIMIT 20
         ";
-        
+
         $stmt = $this->db->prepare($sql);
         $stmt->bindValue(':query', $query, SQLITE3_TEXT);
-        
+
         foreach ($params as $param => $value) {
             $stmt->bindValue($param, $value, SQLITE3_TEXT);
         }
-        
+
         $result = $stmt->execute();
-        
+
         // Collect results
         $searchResults = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
             // Fetch the full entity based on content_type and content_id
             $entity = $this->fetchEntity($row['content_type'], $row['content_id'], $spoilerLevel);
-            
+
             if ($entity) {
                 $searchResults[] = [
                     'entity' => $entity,
@@ -1322,10 +1322,10 @@ class GameSearch {
                 ];
             }
         }
-        
+
         return $searchResults;
     }
-    
+
     private function fetchEntity($type, $id, $spoilerLevel) {
         switch ($type) {
             case 'quest':
@@ -1340,39 +1340,39 @@ class GameSearch {
                 return null;
         }
     }
-    
+
     private function fetchQuest($questId, $spoilerLevel) {
         $stmt = $this->db->prepare("
-            SELECT * FROM quests 
+            SELECT * FROM quests
             WHERE quest_id = :id AND spoiler_level <= :spoiler_level
         ");
         $stmt->bindValue(':id', $questId, SQLITE3_TEXT);
         $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
-        
+
         $result = $stmt->execute();
         return $result->fetchArray(SQLITE3_ASSOC);
     }
-    
+
     private function fetchNPC($npcId) {
         $stmt = $this->db->prepare("SELECT * FROM npcs WHERE npc_id = :id");
         $stmt->bindValue(':id', $npcId, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         return $result->fetchArray(SQLITE3_ASSOC);
     }
-    
+
     private function fetchLocation($locationId) {
         $stmt = $this->db->prepare("SELECT * FROM locations WHERE location_id = :id");
         $stmt->bindValue(':id', $locationId, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         return $result->fetchArray(SQLITE3_ASSOC);
     }
-    
+
     private function fetchItem($itemId) {
         $stmt = $this->db->prepare("SELECT * FROM items WHERE item_id = :id");
         $stmt->bindValue(':id', $itemId, SQLITE3_TEXT);
-        
+
         $result = $stmt->execute();
         return $result->fetchArray(SQLITE3_ASSOC);
     }
@@ -1391,7 +1391,7 @@ class ContextualGameData {
     private $game;
     private $userId;
     private $userProgress;
-    
+
     public function __construct($game, $userId) {
         $this->game = $game;
         $this->userId = $userId;
@@ -1399,14 +1399,14 @@ class ContextualGameData {
         $this->db->enableExceptions(true);
         $this->userProgress = new UserProgress();
     }
-    
+
     public function getContextualQuestInfo($questId) {
         // Get user's progress on this quest
         $progress = $this->userProgress->getUserQuestProgress($this->userId, $this->game, $questId);
-        
+
         // Determine appropriate spoiler level based on progress
         $spoilerLevel = 0;
-        
+
         if ($progress) {
             if ($progress['completed']) {
                 // User completed the quest, show everything
@@ -1420,26 +1420,26 @@ class ContextualGameData {
                 $spoilerLevel = 1;
             }
         }
-        
+
         // Retrieve quest with appropriate spoiler level
         $quest = $this->getQuest($questId, $spoilerLevel);
-        
+
         // Remove future steps beyond current progress + 1
         if ($progress && $progress['step_id'] && !$progress['completed']) {
             $currentStepNumber = 0;
-            
+
             foreach ($quest['steps'] as $step) {
                 if ($step['step_id'] === $progress['step_id']) {
                     $currentStepNumber = $step['step_number'];
                     break;
                 }
             }
-            
+
             // Filter steps
             $quest['steps'] = array_filter($quest['steps'], function($step) use ($currentStepNumber) {
                 return $step['step_number'] <= $currentStepNumber + 1;
             });
-            
+
             // If there's a next step, limit its information
             foreach ($quest['steps'] as &$step) {
                 if ($step['step_number'] > $currentStepNumber) {
@@ -1450,56 +1450,56 @@ class ContextualGameData {
                 }
             }
         }
-        
+
         return $quest;
     }
-    
+
     public function getQuest($questId, $spoilerLevel = 0) {
         $stmt = $this->db->prepare("
-            SELECT * FROM quests 
+            SELECT * FROM quests
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
         ");
         $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
         $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
         $result = $stmt->execute();
-        
+
         $quest = $result->fetchArray(SQLITE3_ASSOC);
         if (!$quest) {
             return null;
         }
-        
+
         // Get quest steps
         $stmt = $this->db->prepare("
-            SELECT * FROM quest_steps 
+            SELECT * FROM quest_steps
             WHERE quest_id = :quest_id AND spoiler_level <= :spoiler_level
             ORDER BY step_number
         ");
         $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
         $stmt->bindValue(':spoiler_level', $spoilerLevel, SQLITE3_INTEGER);
         $result = $stmt->execute();
-        
+
         $steps = [];
         while ($step = $result->fetchArray(SQLITE3_ASSOC)) {
             $steps[] = $step;
         }
-        
+
         $quest['steps'] = $steps;
-        
+
         return $quest;
     }
-    
+
     private function getQuestStep($questId, $stepId) {
         $stmt = $this->db->prepare("
-            SELECT * FROM quest_steps 
+            SELECT * FROM quest_steps
             WHERE quest_id = :quest_id AND step_id = :step_id
         ");
         $stmt->bindValue(':quest_id', $questId, SQLITE3_TEXT);
         $stmt->bindValue(':step_id', $stepId, SQLITE3_TEXT);
         $result = $stmt->execute();
-        
+
         return $result->fetchArray(SQLITE3_ASSOC);
     }
-    
+
     // Additional contextual retrieval methods...
 }
 ```

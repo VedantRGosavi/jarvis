@@ -31,9 +31,9 @@ try {
 function fetchFromAPI($endpoint) {
     $baseUrl = "https://eldenring.fanapis.com/api/";
     $url = $baseUrl . $endpoint;
-    
+
     echo "Fetching data from: $url\n";
-    
+
     $curl = curl_init();
     curl_setopt_array($curl, [
         CURLOPT_URL => $url,
@@ -44,17 +44,17 @@ function fetchFromAPI($endpoint) {
         CURLOPT_CUSTOMREQUEST => "GET",
         CURLOPT_HTTPHEADER => ["accept: application/json"],
     ]);
-    
+
     $response = curl_exec($curl);
     $err = curl_error($curl);
-    
+
     curl_close($curl);
-    
+
     if ($err) {
         echo "cURL Error: " . $err . "\n";
         return [];
     }
-    
+
     return json_decode($response, true) ?: [];
 }
 
@@ -63,46 +63,46 @@ function fetchFromAPI($endpoint) {
  */
 function importLocations($db) {
     echo "Importing locations...\n";
-    
+
     try {
         // Clear existing locations data
         $db->exec("DELETE FROM locations");
         $db->exec("DELETE FROM sqlite_sequence WHERE name='locations'");
-        
+
         $response = fetchFromAPI("locations?limit=100");
         $locations = $response['data'] ?? [];
-        
+
         $count = 0;
         foreach ($locations as $location) {
             // Create a unique ID for the location
             $locationId = 'loc_' . md5($location['name']);
-            
+
             // Determine parent location if available
             $parentLocationId = null;
             $region = $location['region'] ?? null;
-            
+
             // Check if location already exists
             $checkStmt = $db->prepare("SELECT location_id FROM locations WHERE location_id = ?");
             $result = $db->execPrepared($checkStmt, [$locationId]);
             $exists = $result->fetchArray(SQLITE3_ASSOC);
-            
+
             if ($exists) {
                 // Skip if it already exists
                 echo "Skipping duplicate location: " . $location['name'] . "\n";
                 continue;
             }
-            
+
             // Ensure description is not null
             $description = $location['description'] ?? 'No description available';
-            
+
             // Insert location
             $stmt = $db->prepare(
                 "INSERT INTO locations (
-                    location_id, name, description, region, 
+                    location_id, name, description, region,
                     parent_location_id, coordinates, points_of_interest
                 ) VALUES (?, ?, ?, ?, ?, ?, ?)"
             );
-            
+
             $result = $db->execPrepared($stmt, [
                 $locationId,
                 $location['name'],
@@ -112,10 +112,10 @@ function importLocations($db) {
                 null, // coordinates
                 null  // points_of_interest
             ]);
-            
+
             if ($result) {
                 $count++;
-                
+
                 // Add to search index
                 $keywords = $location['name'] . ' ' . ($region ?? '');
                 $stmt = $db->prepare(
@@ -132,7 +132,7 @@ function importLocations($db) {
                 ]);
             }
         }
-        
+
         echo "Imported $count locations.\n";
     } catch (Exception $e) {
         echo "Error importing locations: " . $e->getMessage() . "\n";
@@ -144,24 +144,24 @@ function importLocations($db) {
  */
 function importItems($db) {
     echo "Importing items...\n";
-    
+
     // Clear existing items data
     $db->exec("DELETE FROM items");
     $db->exec("DELETE FROM sqlite_sequence WHERE name='items'");
-    
+
     $itemTypes = ['weapons', 'armors', 'spells', 'shields', 'ashes', 'items'];
     $count = 0;
-    
+
     foreach ($itemTypes as $type) {
         echo "Fetching $type...\n";
-        
+
         $response = fetchFromAPI("$type?limit=100");
         $items = $response['data'] ?? [];
-        
+
         foreach ($items as $item) {
             // Create a unique ID for the item
             $itemId = 'item_' . md5($item['name'] . '_' . $type);
-            
+
             // Determine item rarity
             $rarity = 'common';
             if (strpos(strtolower($item['description'] ?? ''), 'rare') !== false) {
@@ -171,7 +171,7 @@ function importItems($db) {
             } elseif (strpos(strtolower($item['description'] ?? ''), 'legendary') !== false) {
                 $rarity = 'legendary';
             }
-            
+
             // Insert item
             $stmt = $db->prepare(
                 "INSERT INTO items (
@@ -179,11 +179,11 @@ function importItems($db) {
                     stats, requirements, effects, rarity
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            
+
             $stats = json_encode($item['attack'] ?? $item['defence'] ?? $item['effects'] ?? null);
             $requirements = json_encode($item['requiredAttributes'] ?? null);
             $effects = $item['skill'] ?? $item['effect'] ?? null;
-            
+
             $result = $db->execPrepared($stmt, [
                 $itemId,
                 $item['name'],
@@ -195,10 +195,10 @@ function importItems($db) {
                 $effects,
                 $rarity
             ]);
-            
+
             if ($result) {
                 $count++;
-                
+
                 // Add to search index
                 $keywords = $item['name'] . ' ' . ($item['category'] ?? '') . ' ' . $type;
                 $stmt = $db->prepare(
@@ -216,7 +216,7 @@ function importItems($db) {
             }
         }
     }
-    
+
     echo "Imported $count items.\n";
 }
 
@@ -225,50 +225,50 @@ function importItems($db) {
  */
 function importNPCs($db) {
     echo "Importing NPCs...\n";
-    
+
     try {
         // Clear existing NPCs data
         $db->exec("DELETE FROM npcs");
         $db->exec("DELETE FROM sqlite_sequence WHERE name='npcs'");
-        
+
         $response = fetchFromAPI("npcs?limit=100");
         $npcs = $response['data'] ?? [];
-        
+
         $count = 0;
         foreach ($npcs as $npc) {
             // Create a unique ID for the NPC
             $npcId = 'npc_' . md5($npc['name']);
-            
+
             // Check if NPC already exists
             $checkStmt = $db->prepare("SELECT npc_id FROM npcs WHERE npc_id = ?");
             $result = $db->execPrepared($checkStmt, [$npcId]);
             $exists = $result->fetchArray(SQLITE3_ASSOC);
-            
+
             if ($exists) {
                 // Skip if it already exists
                 echo "Skipping duplicate NPC: " . $npc['name'] . "\n";
                 continue;
             }
-            
+
             // Determine hostility
             $isHostile = 0;
-            if (strpos(strtolower($npc['description'] ?? ''), 'enemy') !== false || 
+            if (strpos(strtolower($npc['description'] ?? ''), 'enemy') !== false ||
                 strpos(strtolower($npc['description'] ?? ''), 'hostile') !== false ||
                 strpos(strtolower($npc['description'] ?? ''), 'boss') !== false) {
                 $isHostile = 1;
             }
-            
+
             // Determine if merchant
             $isMerchant = 0;
-            if (strpos(strtolower($npc['description'] ?? ''), 'merchant') !== false || 
+            if (strpos(strtolower($npc['description'] ?? ''), 'merchant') !== false ||
                 strpos(strtolower($npc['description'] ?? ''), 'sells') !== false ||
                 strpos(strtolower($npc['description'] ?? ''), 'vendor') !== false) {
                 $isMerchant = 1;
             }
-            
+
             // Ensure description is not null
             $description = $npc['description'] ?? 'No description available';
-            
+
             // Insert NPC
             $stmt = $db->prepare(
                 "INSERT INTO npcs (
@@ -276,7 +276,7 @@ function importNPCs($db) {
                     is_hostile, is_merchant, dialogue_summary
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            
+
             $result = $db->execPrepared($stmt, [
                 $npcId,
                 $npc['name'],
@@ -287,14 +287,14 @@ function importNPCs($db) {
                 $isMerchant,
                 null  // dialogue_summary
             ]);
-            
+
             if ($result) {
                 $count++;
-                
+
                 // Add default location if found in description
                 $locationKeywords = ['found at', 'located in', 'resides in', 'lives in', 'stays at'];
                 $locationId = null;
-                
+
                 foreach ($locationKeywords as $keyword) {
                     if (strpos(strtolower($description), $keyword) !== false) {
                         // Extract location from description (simplified)
@@ -306,11 +306,11 @@ function importNPCs($db) {
                             $locationRow = $locationResult->fetchArray(SQLITE3_ASSOC);
                             if ($locationRow) {
                                 $locationId = $locationRow['location_id'];
-                                
+
                                 // Link NPC to location
                                 $npcLocationStmt = $db->prepare("INSERT INTO npc_locations (npc_id, location_id) VALUES (?, ?)");
                                 $db->execPrepared($npcLocationStmt, [$npcId, $locationId]);
-                                
+
                                 // Update location's notable NPCs
                                 $updateLocationStmt = $db->prepare("UPDATE locations SET notable_npcs = COALESCE(notable_npcs, '') || ',' || ? WHERE location_id = ?");
                                 $db->execPrepared($updateLocationStmt, [$npcId, $locationId]);
@@ -318,7 +318,7 @@ function importNPCs($db) {
                         }
                     }
                 }
-                
+
                 // Add to search index
                 $keywords = $npc['name'] . ' ' . ($isHostile ? 'enemy hostile' : 'friendly') . ' ' . ($isMerchant ? 'merchant vendor' : '');
                 $stmt = $db->prepare(
@@ -335,7 +335,7 @@ function importNPCs($db) {
                 ]);
             }
         }
-        
+
         echo "Imported $count NPCs.\n";
     } catch (Exception $e) {
         echo "Error importing NPCs: " . $e->getMessage() . "\n";
@@ -347,16 +347,16 @@ function importNPCs($db) {
  */
 function importBosses($db) {
     echo "Importing bosses...\n";
-    
+
     try {
         // Clear existing bosses data
         $db->exec("DELETE FROM npcs WHERE category = 'boss'");
-        
+
         // Load boss data from GitHub API
         $bossesJsonUrl = "https://raw.githubusercontent.com/deliton/eldenring-api/main/api/public/data/bosses.json";
-        
+
         echo "Fetching boss data from: $bossesJsonUrl\n";
-        
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $bossesJsonUrl,
@@ -366,40 +366,40 @@ function importBosses($db) {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
         ]);
-        
+
         $response = curl_exec($curl);
         $err = curl_error($curl);
-        
+
         curl_close($curl);
-        
+
         if ($err) {
             echo "cURL Error: " . $err . "\n";
             return;
         }
-        
+
         $bosses = json_decode($response, true);
-        
+
         if (!$bosses || !is_array($bosses)) {
             echo "Error: Failed to parse bosses data\n";
             return;
         }
-        
+
         $count = 0;
         foreach ($bosses as $boss) {
             // Create a unique ID for the boss
             $npcId = 'boss_' . md5($boss['name']);
-            
+
             // Check if NPC already exists
             $checkStmt = $db->prepare("SELECT npc_id FROM npcs WHERE npc_id = ?");
             $result = $db->execPrepared($checkStmt, [$npcId]);
             $exists = $result->fetchArray(SQLITE3_ASSOC);
-            
+
             if ($exists) {
                 // Skip if it already exists
                 echo "Skipping duplicate boss: " . $boss['name'] . "\n";
                 continue;
             }
-            
+
             // Prepare location data
             $defaultLocation = null;
             if (!empty($boss['location'])) {
@@ -407,12 +407,12 @@ function importBosses($db) {
                 $locStmt = $db->prepare("SELECT location_id FROM locations WHERE name LIKE ?");
                 $locResult = $db->execPrepared($locStmt, ['%' . $boss['location'] . '%']);
                 $locRow = $locResult->fetchArray(SQLITE3_ASSOC);
-                
+
                 if ($locRow) {
                     $defaultLocation = $locRow['location_id'];
                 }
             }
-            
+
             // Process drops into JSON
             $dropsJson = null;
             if (!empty($boss['drops']) && is_array($boss['drops'])) {
@@ -421,16 +421,16 @@ function importBosses($db) {
                 $drops = explode(',', str_replace('"', '', $boss['drops']));
                 $dropsJson = json_encode($drops);
             }
-            
+
             // Insert boss as an NPC
             $stmt = $db->prepare(
                 "INSERT INTO npcs (
-                    npc_id, name, description, role, faction, 
-                    default_location_id, is_hostile, is_merchant, 
+                    npc_id, name, description, role, faction,
+                    default_location_id, is_hostile, is_merchant,
                     dialogue_summary, category, image_url, health, drops
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-            
+
             $result = $db->execPrepared($stmt, [
                 $npcId,
                 $boss['name'],
@@ -446,10 +446,10 @@ function importBosses($db) {
                 $boss['healthPoints'] ?? null,
                 $dropsJson
             ]);
-            
+
             if ($result) {
                 $count++;
-                
+
                 // Add to search index
                 $keywords = $boss['name'] . ' boss ' . ($boss['region'] ?? '') . ' ' . ($boss['location'] ?? '');
                 $stmt = $db->prepare(
@@ -466,7 +466,7 @@ function importBosses($db) {
                 ]);
             }
         }
-        
+
         echo "Imported $count bosses.\n";
     } catch (Exception $e) {
         echo "Error importing bosses: " . $e->getMessage() . "\n";
@@ -478,13 +478,13 @@ function importBosses($db) {
  */
 function importQuests($db) {
     echo "Importing quests...\n";
-    
+
     // Clear existing quests data
     $db->exec("DELETE FROM quests");
     $db->exec("DELETE FROM quest_steps");
     $db->exec("DELETE FROM sqlite_sequence WHERE name='quests'");
     $db->exec("DELETE FROM sqlite_sequence WHERE name='quest_steps'");
-    
+
     // Sample quest data (would be expanded with more complete data)
     $quests = [
         [
@@ -581,7 +581,7 @@ function importQuests($db) {
             ]
         ]
     ];
-    
+
     $count = 0;
     foreach ($quests as $quest) {
         // Insert quest
@@ -591,7 +591,7 @@ function importQuests($db) {
                 is_main_story, difficulty
             ) VALUES (?, ?, ?, ?, ?, ?)"
         );
-        
+
         $result = $db->execPrepared($stmt, [
             $quest['id'],
             $quest['name'],
@@ -600,10 +600,10 @@ function importQuests($db) {
             $quest['is_main_story'],
             $quest['difficulty']
         ]);
-        
+
         if ($result) {
             $count++;
-            
+
             // Add to search index
             $keywords = $quest['name'] . ' ' . $quest['type'] . ' quest';
             $stmt = $db->prepare(
@@ -618,20 +618,20 @@ function importQuests($db) {
                 $quest['description'],
                 $keywords
             ]);
-            
+
             // Extract quest steps if available
             if (!empty($quest['steps'])) {
                 $stepCount = 0;
                 foreach ($quest['steps'] as $index => $step) {
                     $stepId = 'step_' . md5($quest['id'] . '_' . $index);
-                    
+
                     $stepStmt = $db->prepare(
                         "INSERT INTO quest_steps (
                             step_id, quest_id, step_number, title, description,
                             objective, location_id, spoiler_level
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                     );
-                    
+
                     $db->execPrepared($stepStmt, [
                         $stepId,
                         $quest['id'],
@@ -642,24 +642,24 @@ function importQuests($db) {
                         null, // location_id
                         null  // spoiler_level
                     ]);
-                    
+
                     $stepCount++;
                 }
-                
+
                 echo "Added $stepCount steps for quest " . $quest['id'] . "\n";
             }
         }
     }
-    
+
     echo "Imported $count quests with their steps.\n";
 }
 
 /**
- * Import special item types directly from GitHub repository 
+ * Import special item types directly from GitHub repository
  */
 function importSpecialItems($db) {
     echo "Importing special items from the GitHub repository...\n";
-    
+
     $itemTypes = [
         'ammos' => 'Ammunition',
         'armors' => 'Armor',
@@ -671,14 +671,14 @@ function importSpecialItems($db) {
         'incantations' => 'Incantation',
         'spirits' => 'Spirit'
     ];
-    
+
     $count = 0;
     foreach ($itemTypes as $endpoint => $itemType) {
         // Load data from GitHub API
         $jsonUrl = "https://raw.githubusercontent.com/deliton/eldenring-api/main/api/public/data/{$endpoint}.json";
-        
+
         echo "Fetching {$itemType} data from: {$jsonUrl}\n";
-        
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $jsonUrl,
@@ -688,53 +688,53 @@ function importSpecialItems($db) {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
         ]);
-        
+
         $response = curl_exec($curl);
         $err = curl_error($curl);
-        
+
         curl_close($curl);
-        
+
         if ($err) {
             echo "cURL Error: " . $err . "\n";
             continue;
         }
-        
+
         $items = json_decode($response, true);
-        
+
         if (!$items || !is_array($items)) {
             echo "Error: Failed to parse {$itemType} data\n";
             continue;
         }
-        
+
         echo "Found " . count($items) . " {$itemType} items to import\n";
-        
+
         foreach ($items as $item) {
             // Create a unique ID for the item
             $itemId = 'item_' . strtolower(str_replace(' ', '_', $endpoint)) . '_' . md5($item['name']);
-            
+
             // Check if item already exists
             $checkStmt = $db->prepare("SELECT item_id FROM items WHERE item_id = ?");
             $result = $db->execPrepared($checkStmt, [$itemId]);
             $exists = $result->fetchArray(SQLITE3_ASSOC);
-            
+
             if ($exists) {
                 // Update existing item
                 $updateStmt = $db->prepare(
-                    "UPDATE items SET 
-                    description = ?, 
-                    subtype = ?, 
-                    stats = ?, 
-                    requirements = ?, 
-                    effects = ?, 
-                    image_path = ? 
+                    "UPDATE items SET
+                    description = ?,
+                    subtype = ?,
+                    stats = ?,
+                    requirements = ?,
+                    effects = ?,
+                    image_path = ?
                     WHERE item_id = ?"
                 );
-                
+
                 // Prepare the data
                 $stats = null;
                 $requirements = null;
                 $effects = null;
-                
+
                 // Process specific fields based on item type
                 switch ($endpoint) {
                     case 'ammos':
@@ -798,7 +798,7 @@ function importSpecialItems($db) {
                         $effects = $item['effect'] ?? null;
                         break;
                 }
-                
+
                 $result = $db->execPrepared($updateStmt, [
                     $item['description'] ?? '',
                     $item['category'] ?? null,
@@ -808,7 +808,7 @@ function importSpecialItems($db) {
                     $item['image'] ?? null,
                     $itemId
                 ]);
-                
+
                 if ($result) {
                     echo "Updated existing item: " . $item['name'] . "\n";
                     $count++;
@@ -821,7 +821,7 @@ function importSpecialItems($db) {
                         stats, requirements, effects, rarity, image_path
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
-                
+
                 // Determine item rarity if available
                 $rarity = 'common';
                 if (isset($item['rarity'])) {
@@ -829,12 +829,12 @@ function importSpecialItems($db) {
                 } else if (isset($item['type']) && stripos($item['type'], 'legend') !== false) {
                     $rarity = 'legendary';
                 }
-                
+
                 // Prepare the data
                 $stats = null;
                 $requirements = null;
                 $effects = null;
-                
+
                 // Process specific fields based on item type
                 switch ($endpoint) {
                     case 'ammos':
@@ -898,7 +898,7 @@ function importSpecialItems($db) {
                         $effects = $item['effect'] ?? null;
                         break;
                 }
-                
+
                 $result = $db->execPrepared($stmt, [
                     $itemId,
                     $item['name'],
@@ -911,10 +911,10 @@ function importSpecialItems($db) {
                     $rarity,
                     $item['image'] ?? null
                 ]);
-                
+
                 if ($result) {
                     $count++;
-                    
+
                     // Add to search index
                     $keywords = $item['name'] . ' ' . $itemType . ' ' . ($item['category'] ?? '') . ' ' . $rarity;
                     $stmt = $db->prepare(
@@ -933,7 +933,7 @@ function importSpecialItems($db) {
             }
         }
     }
-    
+
     echo "Imported/updated $count special items.\n";
 }
 
@@ -942,13 +942,13 @@ function importSpecialItems($db) {
  */
 function importCreatures($db) {
     echo "Importing creatures...\n";
-    
+
     try {
         // Load creature data from GitHub API
         $creaturesJsonUrl = "https://raw.githubusercontent.com/deliton/eldenring-api/main/api/public/data/creatures.json";
-        
+
         echo "Fetching creature data from: $creaturesJsonUrl\n";
-        
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $creaturesJsonUrl,
@@ -958,49 +958,49 @@ function importCreatures($db) {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
         ]);
-        
+
         $response = curl_exec($curl);
         $err = curl_error($curl);
-        
+
         curl_close($curl);
-        
+
         if ($err) {
             echo "cURL Error: " . $err . "\n";
             return;
         }
-        
+
         $creatures = json_decode($response, true);
-        
+
         if (!$creatures || !is_array($creatures)) {
             echo "Error: Failed to parse creatures data\n";
             return;
         }
-        
+
         $count = 0;
         foreach ($creatures as $creature) {
             // Create a unique ID for the creature
             $npcId = 'creature_' . md5($creature['name']);
-            
+
             // Check if NPC already exists
             $checkStmt = $db->prepare("SELECT npc_id FROM npcs WHERE npc_id = ?");
             $result = $db->execPrepared($checkStmt, [$npcId]);
             $exists = $result->fetchArray(SQLITE3_ASSOC);
-            
+
             // Determine if the creature is hostile (most creatures are)
             $isHostile = 1;
-            
+
             // Determine location if available
             $locationId = null;
             if (!empty($creature['location'])) {
                 $locStmt = $db->prepare("SELECT location_id FROM locations WHERE name LIKE ? LIMIT 1");
                 $locResult = $db->execPrepared($locStmt, ['%' . $creature['location'] . '%']);
                 $locRow = $locResult->fetchArray(SQLITE3_ASSOC);
-                
+
                 if ($locRow) {
                     $locationId = $locRow['location_id'];
                 }
             }
-            
+
             // Process drops into JSON
             $dropsJson = null;
             if (!empty($creature['drops']) && is_array($creature['drops'])) {
@@ -1009,19 +1009,19 @@ function importCreatures($db) {
                 $drops = explode(',', str_replace('"', '', $creature['drops']));
                 $dropsJson = json_encode($drops);
             }
-            
+
             if ($exists) {
                 // Update the existing creature
                 $updateStmt = $db->prepare(
-                    "UPDATE npcs SET 
-                    description = ?, 
-                    default_location_id = ?, 
-                    category = ?, 
-                    image_url = ?, 
-                    drops = ? 
+                    "UPDATE npcs SET
+                    description = ?,
+                    default_location_id = ?,
+                    category = ?,
+                    image_url = ?,
+                    drops = ?
                     WHERE npc_id = ?"
                 );
-                
+
                 $result = $db->execPrepared($updateStmt, [
                     $creature['description'] ?? 'A creature found in the Lands Between.',
                     $locationId,
@@ -1030,7 +1030,7 @@ function importCreatures($db) {
                     $dropsJson,
                     $npcId
                 ]);
-                
+
                 if ($result) {
                     echo "Updated existing creature: " . $creature['name'] . "\n";
                     $count++;
@@ -1039,12 +1039,12 @@ function importCreatures($db) {
                 // Insert creature as an NPC
                 $stmt = $db->prepare(
                     "INSERT INTO npcs (
-                        npc_id, name, description, role, faction, 
-                        default_location_id, is_hostile, is_merchant, 
+                        npc_id, name, description, role, faction,
+                        default_location_id, is_hostile, is_merchant,
                         dialogue_summary, category, image_url, drops
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                 );
-                
+
                 $result = $db->execPrepared($stmt, [
                     $npcId,
                     $creature['name'],
@@ -1059,10 +1059,10 @@ function importCreatures($db) {
                     $creature['image'] ?? null,
                     $dropsJson
                 ]);
-                
+
                 if ($result) {
                     $count++;
-                    
+
                     // Add to search index
                     $keywords = $creature['name'] . ' creature ' . ($creature['location'] ?? '');
                     $stmt = $db->prepare(
@@ -1080,7 +1080,7 @@ function importCreatures($db) {
                 }
             }
         }
-        
+
         echo "Imported/updated $count creatures.\n";
     } catch (Exception $e) {
         echo "Error importing creatures: " . $e->getMessage() . "\n";
@@ -1092,13 +1092,13 @@ function importCreatures($db) {
  */
 function importClasses($db) {
     echo "Importing character classes...\n";
-    
+
     try {
         // Load class data from GitHub API
         $classesJsonUrl = "https://raw.githubusercontent.com/deliton/eldenring-api/main/api/public/data/classes.json";
-        
+
         echo "Fetching class data from: $classesJsonUrl\n";
-        
+
         $curl = curl_init();
         curl_setopt_array($curl, [
             CURLOPT_URL => $classesJsonUrl,
@@ -1108,24 +1108,24 @@ function importClasses($db) {
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "GET",
         ]);
-        
+
         $response = curl_exec($curl);
         $err = curl_error($curl);
-        
+
         curl_close($curl);
-        
+
         if ($err) {
             echo "cURL Error: " . $err . "\n";
             return;
         }
-        
+
         $classes = json_decode($response, true);
-        
+
         if (!$classes || !is_array($classes)) {
             echo "Error: Failed to parse classes data\n";
             return;
         }
-        
+
         // Create a new table for classes if it doesn't exist
         $db->exec("CREATE TABLE IF NOT EXISTS classes (
             class_id TEXT PRIMARY KEY,
@@ -1135,22 +1135,22 @@ function importClasses($db) {
             equipment TEXT,
             image_url TEXT
         )");
-        
+
         // Clear existing classes data
         $db->exec("DELETE FROM classes");
-        
+
         $count = 0;
         foreach ($classes as $class) {
             // Create a unique ID for the class
             $classId = 'class_' . md5($class['name']);
-            
+
             // Insert class
             $stmt = $db->prepare(
                 "INSERT INTO classes (
                     class_id, name, description, stats, equipment, image_url
                 ) VALUES (?, ?, ?, ?, ?, ?)"
             );
-            
+
             // Process stats and equipment into JSON
             $stats = json_encode([
                 'level' => $class['level'] ?? null,
@@ -1163,9 +1163,9 @@ function importClasses($db) {
                 'faith' => $class['faith'] ?? null,
                 'arcane' => $class['arcane'] ?? null
             ]);
-            
+
             $equipment = json_encode($class['equipment'] ?? null);
-            
+
             $result = $db->execPrepared($stmt, [
                 $classId,
                 $class['name'],
@@ -1174,10 +1174,10 @@ function importClasses($db) {
                 $equipment,
                 $class['image'] ?? null
             ]);
-            
+
             if ($result) {
                 $count++;
-                
+
                 // Add to search index
                 $keywords = $class['name'] . ' class starting character build';
                 $stmt = $db->prepare(
@@ -1194,7 +1194,7 @@ function importClasses($db) {
                 ]);
             }
         }
-        
+
         echo "Imported $count character classes.\n";
     } catch (Exception $e) {
         echo "Error importing classes: " . $e->getMessage() . "\n";
@@ -1204,10 +1204,10 @@ function importClasses($db) {
 // Run the import functions
 try {
     echo "Starting Elden Ring data import...\n";
-    
+
     // Start transaction
     $db->exec("BEGIN TRANSACTION");
-    
+
     // Import data
     importLocations($db);
     importItems($db);
@@ -1217,13 +1217,13 @@ try {
     importCreatures($db);
     importSpecialItems($db);
     importClasses($db);
-    
+
     // Commit transaction
     $db->exec("COMMIT");
-    
+
     echo "Elden Ring data import completed successfully!\n";
 } catch (Exception $e) {
     // Rollback transaction in case of error
     $db->exec("ROLLBACK");
     echo "Error during import: " . $e->getMessage() . "\n";
-} 
+}

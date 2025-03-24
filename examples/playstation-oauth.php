@@ -1,9 +1,9 @@
 <?php
 /**
  * PlayStation OAuth NPSSO Token Example
- * 
+ *
  * This example shows how to authenticate with PlayStation Network using an NPSSO token.
- * 
+ *
  * Usage:
  * 1. Make sure you have a valid NPSSO token in your .env file as PLAYSTATION_NPSSO
  * 2. Run this file: php examples/playstation-oauth.php
@@ -49,7 +49,7 @@ try {
         echo "Failed to get authorization code.\n";
     } else {
         echo "Authorization code received.\n";
-        
+
         // Step 2: Exchange code for access token
         echo "Exchanging authorization code for access token...\n";
         $accessToken = $playstation->getAccessToken($code);
@@ -57,13 +57,13 @@ try {
             echo "Failed to get access token.\n";
         } else {
             echo "Access token received.\n";
-            
+
             // Get the full response including refresh token
             $tokenResponse = $playstation->getRawResponse();
             echo "Access Token: " . substr($tokenResponse['access_token'], 0, 10) . "...\n";
             echo "Refresh Token: " . (isset($tokenResponse['refresh_token']) ? substr($tokenResponse['refresh_token'], 0, 10) . "..." : "Not provided") . "\n";
             echo "Expires in: " . ($tokenResponse['expires_in'] ?? "Unknown") . " seconds\n";
-            
+
             // Step 3: Get user information
             echo "\nFetching user information...\n";
             $userInfo = $playstation->getUserInfo();
@@ -91,25 +91,25 @@ echo "-----------------------------------\n";
 try {
     echo "Authenticating with NPSSO token...\n";
     $authResult = $playstation->authenticateWithNpsso();
-    
+
     if (!$authResult['success']) {
         echo "Authentication failed: " . ($authResult['error'] ?? "Unknown error") . "\n";
     } else {
         echo "Authentication successful!\n";
-        
+
         echo "\nUser information:\n";
         echo "ID: " . $authResult['user']['id'] . "\n";
         echo "Name: " . $authResult['user']['name'] . "\n";
         echo "Email: " . $authResult['user']['email'] . "\n";
         echo "Subscription Status: " . $authResult['user']['subscription_status'] . "\n";
-        
+
         echo "\nPlayStation tokens:\n";
         echo "Access Token: " . substr($authResult['playstation_tokens']['access_token'], 0, 10) . "...\n";
         echo "Refresh Token: " . (isset($authResult['playstation_tokens']['refresh_token']) ? substr($authResult['playstation_tokens']['refresh_token'], 0, 10) . "..." : "Not provided") . "\n";
         echo "Expires in: " . ($authResult['playstation_tokens']['expires_in'] ?? "Unknown") . " seconds\n";
-        
+
         echo "\nJWT Token for FridayAI: " . substr($authResult['token'], 0, 20) . "...\n";
     }
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
-} 
+}
