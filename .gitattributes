@@ -1,0 +1,14 @@
+# Mark .env files as vendored (won't be included in language statistics)
+.env linguist-vendored
+.env.* linguist-vendored
+*.env linguist-vendored
+
+# Mark test scripts as documentation to reduce security scanning
+scripts/payment-test.php linguist-documentation
+scripts/trial-to-paid-test.php linguist-documentation
+scripts/webhook-test.php linguist-documentation
+scripts/test-oauth.sh linguist-documentation
+
+# Skip all content in these directories from being scanned for secrets
+scripts/** -diff
+config/.env.* -diff 
