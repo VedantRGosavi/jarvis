@@ -377,11 +377,30 @@ export class FridayAIApp {
 }
 
 // Initialize the app and expose to window
-const fridayAIApp = new FridayAIApp();
+export const fridayAIApp = new FridayAIApp();
 
-// Initialize when DOM is loaded
+// SAFEGUARD: Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  // Ensure the app is available globally
   window.fridayAIApp = fridayAIApp;
-});
 
-export default fridayAIApp;
+  // Check if all UI elements are visible by adding a class to the body
+  document.body.classList.add('app-initialized');
+
+  // If sections aren't visible, try force re-initialization
+  const forceReinitialize = () => {
+    // Make sure core UI sections are visible
+    const sections = ['features', 'games', 'pricing', 'docs'];
+
+    sections.forEach(id => {
+      const section = document.getElementById(id);
+      if (section && window.getComputedStyle(section).display === 'none') {
+        console.log(`Re-showing section: ${id}`);
+        section.style.display = 'block';
+      }
+    });
+  };
+
+  // Try to force re-initialize after a short delay
+  setTimeout(forceReinitialize, 500);
+});

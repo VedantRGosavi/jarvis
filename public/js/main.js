@@ -22,6 +22,12 @@ document.addEventListener('DOMContentLoaded', function() {
         window.downloadManager = new DownloadManager();
     }
 
+    // Safeguard for content visibility
+    document.body.classList.add('app-initialized');
+
+    // Make sure all sections are visible
+    ensureContentVisibility();
+
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -113,3 +119,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Safeguard function to ensure content visibility
+function ensureContentVisibility() {
+    // Force display all major sections
+    ['features', 'games', 'pricing', 'docs'].forEach(function(id) {
+        var section = document.getElementById(id);
+        if (section) {
+            section.style.display = 'block';
+            section.style.visibility = 'visible';
+            section.style.opacity = '1';
+        }
+    });
+
+    // Check all sections for visibility
+    var sections = document.querySelectorAll('section');
+    sections.forEach(function(section) {
+        if (window.getComputedStyle(section).display === 'none') {
+            section.style.display = 'block';
+            section.style.visibility = 'visible';
+            section.style.opacity = '1';
+        }
+    });
+
+    // Make sure footer is visible
+    var footer = document.querySelector('footer');
+    if (footer) {
+        footer.style.display = 'block';
+        footer.style.visibility = 'visible';
+        footer.style.opacity = '1';
+    }
+
+    console.log('Content visibility ensured by main.js');
+}

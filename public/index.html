@@ -624,7 +624,23 @@
 
     <!-- Core scripts -->
     <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <script type="module">
+        import { fridayAIApp } from './js/app.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Make sure app is initialized and available globally
+            window.fridayAIApp = fridayAIApp;
+
+            // Ensure all UI elements are properly rendered
+            if (fridayAIApp) {
+                console.log('FridayAI app successfully initialized');
+
+                // Manually re-run initialization for critical UI elements if needed
+                fridayAIApp.initEventListeners();
+                fridayAIApp.handleNavigation();
+            }
+        });
+    </script>
 
     <!-- Authentication Scripts -->
     <script type="module" src="js/data/authService.js"></script>
@@ -668,5 +684,44 @@
         });
     </script>
     <script src="js/analytics-init.js" type="module"></script>
+
+    <!-- Final safeguard to ensure content visibility -->
+    <script>
+        // Wait for everything to load then ensure content is visible
+        window.addEventListener('load', function() {
+            // Mark the body as initialized
+            document.body.classList.add('app-initialized');
+
+            // Force display all major sections
+            ['features', 'games', 'pricing', 'docs'].forEach(function(id) {
+                var section = document.getElementById(id);
+                if (section) {
+                    section.style.display = 'block';
+                    section.style.visibility = 'visible';
+                    section.style.opacity = '1';
+                }
+            });
+
+            // Check if any .section elements with display:none and make them visible
+            var sections = document.querySelectorAll('section');
+            sections.forEach(function(section) {
+                if (window.getComputedStyle(section).display === 'none') {
+                    section.style.display = 'block';
+                    section.style.visibility = 'visible';
+                    section.style.opacity = '1';
+                }
+            });
+
+            // Make sure footer is visible
+            var footer = document.querySelector('footer');
+            if (footer) {
+                footer.style.display = 'block';
+                footer.style.visibility = 'visible';
+                footer.style.opacity = '1';
+            }
+
+            console.log('Content visibility safeguard applied');
+        });
+    </script>
 </body>
 </html>

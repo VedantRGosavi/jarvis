@@ -360,3 +360,18 @@ html {
 #auth-check-overlay:not(.hidden) {
   display: flex;
 }
+
+/* App Initialization Safeguards */
+body.app-initialized #features,
+body.app-initialized #games,
+body.app-initialized #pricing,
+body.app-initialized #docs,
+body.app-initialized .features-section,
+body.app-initialized .games-section,
+body.app-initialized .pricing-section,
+body.app-initialized .docs-section,
+body.app-initialized .footer-section {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
