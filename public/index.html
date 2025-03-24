@@ -646,8 +646,6 @@
     <script type="module" src="js/data/paymentService.js"></script>
     <script type="module" src="js/ui/paymentUI.js"></script>
     <script type="module">
-        import { FridayAIApp } from './js/app.js';
-
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize tooltips
             const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
@@ -665,9 +663,6 @@
                     document.getElementById('admin-nav-item').classList.remove('hidden');
                 }
             }
-
-            // Initialize app
-            const app = new FridayAIApp();
         });
     </script>
     <script src="js/analytics-init.js" type="module"></script>
