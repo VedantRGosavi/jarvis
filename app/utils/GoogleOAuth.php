@@ -9,12 +9,20 @@ class GoogleOAuth extends OAuthProvider {
     }
     
     public function getAuthorizationUrl() {
+        // Generate state for CSRF protection
+        $state = bin2hex(random_bytes(16));
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $_SESSION['oauth_state'] = $state;
+        
         $params = [
             'client_id' => $this->clientId,
             'redirect_uri' => $this->redirectUri,
             'response_type' => 'code',
-            'scope' => 'email profile',
+            'scope' => 'email profile openid',
             'access_type' => 'online',
+            'state' => $state,
             'prompt' => 'select_account'
         ];
         
@@ -22,6 +30,19 @@ class GoogleOAuth extends OAuthProvider {
     }
     
     public function handleCallback($code) {
+        // Verify state parameter
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        
+        if (isset($_GET['state']) && isset($_SESSION['oauth_state']) && $_GET['state'] !== $_SESSION['oauth_state']) {
+            error_log('Google OAuth: State parameter mismatch');
+            return [
+                'success' => false,
+                'error' => 'Invalid state parameter'
+            ];
+        }
+        
         // Exchange code for token
         $token = $this->getAccessToken($code);
         
@@ -42,9 +63,18 @@ class GoogleOAuth extends OAuthProvider {
             ];
         }
         
+        // Ensure we have the necessary fields
+        if (empty($userInfo['email'])) {
+            error_log('Google OAuth: Email not provided in user info');
+            return [
+                'success' => false,
+                'error' => 'Email is required'
+            ];
+        }
+        
         // Create or update user
         $userData = $this->createOrUpdateUser(
-            $userInfo['id'],
+            $userInfo['sub'] ?? $userInfo['id'], // Use OpenID sub or regular id
             $userInfo['email'],
             $userInfo['name'],
             'google'
@@ -60,7 +90,8 @@ class GoogleOAuth extends OAuthProvider {
                 'id' => $userData['id'],
                 'name' => $userData['name'],
                 'email' => $userData['email'],
-                'subscription_status' => $userData['subscription_status']
+                'subscription_status' => $userData['subscription_status'],
+                'picture' => $userInfo['picture'] ?? null // Include profile picture if available
             ]
         ];
     }
@@ -78,9 +109,10 @@ class GoogleOAuth extends OAuthProvider {
         
         $options = [
             'http' => [
-                'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                'header' => "Content-type: application/x-www-form-urlencoded\r\nAccept: application/json\r\n",
                 'method' => 'POST',
-                'content' => http_build_query($data)
+                'content' => http_build_query($data),
+                'ignore_errors' => true // Get response content even on error
             ]
         ];
         
@@ -88,11 +120,18 @@ class GoogleOAuth extends OAuthProvider {
         $result = file_get_contents($url, false, $context);
         
         if ($result === false) {
+            error_log('Google OAuth: Failed to get access token');
             return null;
         }
         
         $decoded = json_decode($result, true);
-        return $decoded['access_token'] ?? null;
+        
+        if (!isset($decoded['access_token'])) {
+            error_log('Google OAuth: Access token not found in response: ' . $result);
+            return null;
+        }
+        
+        return $decoded['access_token'];
     }
     
     private function getUserInfo($accessToken) {
@@ -100,8 +139,9 @@ class GoogleOAuth extends OAuthProvider {
         
         $options = [
             'http' => [
-                'header' => "Authorization: Bearer $accessToken\r\n",
-                'method' => 'GET'
+                'header' => "Authorization: Bearer $accessToken\r\nAccept: application/json\r\n",
+                'method' => 'GET',
+                'ignore_errors' => true
             ]
         ];
         
@@ -109,9 +149,17 @@ class GoogleOAuth extends OAuthProvider {
         $result = file_get_contents($url, false, $context);
         
         if ($result === false) {
+            error_log('Google OAuth: Failed to get user info');
             return null;
         }
         
-        return json_decode($result, true);
+        $userInfo = json_decode($result, true);
+        
+        if (empty($userInfo) || !isset($userInfo['email'])) {
+            error_log('Google OAuth: Invalid user info response: ' . $result);
+            return null;
+        }
+        
+        return $userInfo;
     }
 } 

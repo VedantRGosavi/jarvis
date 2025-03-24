@@ -3,6 +3,17 @@
 return [
     'integration_version' => '1.0.0',
     
+    // Stripe API Keys
+    'secret_key' => $_ENV['STRIPE_SECRET_KEY'] ?? '',
+    'publishable_key' => $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? '',
+    
+    // Subscription settings
+    'trial_period_days' => 7,
+    'subscription_price_id' => $_ENV['STRIPE_SUBSCRIPTION_PRICE_ID'] ?? '',
+    
+    // Webhook settings
+    'webhook_secret' => $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '',
+    
     'products' => [
         // Core Game Data Packs
         'elden_ring' => [

@@ -3,6 +3,29 @@
 
 FridayAI is a comprehensive gaming companion tool that provides in-game overlay information for RPG games like Elden Ring and Baldur's Gate 3.
 
+## Authentication System
+
+FridayAI supports multiple OAuth providers for user authentication:
+
+- Google OAuth 2.0
+- GitHub OAuth
+- PlayStation Network OAuth
+- Steam Authentication
+
+This allows gamers to sign in using their existing accounts. See [OAuth Setup Guide](documentation/oauth-setup.md) for detailed configuration instructions.
+
+To test the OAuth implementation:
+
+```bash
+# Check current OAuth configuration
+./scripts/test-oauth.sh check
+
+# Start the OAuth test tool
+./scripts/test-oauth.sh start
+```
+
+For a quick overview of the authentication system, refer to the [OAuth Quick Reference](documentation/oauth-quick-reference.md).
+
 ## Database Setup
 
 This project uses SQLite databases to store both system and game-specific data. The database structure follows the schema defined in `database-schema.md`.

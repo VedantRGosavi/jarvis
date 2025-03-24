@@ -35,6 +35,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 $action = $api_segments[1] ?? '';
 $data = json_decode(file_get_contents('php://input'), true);
 
+// Special case: Config endpoint doesn't require authentication
+if ($action === 'config' && $method === 'GET') {
+    try {
+        Response::success([
+            'publishable_key' => $stripeConfig['publishable_key']
+        ]);
+        exit;
+    } catch (\Exception $e) {
+        Response::error('Failed to get Stripe configuration', 500);
+        exit;
+    }
+}
+
 // Get authenticated user
 $userModel = new User();
 $user = $userModel->getById($userId);

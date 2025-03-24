@@ -80,4 +80,130 @@ abstract class OAuthProvider {
     protected function generateToken($userId) {
         return Auth::generateToken($userId);
     }
+
+    /**
+     * Check if the provider is properly configured
+     *
+     * @return bool True if all required configuration values are set
+     */
+    public function isConfigured()
+    {
+        // Base check to see if client ID and redirect URI are configured
+        // Client secret is checked if the provider uses it
+        $clientIdConfigured = !empty($this->clientId) && $this->clientId !== 'your_' . strtolower($this->providerName) . '_client_id';
+        $redirectUriConfigured = !empty($this->redirectUri);
+        
+        // Different providers have different requirements
+        if ($this->providerName === 'steam') {
+            // Steam uses API key instead of client secret
+            $apiKey = getenv('STEAM_API_KEY');
+            $apiKeyConfigured = !empty($apiKey) && $apiKey !== 'your_steam_api_key';
+            return $clientIdConfigured && $redirectUriConfigured && $apiKeyConfigured;
+        } else if ($this->providerName === 'playstation') {
+            // PlayStation can use either client secret or NPSSO token
+            $clientSecretConfigured = !empty($this->clientSecret) && 
+                $this->clientSecret !== 'your_' . strtolower($this->providerName) . '_client_secret';
+            
+            // Check for NPSSO token
+            $npsso = getenv('PLAYSTATION_NPSSO');
+            $npssoConfigured = !empty($npsso);
+            
+            // We need either client secret or NPSSO token, but not necessarily both
+            $credentialsConfigured = $clientSecretConfigured || $npssoConfigured;
+            
+            return $clientIdConfigured && $redirectUriConfigured && $credentialsConfigured;
+        } else {
+            // Most OAuth providers use client secret
+            $clientSecretConfigured = !empty($this->clientSecret) && 
+                $this->clientSecret !== 'your_' . strtolower($this->providerName) . '_client_secret';
+            return $clientIdConfigured && $clientSecretConfigured && $redirectUriConfigured;
+        }
+    }
+
+    /**
+     * Make an HTTP GET request
+     *
+     * @param string $url The URL to request
+     * @param array $params Additional query parameters
+     * @param array $headers Additional headers
+     * @param bool $followRedirect Whether to follow redirects or capture them
+     * @return array|false The response data or false on failure
+     */
+    protected function httpGet($url, $params = [], $headers = [], $captureRedirect = false) {
+        if (!empty($params)) {
+            $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query($params);
+        }
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, $captureRedirect);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        
+        if ($captureRedirect) {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        } else {
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        }
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        
+        if ($captureRedirect && ($httpCode >= 300 && $httpCode < 400)) {
+            $redirectUrl = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
+            curl_close($ch);
+            return ['redirect_url' => $redirectUrl];
+        }
+        
+        curl_close($ch);
+        
+        if ($response === false) {
+            error_log('HTTP GET Error: ' . curl_error($ch));
+            return false;
+        }
+        
+        // Try to decode as JSON
+        $jsonData = json_decode($response, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $jsonData;
+        }
+        
+        // If not JSON, return as is
+        return $response;
+    }
+    
+    /**
+     * Make an HTTP POST request
+     *
+     * @param string $url The URL to request
+     * @param array $data The data to send
+     * @param array $headers Additional headers
+     * @return array|false The response data or false on failure
+     */
+    protected function httpPost($url, $data = [], $headers = []) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        
+        $response = curl_exec($ch);
+        curl_close($ch);
+        
+        if ($response === false) {
+            error_log('HTTP POST Error: ' . curl_error($ch));
+            return false;
+        }
+        
+        // Try to decode as JSON
+        $jsonData = json_decode($response, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            return $jsonData;
+        }
+        
+        // If not JSON, return as is
+        return $response;
+    }
 } 

@@ -1,0 +1,12 @@
+# Enable rewrite engine
+RewriteEngine On
+
+# Handle the OAuth test tool
+RewriteRule ^oauth-test$ oauth-test.php [L]
+RewriteRule ^oauth-test/(.*)$ oauth-test.php?$1 [L,QSA]
+
+# Protect other tools from direct access
+RewriteCond %{REQUEST_URI} !^/app/tools/oauth-test
+RewriteCond %{HTTP_REFERER} !^http://(www\.)?localhost [NC]
+RewriteCond %{HTTP_REFERER} !^https://(www\.)?fridayai\.me [NC]
+RewriteRule .* - [F] 

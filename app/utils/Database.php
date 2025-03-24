@@ -100,4 +100,13 @@ class Database {
         
         return $result->fetchArray(SQLITE3_ASSOC);
     }
+    
+    /**
+     * Get the ID of the last inserted row
+     * 
+     * @return int The last insert ID
+     */
+    public function lastInsertId() {
+        return $this->db->lastInsertRowID();
+    }
 }

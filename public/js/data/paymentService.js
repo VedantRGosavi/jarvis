@@ -7,20 +7,39 @@ class PaymentService {
   constructor() {
     this.baseUrl = '/api/payments';
     this.stripePromise = null;
-    this.stripePublicKey = 'pk_test_51XYZABCDEStripeTestKeyKeepThisSecret0123'; // Replace with real key in production
+    this.stripePublicKey = null; // Will be fetched from server
     
-    // Initialize Stripe if the script is loaded
-    this.initStripe();
+    // Initialize Stripe asynchronously
+    this.fetchStripeConfig();
+  }
+  
+  /**
+   * Fetch Stripe configuration from server
+   */
+  async fetchStripeConfig() {
+    try {
+      const response = await fetch(`${this.baseUrl}/config`);
+      const data = await response.json();
+      
+      if (data && data.publishable_key) {
+        this.stripePublicKey = data.publishable_key;
+        this.initStripe();
+      } else {
+        console.warn('Failed to get Stripe publishable key from server');
+      }
+    } catch (error) {
+      console.error('Error fetching Stripe config:', error);
+    }
   }
   
   /**
    * Initialize Stripe
    */
   initStripe() {
-    if (window.Stripe) {
+    if (window.Stripe && this.stripePublicKey) {
       this.stripePromise = window.Stripe(this.stripePublicKey);
     } else {
-      console.warn('Stripe.js not loaded. Payment functionality will be limited.');
+      console.warn('Stripe.js not loaded or key not available. Payment functionality will be limited.');
     }
   }
   
@@ -30,7 +49,14 @@ class PaymentService {
    */
   async getStripe() {
     if (!this.stripePromise) {
-      this.initStripe();
+      // If not initialized yet, wait for the key and try again
+      if (!this.stripePublicKey) {
+        await this.fetchStripeConfig();
+      }
+      
+      if (this.stripePublicKey) {
+        this.initStripe();
+      }
     }
     
     if (!this.stripePromise) {

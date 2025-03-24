@@ -95,33 +95,45 @@ class User {
     
     public function updateStripeCustomerId($userId, $stripeCustomerId) {
         $stmt = $this->db->prepare("UPDATE users SET stripe_customer_id = ? WHERE id = ?");
-        return $stmt->execute([$stripeCustomerId, $userId]);
+        $stmt->bindValue(1, $stripeCustomerId);
+        $stmt->bindValue(2, $userId);
+        return $stmt->execute();
     }
     
     public function removeStripeCustomerId($stripeCustomerId) {
         $stmt = $this->db->prepare("UPDATE users SET stripe_customer_id = NULL WHERE stripe_customer_id = ?");
-        return $stmt->execute([$stripeCustomerId]);
+        $stmt->bindValue(1, $stripeCustomerId);
+        return $stmt->execute();
     }
     
     public function updateCustomerDetails($userId, $email, $name) {
         $stmt = $this->db->prepare("UPDATE users SET email = ?, name = ? WHERE id = ?");
-        return $stmt->execute([$email, $name, $userId]);
+        $stmt->bindValue(1, $email);
+        $stmt->bindValue(2, $name);
+        $stmt->bindValue(3, $userId);
+        return $stmt->execute();
     }
     
     public function updateSubscription($userId, $status, $endDate = null) {
         if ($endDate) {
             $stmt = $this->db->prepare("UPDATE users SET subscription_status = ?, subscription_end = ? WHERE id = ?");
-            return $stmt->execute([$status, $endDate, $userId]);
+            $stmt->bindValue(1, $status);
+            $stmt->bindValue(2, $endDate);
+            $stmt->bindValue(3, $userId);
         } else {
             $stmt = $this->db->prepare("UPDATE users SET subscription_status = ? WHERE id = ?");
-            return $stmt->execute([$status, $userId]);
+            $stmt->bindValue(1, $status);
+            $stmt->bindValue(2, $userId);
         }
+        return $stmt->execute();
     }
     
     public function getByStripeCustomerId($stripeCustomerId) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE stripe_customer_id = ?");
-        $stmt->execute([$stripeCustomerId]);
-        return $stmt->fetch();
+        $stmt->bindValue(1, $stripeCustomerId);
+        $result = $stmt->execute();
+        if (!$result) return null;
+        return $result->fetchArray(SQLITE3_ASSOC);
     }
     
     public function getSettings($userId) {
@@ -262,5 +274,73 @@ class User {
         $purchase = $this->db->fetchOne($stmt, [$userId, $gameId]);
         
         return $purchase ? true : false;
+    }
+    
+    /**
+     * Create a user with the provided details
+     * 
+     * @param string $name User's full name
+     * @param string $email User's email address
+     * @param string $password User's password
+     * @param string|null $stripeCustomerId Optional Stripe customer ID
+     * @return array|null The created user or null on failure
+     */
+    public function createUser($name, $email, $password, $stripeCustomerId = null) {
+        // Check if user exists
+        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->bindValue(1, $email);
+        $result = $stmt->execute();
+        
+        if ($result && $result->fetchArray(SQLITE3_ASSOC)) {
+            return null; // User already exists
+        }
+        
+        // Create user
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $timestamp = date('Y-m-d H:i:s');
+        
+        $sql = "INSERT INTO users (name, email, password, created_at, subscription_status, stripe_customer_id) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindValue(1, $name);
+        $stmt->bindValue(2, $email);
+        $stmt->bindValue(3, $passwordHash);
+        $stmt->bindValue(4, $timestamp);
+        $stmt->bindValue(5, 'none');
+        $stmt->bindValue(6, $stripeCustomerId);
+        
+        $result = $stmt->execute();
+        
+        if (!$result) {
+            return null;
+        }
+        
+        // Get last insert ID
+        $userId = $this->db->lastInsertId();
+        
+        if (!$userId) {
+            return null;
+        }
+        
+        // Get the created user
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->bindValue(1, $userId);
+        $result = $stmt->execute();
+        
+        if (!$result) {
+            return null;
+        }
+        
+        $user = $result->fetchArray(SQLITE3_ASSOC);
+        
+        if (!$user) {
+            return null;
+        }
+        
+        // Remove password before returning
+        unset($user['password']);
+        
+        return $user;
     }
 }
