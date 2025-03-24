@@ -645,148 +645,16 @@
     </script>
     <script type="module" src="js/data/paymentService.js"></script>
     <script type="module" src="js/ui/paymentUI.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Mobile menu functionality
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
-            const authButton = document.getElementById('auth-button');
-            const mobileAuthButton = document.getElementById('mobile-auth-button');
+    <script type="module">
+        import { FridayAIApp } from './js/app.js';
 
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
-
-            // Close mobile menu when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
-                    mobileMenu.classList.add('hidden');
-                }
-            });
-
-            // Close mobile menu when clicking a link
-            mobileMenu.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    mobileMenu.classList.add('hidden');
-                });
-            });
-
-            // Make mobile auth button navigate to register form
-            mobileAuthButton.addEventListener('click', () => {
-                document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });
-                // Trigger register form display if you have such functionality
-                if (typeof showRegisterForm === 'function') {
-                    showRegisterForm();
-                }
-                mobileMenu.classList.add('hidden');
-            });
-
-            // Make desktop auth button navigate to register form
-            authButton.addEventListener('click', () => {
-                document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });
-                // Trigger register form display if you have such functionality
-                if (typeof showRegisterForm === 'function') {
-                    showRegisterForm();
-                }
-            });
-
-            // Navbar scroll effect
-            const navbar = document.querySelector('.navbar-container');
-            let lastScroll = window.pageYOffset;
-
-            function handleScroll() {
-                const currentScroll = window.pageYOffset;
-                if (currentScroll > 50) {
-                    navbar.classList.add('scrolled');
-                } else {
-                    navbar.classList.remove('scrolled');
-                }
-                lastScroll = currentScroll;
-            }
-
-            window.addEventListener('scroll', handleScroll);
-            handleScroll(); // Check initial state
-
-            // Smooth scroll for navigation
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const targetId = this.getAttribute('href');
-                    const targetElement = document.querySelector(targetId);
-
-                    if (targetElement) {
-                        const navbarHeight = navbar.offsetHeight;
-                        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
-
-                        window.scrollTo({
-                            top: targetPosition,
-                            behavior: 'smooth'
-                        });
-                    }
-                });
-            });
-
-            // Fade in elements on scroll
-            const fadeElements = document.querySelectorAll('.fade-in-element');
-
-            function checkFade() {
-                fadeElements.forEach(element => {
-                    const elementTop = element.getBoundingClientRect().top;
-                    const elementBottom = element.getBoundingClientRect().bottom;
-                    const windowHeight = window.innerHeight;
-
-                    if (elementTop < windowHeight - 100 && elementBottom > 0) {
-                        element.classList.add('visible');
-                    }
-                });
-            }
-
-            // Check elements on load
-            setTimeout(checkFade, 100);
-
-            // Check elements on scroll
-            window.addEventListener('scroll', checkFade);
-
-            // Auth form switching logic
-            const showLoginBtn = document.getElementById('show-login');
-            const showRegisterBtn = document.getElementById('show-register');
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-
-            // Define the showRegisterForm function for global access
-            window.showRegisterForm = function() {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-            };
-
-            // Define the showLoginForm function for global access
-            window.showLoginForm = function() {
-                registerForm.classList.add('hidden');
-                loginForm.classList.remove('hidden');
-            };
-
-            if (showLoginBtn) {
-                showLoginBtn.addEventListener('click', function() {
-                    window.showLoginForm();
-                });
-            }
-
-            if (showRegisterBtn) {
-                showRegisterBtn.addEventListener('click', function() {
-                    window.showRegisterForm();
-                });
-            }
-
-            // Check if there's a data-form attribute on the button that was clicked
-            const authButtons = document.querySelectorAll('[data-form]');
-            authButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const formType = this.getAttribute('data-form');
-                    if (formType === 'register') {
-                        window.showRegisterForm();
-                    } else if (formType === 'login') {
-                        window.showLoginForm();
-                    }
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize tooltips
+            const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl, {
+                    container: 'body',
+                    trigger: 'hover'
                 });
             });
 

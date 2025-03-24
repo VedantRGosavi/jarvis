@@ -190,7 +190,11 @@ switch ($action) {
 
     case 'oauth':
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            // Get the provider from either query parameters or URL segments
             $provider = $_GET['provider'] ?? '';
+            if (empty($provider) && isset($api_segments[2])) {
+                $provider = $api_segments[2];
+            }
 
             if (empty($provider)) {
                 Response::error('Provider is required', 400);

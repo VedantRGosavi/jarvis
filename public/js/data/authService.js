@@ -228,36 +228,18 @@ export class AuthService {
    */
   async getOAuthUrl(provider) {
     try {
-      // In development/preview environment, use mock auth URLs
-      if (window.location.hostname === 'localhost' ||
-          window.location.hostname.includes('preview') ||
-          window.location.hostname.includes('staging')) {
-
-        console.log(`Using mock OAuth URL for ${provider} in development/preview environment`);
-
-        const mockAuthUrls = {
-          'google': 'https://accounts.google.com/o/oauth2/auth?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&response_type=code&scope=email%20profile',
-          'github': 'https://github.com/login/oauth/authorize?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&scope=user:email',
-          'playstation': 'https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&response_type=code&scope=psn:s2s',
-          'steam': 'https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=http://localhost:8000/auth-callback.html&openid.realm=http://localhost:8000'
-        };
-
-        return {
-          success: true,
-          auth_url: mockAuthUrls[provider] || `https://example.com/oauth/${provider}?mock=true&redirect_uri=http://localhost:8000/auth-callback.html`
-        };
-      }
+      console.log(`Getting OAuth URL for ${provider}`);
 
       // For production environments, use real OAuth endpoints
       const hostname = window.location.hostname;
       let apiUrl;
 
       if (hostname === 'fridayai.me') {
-        apiUrl = `https://fridayai.me/api/auth.php?action=oauth&provider=${provider}`;
+        apiUrl = `https://fridayai.me/api/auth/oauth?provider=${provider}`;
       } else if (hostname === 'fridayai-gold.vercel.app') {
-        apiUrl = `https://fridayai-gold.vercel.app/api/auth.php?action=oauth&provider=${provider}`;
+        apiUrl = `https://fridayai-gold.vercel.app/api/auth/oauth?provider=${provider}`;
       } else {
-        apiUrl = `/api/auth.php?action=oauth&provider=${provider}`;
+        apiUrl = `/api/auth/oauth?provider=${provider}`;
       }
 
       console.log(`Fetching OAuth URL for ${provider} from ${apiUrl}`);
