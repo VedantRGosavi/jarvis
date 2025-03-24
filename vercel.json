@@ -2,13 +2,13 @@
   "version": 2,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "env": {
+    "PHP_VERSION": "8.2",
+    "PHP_INI_SCAN_DIR": ":/var/task/api"
+  },
   "functions": {
     "api/**/*.php": {
-      "runtime": "vercel-php@0.6.0",
-      "environment": {
-        "PHP_VERSION": "8.2",
-        "PHP_INI_SCAN_DIR": ":/var/task/api"
-      }
+      "runtime": "vercel-php@0.6.0"
     }
   },
   "routes": [
