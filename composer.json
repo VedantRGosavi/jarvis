@@ -12,7 +12,8 @@
   },
   "autoload": {
     "psr-4": {
-      "App\\": "app/"
+      "App\\Models\\": "app/models/",
+      "App\\Utils\\": "app/utils/"
     }
   },
   "config": {
@@ -27,7 +28,6 @@
   },
   "scripts": {
     "post-install-cmd": [
-      "php artisan clear-compiled",
       "chmod -R 777 storage"
     ]
   }
