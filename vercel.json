@@ -1,16 +1,15 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "env": {
-    "PHP_VERSION": "8.2",
-    "PHP_INI_SCAN_DIR": ":/var/task/api"
-  },
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.6.0"
+  "builds": [
+    {
+      "src": "api/**/*.php",
+      "use": "vercel-php@0.5.0"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
     }
-  },
+  ],
   "routes": [
     { "src": "/api/auth.php", "dest": "/api/auth.php" },
     { "src": "/api/user.php", "dest": "/api/user.php" },
@@ -27,11 +26,11 @@
     { "src": "/api/data/(.*)", "dest": "/api/data.php?api_segments=$1" },
     { "src": "/api/webhook", "dest": "/api/webhook.php" },
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/assets/(.*)", "dest": "/assets/$1" },
-    { "src": "/css/(.*)", "dest": "/css/$1" },
-    { "src": "/js/(.*)", "dest": "/js/$1" },
-    { "src": "/images/(.*)", "dest": "/images/$1" },
-    { "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico))", "dest": "/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "src": "/assets/(.*)", "dest": "/public/assets/$1" },
+    { "src": "/css/(.*)", "dest": "/public/css/$1" },
+    { "src": "/js/(.*)", "dest": "/public/js/$1" },
+    { "src": "/images/(.*)", "dest": "/public/images/$1" },
+    { "src": "/(.*\\.(js|css|png|jpg|jpeg|svg|ico))", "dest": "/public/$1" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
   ]
 }
