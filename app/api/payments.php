@@ -16,20 +16,6 @@ require_once BASE_PATH . '/vendor/autoload.php';
 $stripeConfig = require BASE_PATH . '/app/config/stripe.php';
 \Stripe\Stripe::setApiKey($stripeConfig['secret_key']);
 
-// Validate authentication for protected endpoints
-$authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
-$token = str_replace('Bearer ', '', $authHeader);
-$isAuthenticated = false;
-$userId = null;
-
-if ($token && Auth::validateToken($token)) {
-    $isAuthenticated = true;
-    $userId = Auth::getUserIdFromToken($token);
-} else {
-    Response::error('Unauthorized', 401);
-    exit;
-}
-
 // Get request data
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $api_segments[1] ?? '';
@@ -46,6 +32,20 @@ if ($action === 'config' && $method === 'GET') {
         Response::error('Failed to get Stripe configuration', 500);
         exit;
     }
+}
+
+// Validate authentication for protected endpoints
+$authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+$token = str_replace('Bearer ', '', $authHeader);
+$isAuthenticated = false;
+$userId = null;
+
+if ($token && Auth::validateToken($token)) {
+    $isAuthenticated = true;
+    $userId = Auth::getUserIdFromToken($token);
+} else {
+    Response::error('Unauthorized', 401);
+    exit;
 }
 
 // Get authenticated user
