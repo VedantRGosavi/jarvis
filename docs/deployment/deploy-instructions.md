@@ -2,41 +2,45 @@
 
 ## Setting Environment Variables in Production
 
-When deploying to production, you need to ensure that your environment variables are properly set. Here's how to do it on different platforms:
+When deploying to production, you need to ensure that your environment variables are properly set. Here's how to do it:
 
 ### 1. Setting APP_ENV to Production
 
 First, ensure that `APP_ENV=production` is set in your production environment. This is crucial for the dynamic URL resolution to work correctly.
 
-### 2. Cloud Provider Instructions
+### 2. Heroku Deployment Instructions
 
-#### Heroku
-
+1. **Set Environment Variables**
 ```bash
 # Set all environment variables
 heroku config:set APP_ENV=production
 heroku config:set GOOGLE_CLIENT_ID=your_client_id
 heroku config:set GOOGLE_CLIENT_SECRET=your_client_secret
+heroku config:set GITHUB_CLIENT_ID=your_github_client_id
+heroku config:set GITHUB_CLIENT_SECRET=your_github_client_secret
+heroku config:set STRIPE_PUBLIC_KEY=your_stripe_public_key
+heroku config:set STRIPE_SECRET_KEY=your_stripe_secret_key
+heroku config:set STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 # ...and so on for all variables
 ```
 
-#### AWS Elastic Beanstalk
+2. **Domain Configuration**
+- Add your custom domain: `heroku domains:add your-domain.com`
+- Enable automatic SSL: `heroku certs:auto:enable`
+- Update your DNS settings with the provided Heroku DNS target
 
-- Go to AWS Console > Elastic Beanstalk > Your Environment
-- Click on "Configuration" > "Software"
-- Scroll to "Environment properties" and add all your variables
-- Ensure APP_ENV is set to "production"
-
-#### Google Cloud Run
-
+3. **Deployment**
 ```bash
-gcloud run services update your-service-name --set-env-vars APP_ENV=production,GOOGLE_CLIENT_ID=your_client_id,GOOGLE_CLIENT_SECRET=your_client_secret
+# Deploy your code
+git push heroku main
 ```
 
-#### Docker
-
+4. **Verify Deployment**
 ```bash
-docker run -e APP_ENV=production -e GOOGLE_CLIENT_ID=your_client_id -e GOOGLE_CLIENT_SECRET=your_client_secret ...your-image-name
+# Check app status
+heroku ps
+# View logs
+heroku logs --tail
 ```
 
 ### 3. Using a Configuration Management Tool
@@ -50,22 +54,12 @@ These tools help securely manage environment variables across different environm
 
 ### 4. Verifying the Environment
 
-After deployment, verify that the environment variables are correctly set:
-
-```javascript
-// Add this to a route that only you can access
-app.get('/debug-env', (req, res) => {
-  if (process.env.APP_ENV !== 'production') {
-    res.json({
-      environment: process.env.APP_ENV,
-      googleRedirectUri: process.env.GOOGLE_REDIRECT_URI,
-      // Include other non-sensitive variables to verify
-    });
-  } else {
-    res.status(403).send('Not available in production');
-  }
-});
-```
+After deployment, verify that your application is working correctly:
+1. Test the application at your custom domain
+2. Verify SSL certificate is active
+3. Check all OAuth logins are working
+4. Test Stripe integration
+5. Monitor application logs
 
 ## Important Security Notes
 
