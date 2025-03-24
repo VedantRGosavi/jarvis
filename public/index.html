@@ -5,12 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FridayAI - Gaming Companion</title>
     <meta name="google-analytics-id" content="G-XXXXXXXXXX">
+    <!-- Force reload script - load first -->
+    <script type="module" src="js/force-reload.js?v=<?php echo time(); ?>"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/tailwind.css">
-    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/tailwind.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/custom.css?v=<?php echo time(); ?>">
+    <style>
+        /* Direct CSS override to force visibility */
+        body section,
+        body footer,
+        #features, #games, #pricing, #docs,
+        .features-section, .games-section, .pricing-section, .docs-section, .footer-section {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+    </style>
 </head>
-<body class="bg-gaming-primary text-gaming-light font-sans">
+<body class="bg-gaming-primary text-gaming-light font-sans force-display app-initialized">
+    <!-- Emergency fix script - loads as early as possible -->
+    <script src="js/fix-content.js"></script>
+
     <!-- Integrated layout with seamless transitions -->
     <div class="page-container relative">
         <!-- Navbar -->
@@ -622,32 +638,67 @@
         </div>
     </footer>
 
-    <!-- Core scripts -->
-    <script type="module" src="js/main.js"></script>
+    <!-- Force display script - early load -->
+    <script>
+        // Immediate execution - force display all sections
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = ['features', 'games', 'pricing', 'docs', 'footer'];
+            sections.forEach(function(id) {
+                const element = id === 'footer' ? document.querySelector('footer') : document.getElementById(id);
+                if (element) {
+                    element.style.display = 'block';
+                    element.style.visibility = 'visible';
+                    element.style.opacity = '1';
+                }
+            });
+
+            // Force display all section elements
+            document.querySelectorAll('section').forEach(function(section) {
+                section.style.display = 'block';
+                section.style.visibility = 'visible';
+                section.style.opacity = '1';
+            });
+        });
+    </script>
+
+    <!-- Core scripts with cache busting -->
+    <script type="module" src="js/main.js?v=<?php echo time(); ?>"></script>
     <script type="module">
-        import { fridayAIApp } from './js/app.js';
+        // Direct import with inline force display
+        import { fridayAIApp } from './js/app.js?v=<?php echo time(); ?>';
 
         document.addEventListener('DOMContentLoaded', () => {
             // Make sure app is initialized and available globally
             window.fridayAIApp = fridayAIApp;
 
+            // Force display all sections
+            const sections = ['features', 'games', 'pricing', 'docs'];
+            sections.forEach(id => {
+                const section = document.getElementById(id);
+                if (section) {
+                    section.style.display = 'block';
+                    section.style.visibility = 'visible';
+                    section.style.opacity = '1';
+                }
+            });
+
             // Ensure all UI elements are properly rendered
             if (fridayAIApp) {
                 console.log('FridayAI app successfully initialized');
 
-                // Manually re-run initialization for critical UI elements if needed
+                // Manually re-run initialization for critical UI elements
                 fridayAIApp.initEventListeners();
                 fridayAIApp.handleNavigation();
             }
         });
     </script>
 
-    <!-- Authentication Scripts -->
-    <script type="module" src="js/data/authService.js"></script>
-    <script type="module" src="js/ui/icons.js"></script>
-    <script type="module" src="js/ui/authForms.js"></script>
-    <script type="module" src="js/ui/accountUI.js"></script>
-    <script type="module" src="js/ui/accountPage.js"></script>
+    <!-- Authentication Scripts with cache busting -->
+    <script type="module" src="js/data/authService.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/ui/icons.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/ui/authForms.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/ui/accountUI.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/ui/accountPage.js?v=<?php echo time(); ?>"></script>
 
     <!-- Payment Scripts -->
     <script src="https://js.stripe.com/v3/"></script>
@@ -684,44 +735,5 @@
         });
     </script>
     <script src="js/analytics-init.js" type="module"></script>
-
-    <!-- Final safeguard to ensure content visibility -->
-    <script>
-        // Wait for everything to load then ensure content is visible
-        window.addEventListener('load', function() {
-            // Mark the body as initialized
-            document.body.classList.add('app-initialized');
-
-            // Force display all major sections
-            ['features', 'games', 'pricing', 'docs'].forEach(function(id) {
-                var section = document.getElementById(id);
-                if (section) {
-                    section.style.display = 'block';
-                    section.style.visibility = 'visible';
-                    section.style.opacity = '1';
-                }
-            });
-
-            // Check if any .section elements with display:none and make them visible
-            var sections = document.querySelectorAll('section');
-            sections.forEach(function(section) {
-                if (window.getComputedStyle(section).display === 'none') {
-                    section.style.display = 'block';
-                    section.style.visibility = 'visible';
-                    section.style.opacity = '1';
-                }
-            });
-
-            // Make sure footer is visible
-            var footer = document.querySelector('footer');
-            if (footer) {
-                footer.style.display = 'block';
-                footer.style.visibility = 'visible';
-                footer.style.opacity = '1';
-            }
-
-            console.log('Content visibility safeguard applied');
-        });
-    </script>
 </body>
 </html>
