@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FridayAI - Gaming Companion</title>
     <meta name="google-analytics-id" content="G-XXXXXXXXXX">
-    <!-- Force reload script - load first -->
-    <script type="module" src="js/force-reload.js?v=<?php echo time(); ?>"></script>
+
+    <!-- EMERGENCY FIX - NO PHP REQUIRED -->
+    <script src="js/emergency-fix.js?v=20250324"></script>
+
+    <!-- Force reload script -->
+    <script type="module" src="js/force-reload.js?v=20250324"></script>
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/tailwind.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" href="css/custom.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="css/tailwind.css?v=20250324">
+    <link rel="stylesheet" href="css/custom.css?v=20250324">
     <style>
         /* Direct CSS override to force visibility */
         body section,
@@ -662,10 +667,10 @@
     </script>
 
     <!-- Core scripts with cache busting -->
-    <script type="module" src="js/main.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/main.js?v=20250324"></script>
     <script type="module">
         // Direct import with inline force display
-        import { fridayAIApp } from './js/app.js?v=<?php echo time(); ?>';
+        import { fridayAIApp } from './js/app.js?v=20250324';
 
         document.addEventListener('DOMContentLoaded', () => {
             // Make sure app is initialized and available globally
@@ -694,11 +699,11 @@
     </script>
 
     <!-- Authentication Scripts with cache busting -->
-    <script type="module" src="js/data/authService.js?v=<?php echo time(); ?>"></script>
-    <script type="module" src="js/ui/icons.js?v=<?php echo time(); ?>"></script>
-    <script type="module" src="js/ui/authForms.js?v=<?php echo time(); ?>"></script>
-    <script type="module" src="js/ui/accountUI.js?v=<?php echo time(); ?>"></script>
-    <script type="module" src="js/ui/accountPage.js?v=<?php echo time(); ?>"></script>
+    <script type="module" src="js/data/authService.js?v=20250324"></script>
+    <script type="module" src="js/ui/icons.js?v=20250324"></script>
+    <script type="module" src="js/ui/authForms.js?v=20250324"></script>
+    <script type="module" src="js/ui/accountUI.js?v=20250324"></script>
+    <script type="module" src="js/ui/accountPage.js?v=20250324"></script>
 
     <!-- Payment Scripts -->
     <script src="https://js.stripe.com/v3/"></script>
@@ -712,8 +717,8 @@
     </script>
     <script type="module">
         // Import modules
-        import paymentService from './js/data/paymentService.js';
-        import paymentUI from './js/ui/paymentUI.js';
+        import paymentService from './js/data/paymentService.js?v=20250324';
+        import paymentUI from './js/ui/paymentUI.js?v=20250324';
 
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize tooltips
@@ -734,6 +739,6 @@
             }
         });
     </script>
-    <script src="js/analytics-init.js" type="module"></script>
+    <script src="js/analytics-init.js?v=20250324" type="module"></script>
 </body>
 </html>
