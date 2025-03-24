@@ -8,6 +8,60 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/tailwind.css">
     <link rel="stylesheet" href="css/custom.css">
+    <style>
+        .download-option {
+            transition: transform 0.2s ease-in-out;
+        }
+        .download-option:hover {
+            transform: translateY(-5px);
+        }
+        .download-progress {
+            width: 100%;
+            height: 4px;
+            background-color: #2d2f34;
+            border-radius: 2px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #6200ea;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .system-requirements {
+            background-color: #1e2024;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+        }
+        .system-requirements h4 {
+            color: #e0e0e0;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .system-requirements ul {
+            list-style-type: disc;
+            list-style-position: inside;
+            margin-left: 1rem;
+        }
+        .system-requirements li {
+            color: #a0a0a0;
+            margin-bottom: 0.25rem;
+            font-size: 0.875rem;
+        }
+        .download-option .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #6200ea;
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="bg-gaming-primary text-gaming-light font-sans">
     <!-- Integrated layout with seamless transitions -->
@@ -22,6 +76,7 @@
                         <li><a href="index.html#games" class="hover:text-gaming-gray-200 transition font-medium">Games</a></li>
                         <li><a href="index.html#pricing" class="hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
                         <li><a href="#" class="text-gaming-light font-bold">Download</a></li>
+                        <li id="admin-nav-item" class="hidden"><a href="admin/index.html" class="hover:text-gaming-gray-200 transition font-medium">Admin</a></li>
                     </ul>
                 </nav>
             </div>
@@ -50,7 +105,41 @@
                     <div id="trial-downloads" class="download-options grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                         <!-- Download options will be inserted here dynamically -->
                     </div>
-                    <p class="text-sm text-gaming-gray-400">Your trial expires in <span id="trial-days">14</span> days.</p>
+                    <p class="text-sm text-gaming-gray-400 mb-4">Your trial expires in <span id="trial-days">14</span> days.</p>
+
+                    <!-- System Requirements -->
+                    <div class="system-requirements mt-8">
+                        <h4 class="text-lg font-semibold">System Requirements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <h5 class="font-medium mb-2">Windows</h5>
+                                <ul>
+                                    <li>Windows 10 64-bit or newer</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>DirectX 11 compatible GPU</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-medium mb-2">macOS</h5>
+                                <ul>
+                                    <li>macOS 11.0 or newer</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>Apple M1 or Intel CPU</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-medium mb-2">Linux</h5>
+                                <ul>
+                                    <li>Ubuntu 20.04+, Fedora 35+</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>OpenGL 3.3+ compatible GPU</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Premium User State -->
@@ -62,9 +151,60 @@
                     </div>
                     <div class="mt-8 pt-8 border-t border-gaming-gray-700">
                         <h4 class="text-xl font-semibold mb-4">Beta Versions</h4>
-                        <p class="text-gaming-gray-300 mb-6">As a premium user, you have access to beta releases:</p>
+                        <p class="text-gaming-gray-300 mb-6">As a premium user, you have access to beta releases with new features:</p>
                         <div id="beta-downloads" class="download-options grid grid-cols-1 md:grid-cols-3 gap-4">
                             <!-- Beta download options will be inserted here dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- System Requirements -->
+                    <div class="system-requirements mt-8">
+                        <h4 class="text-lg font-semibold">System Requirements</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div>
+                                <h5 class="font-medium mb-2">Windows</h5>
+                                <ul>
+                                    <li>Windows 10 64-bit or newer</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>DirectX 11 compatible GPU</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-medium mb-2">macOS</h5>
+                                <ul>
+                                    <li>macOS 11.0 or newer</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>Apple M1 or Intel CPU</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h5 class="font-medium mb-2">Linux</h5>
+                                <ul>
+                                    <li>Ubuntu 20.04+, Fedora 35+</li>
+                                    <li>4GB RAM minimum</li>
+                                    <li>1GB free storage</li>
+                                    <li>OpenGL 3.3+ compatible GPU</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Progress Modal -->
+                <div id="download-modal" class="fixed inset-0 bg-black bg-opacity-70 items-center justify-center z-50 hidden">
+                    <div class="bg-gaming-gray-800 rounded-lg p-8 max-w-md w-full">
+                        <h3 class="text-xl font-bold mb-4">Downloading FridayAI</h3>
+                        <p id="download-message" class="text-gaming-gray-300 mb-4">Preparing your download...</p>
+                        <div class="download-progress">
+                            <div id="download-progress-bar" class="progress-bar"></div>
+                        </div>
+                        <p id="download-speed" class="text-sm text-gaming-gray-400 mt-2 text-right">0 KB/s</p>
+                        <div class="flex justify-end mt-6">
+                            <button id="cancel-download" class="bg-gaming-gray-700 hover:bg-gaming-gray-600 text-white font-medium py-2 px-4 rounded transition">
+                                Cancel
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -76,6 +216,20 @@
     <script src="js/data/authService.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Get CSRF token
+            let csrfToken = '';
+            fetch('/api/auth/csrf', {
+                method: 'GET',
+                credentials: 'include'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.csrf_token) {
+                    csrfToken = data.csrf_token;
+                }
+            })
+            .catch(error => console.error('Error fetching CSRF token:', error));
+
             // Check authentication
             if (window.authService && window.authService.isAuthenticated()) {
                 const user = window.authService.getCurrentUser();
@@ -86,6 +240,19 @@
                         // Show trial UI
                         document.getElementById('trial-user').classList.remove('hidden');
                         populateDownloadOptions('trial-downloads', 'latest');
+
+                        // Show admin link for admin users
+                        if (user.subscription_status === 'admin') {
+                            document.getElementById('admin-nav-item').classList.remove('hidden');
+                        }
+
+                        // Set trial days remaining
+                        if (user.trial_ends_at) {
+                            const trialEnds = new Date(user.trial_ends_at);
+                            const today = new Date();
+                            const daysLeft = Math.ceil((trialEnds - today) / (1000 * 60 * 60 * 24));
+                            document.getElementById('trial-days').textContent = daysLeft > 0 ? daysLeft : 0;
+                        }
                     } else {
                         // Show premium UI
                         document.getElementById('premium-user').classList.remove('hidden');
@@ -107,22 +274,26 @@
                 if (!container) return;
 
                 const platforms = [
-                    { name: 'Windows', icon: 'windows', ext: 'zip' },
-                    { name: 'macOS', icon: 'apple', ext: 'dmg' },
-                    { name: 'Linux', icon: 'linux', ext: 'tar.gz' }
+                    { name: 'Windows', icon: 'windows', ext: 'zip', isNew: version === 'beta' && Math.random() > 0.5 },
+                    { name: 'macOS', icon: 'apple', ext: 'dmg', isNew: version === 'beta' && Math.random() > 0.5 },
+                    { name: 'Linux', icon: 'linux', ext: 'tar.gz', isNew: version === 'beta' && Math.random() > 0.5 }
                 ];
 
                 let html = '';
                 platforms.forEach(platform => {
-                    const platformKey = platform.name.toLowerCase();
+                    let platformKey = platform.name.toLowerCase();
                     if (platform.name === 'macOS') {
                         platformKey = 'mac';
                     }
 
                     html += `
-                        <div class="download-option flex flex-col items-center">
-                            <a href="/api/download/${version}?platform=${platformKey}"
+                        <div class="download-option flex flex-col items-center relative">
+                            <a href="javascript:void(0)"
+                               data-url="/api/download/${version}?platform=${platformKey}&csrf_token=${csrfToken}"
+                               data-platform="${platform.name}"
+                               data-version="${version}"
                                class="download-button flex flex-col items-center p-4 rounded-lg bg-gaming-gray-700 hover:bg-gaming-gray-600 transition w-full">
+                                ${platform.isNew ? '<span class="badge">NEW</span>' : ''}
                                 <i class="fab fa-${platform.icon} text-3xl mb-2"></i>
                                 <span class="font-medium">${platform.name}</span>
                                 <span class="text-xs text-gaming-gray-400 mt-1">${version === 'beta' ? 'Beta' : ''} (.${platform.ext})</span>
@@ -132,7 +303,145 @@
                 });
 
                 container.innerHTML = html;
+
+                // Add click handlers to download buttons
+                const downloadButtons = container.querySelectorAll('.download-button');
+                downloadButtons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        startDownload(button.dataset.url, button.dataset.platform, button.dataset.version);
+                    });
+                });
             }
+
+            // Download progress functionality
+            const downloadModal = document.getElementById('download-modal');
+            const progressBar = document.getElementById('download-progress-bar');
+            const downloadMessage = document.getElementById('download-message');
+            const downloadSpeed = document.getElementById('download-speed');
+            const cancelDownloadBtn = document.getElementById('cancel-download');
+
+            let downloadController = null;
+
+            function startDownload(url, platform, version) {
+                // Show download modal
+                downloadModal.classList.remove('hidden');
+                downloadModal.classList.add('flex');
+                progressBar.style.width = '0%';
+                downloadMessage.textContent = `Preparing your ${platform} download...`;
+                downloadSpeed.textContent = '0 KB/s';
+
+                // Create AbortController for cancellation
+                downloadController = new AbortController();
+                const signal = downloadController.signal;
+
+                // Get auth token
+                const token = window.authService.getToken();
+
+                // Start time for speed calculation
+                const startTime = Date.now();
+                let lastLoaded = 0;
+                let lastTime = startTime;
+
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    signal
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+                    }
+
+                    const contentLength = response.headers.get('Content-Length');
+                    const totalSize = contentLength ? parseInt(contentLength, 10) : 0;
+                    let loaded = 0;
+
+                    // Create a reader from the response body stream
+                    const reader = response.body.getReader();
+
+                    // Update progress function
+                    function updateProgress({ done, value }) {
+                        if (done) {
+                            progressBar.style.width = '100%';
+                            downloadMessage.textContent = 'Download complete!';
+                            setTimeout(() => {
+                                downloadModal.classList.add('hidden');
+                                downloadModal.classList.remove('flex');
+                            }, 2000);
+                            return;
+                        }
+
+                        loaded += value.length;
+                        const currentTime = Date.now();
+
+                        // Update progress bar if we know the total size
+                        if (totalSize) {
+                            const percent = Math.round((loaded / totalSize) * 100);
+                            progressBar.style.width = `${percent}%`;
+                            downloadMessage.textContent = `Downloading ${platform} (${version})... ${percent}%`;
+                        } else {
+                            downloadMessage.textContent = `Downloading ${platform} (${version})...`;
+                        }
+
+                        // Calculate download speed
+                        if (currentTime - lastTime >= 1000) { // Update every second
+                            const timeDiff = (currentTime - lastTime) / 1000; // seconds
+                            const loadedDiff = loaded - lastLoaded; // bytes
+                            const speedKBps = Math.round((loadedDiff / 1024) / timeDiff);
+
+                            downloadSpeed.textContent = `${speedKBps} KB/s`;
+
+                            lastTime = currentTime;
+                            lastLoaded = loaded;
+                        }
+
+                        // Continue reading
+                        return reader.read().then(updateProgress);
+                    }
+
+                    // Start reading
+                    return reader.read().then(updateProgress);
+                })
+                .catch(error => {
+                    if (error.name === 'AbortError') {
+                        downloadMessage.textContent = 'Download cancelled.';
+                    } else {
+                        console.error('Download error:', error);
+                        downloadMessage.textContent = `Download failed: ${error.message}`;
+                    }
+
+                    setTimeout(() => {
+                        downloadModal.classList.add('hidden');
+                        downloadModal.classList.remove('flex');
+                    }, 2000);
+                });
+            }
+
+            // Cancel download button
+            cancelDownloadBtn.addEventListener('click', () => {
+                if (downloadController) {
+                    downloadController.abort();
+                    downloadMessage.textContent = 'Download cancelled.';
+                    setTimeout(() => {
+                        downloadModal.classList.add('hidden');
+                        downloadModal.classList.remove('flex');
+                    }, 1000);
+                }
+            });
+
+            // Allow clicking outside modal to close it
+            downloadModal.addEventListener('click', (e) => {
+                if (e.target === downloadModal) {
+                    if (downloadController) {
+                        downloadController.abort();
+                    }
+                    downloadModal.classList.add('hidden');
+                    downloadModal.classList.remove('flex');
+                }
+            });
         });
     </script>
 </body>

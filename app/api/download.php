@@ -2,9 +2,11 @@
 require_once BASE_PATH . '/app/utils/Response.php';
 require_once BASE_PATH . '/app/utils/Auth.php';
 require_once BASE_PATH . '/app/models/User.php';
+require_once BASE_PATH . '/app/utils/Security.php';
 
 use App\Utils\Response;
 use App\Models\User;
+use App\Utils\Security;
 
 // Get request method
 $method = $_SERVER['REQUEST_METHOD'];
@@ -13,6 +15,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method !== 'GET') {
     Response::error('Method not allowed', 405);
     exit;
+}
+
+// Check for CSRF token if coming from download page
+if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], '/download.html') !== false) {
+    $csrfToken = $_GET['csrf_token'] ?? '';
+    if (!Security::validateCSRFToken($csrfToken)) {
+        Response::error('Invalid CSRF token', 403);
+        exit;
+    }
 }
 
 // Verify authentication
@@ -42,6 +53,23 @@ if (!in_array($userData['subscription_status'], ['trial', 'active', 'admin'])) {
     exit;
 }
 
+// Rate limiting - check if user has exceeded download limits
+try {
+    $db = new \App\Utils\Database();
+    $recentDownloads = $db->query(
+        "SELECT COUNT(*) as count FROM downloads WHERE user_id = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)",
+        [$userId]
+    )->fetch(\PDO::FETCH_ASSOC);
+
+    if ($recentDownloads && $recentDownloads['count'] > 10) {
+        Response::error('Download rate limit exceeded. Please try again later.', 429);
+        exit;
+    }
+} catch (\Exception $e) {
+    // Log error but continue - don't block download for logging errors
+    error_log("Rate limiting check failed: " . $e->getMessage());
+}
+
 // Define different versions available
 $action = $api_segments[1] ?? 'latest';
 $platform = $_GET['platform'] ?? 'windows';
@@ -59,6 +87,22 @@ $downloadPaths = [
     'linux' => [
         'latest' => BASE_PATH . '/downloads/FridayAI-Linux-latest.tar.gz',
         'beta' => BASE_PATH . '/downloads/FridayAI-Linux-beta.tar.gz',
+    ]
+];
+
+// File checksums for verification
+$fileChecksums = [
+    'windows' => [
+        'latest' => 'sha256:' . hash_file('sha256', $downloadPaths['windows']['latest']),
+        'beta' => 'sha256:' . hash_file('sha256', $downloadPaths['windows']['beta']),
+    ],
+    'mac' => [
+        'latest' => 'sha256:' . hash_file('sha256', $downloadPaths['mac']['latest']),
+        'beta' => 'sha256:' . hash_file('sha256', $downloadPaths['mac']['beta']),
+    ],
+    'linux' => [
+        'latest' => 'sha256:' . hash_file('sha256', $downloadPaths['linux']['latest']),
+        'beta' => 'sha256:' . hash_file('sha256', $downloadPaths['linux']['beta']),
     ]
 ];
 
@@ -82,12 +126,16 @@ if (!file_exists($filePath)) {
     exit;
 }
 
+// Get client info for analytics
+$ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+
 // Log the download
 try {
     $db = new \App\Utils\Database();
     $db->query(
-        "INSERT INTO downloads (user_id, platform, version, created_at) VALUES (?, ?, ?, ?)",
-        [$userId, $platform, $action, date('Y-m-d H:i:s')]
+        "INSERT INTO downloads (user_id, platform, version, created_at, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?)",
+        [$userId, $platform, $action, date('Y-m-d H:i:s'), $ipAddress, $userAgent]
     );
 } catch (\Exception $e) {
     // Log error but continue with download
@@ -104,8 +152,11 @@ header('Content-Description: File Transfer');
 header('Content-Type: ' . $fileType);
 header('Content-Disposition: attachment; filename="' . $fileName . '"');
 header('Content-Length: ' . $fileSize);
+header('Content-MD5: ' . base64_encode(md5_file($filePath, true))); // Add content verification
+header('X-Content-Type-Options: nosniff');
+header('X-Checksum: ' . $fileChecksums[$platform][$action]);
 header('Expires: 0');
-header('Cache-Control: must-revalidate');
+header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 header('Pragma: public');
 
 // Clear output buffer

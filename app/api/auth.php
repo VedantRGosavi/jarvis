@@ -19,6 +19,19 @@ $method = $_SERVER['REQUEST_METHOD'];
 // Route to appropriate auth handler
 $action = $api_segments[1] ?? '';
 
+// Check if the request is for CSRF token
+if (isset($api_segments[1]) && $api_segments[1] === 'csrf') {
+    // Handle CSRF token request
+    require_once BASE_PATH . '/app/utils/Security.php';
+
+    // Return the CSRF token
+    header('Content-Type: application/json');
+    echo json_encode([
+        'csrf_token' => \App\Utils\Security::generateCSRFToken()
+    ]);
+    exit;
+}
+
 switch ($action) {
     case 'login':
         if ($method !== 'POST') {

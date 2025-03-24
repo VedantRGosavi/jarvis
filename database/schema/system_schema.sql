@@ -113,6 +113,10 @@ CREATE TABLE downloads (
     user_id INTEGER NOT NULL,
     platform TEXT NOT NULL,
     version TEXT NOT NULL,
+    ip_address TEXT,
+    user_agent TEXT,
+    download_status TEXT DEFAULT 'completed',
+    file_size INTEGER,
     created_at TEXT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

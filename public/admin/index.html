@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FridayAI - Admin Dashboard</title>
+    <meta name="description" content="Admin dashboard for FridayAI platform">
+
+    <!-- Favicon -->
+    <link rel="icon" href="../assets/images/favicon.ico" type="image/x-icon">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/admin.css">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>FridayAI Admin</h1>
+            </div>
+
+            <div class="sidebar-content">
+                <ul class="sidebar-nav">
+                    <li>
+                        <a href="#" data-target="dashboard" class="active">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="downloads">
+                            <i class="fas fa-download"></i>
+                            Downloads
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="users">
+                            <i class="fas fa-users"></i>
+                            Users
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" data-target="subscriptions">
+                            <i class="fas fa-credit-card"></i>
+                            Subscriptions
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <span id="admin-name">Admin</span>
+                <button id="logout-btn" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Section -->
+            <section id="dashboard-section" class="section">
+                <div class="content-header">
+                    <h2>Dashboard</h2>
+                    <button id="refresh-data" class="btn btn-primary">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+
+                <!-- Loading indicator -->
+                <div id="dashboard-loader" class="hidden">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading dashboard data...
+                    </div>
+                </div>
+
+                <!-- Dashboard Content -->
+                <div id="dashboard-content">
+                    <!-- Stats Row -->
+                    <div class="stats-row">
+                        <div class="stat-card primary">
+                            <div class="stat-card-title">Total Downloads</div>
+                            <div id="total-downloads-value" class="stat-card-value">0</div>
+                            <div class="stat-card-info">All platforms</div>
+                        </div>
+
+                        <div class="stat-card windows">
+                            <div class="stat-card-title">Windows Downloads</div>
+                            <div id="windows-downloads-value" class="stat-card-value">0</div>
+                            <div class="stat-card-info">Windows platform</div>
+                        </div>
+
+                        <div class="stat-card mac">
+                            <div class="stat-card-title">Mac Downloads</div>
+                            <div id="mac-downloads-value" class="stat-card-value">0</div>
+                            <div class="stat-card-info">macOS platform</div>
+                        </div>
+
+                        <div class="stat-card linux">
+                            <div class="stat-card-title">Linux Downloads</div>
+                            <div id="linux-downloads-value" class="stat-card-value">0</div>
+                            <div class="stat-card-info">Linux platform</div>
+                        </div>
+
+                        <div class="stat-card success">
+                            <div class="stat-card-title">Successful Downloads</div>
+                            <div id="successful-downloads-value" class="stat-card-value">0</div>
+                            <div class="stat-card-info">Completed downloads</div>
+                        </div>
+
+                        <div class="stat-card info">
+                            <div class="stat-card-title">Total Download Size</div>
+                            <div id="total-download-size" class="stat-card-value">0 MB</div>
+                            <div class="stat-card-info">All files combined</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-row">
+                        <div class="chart-container">
+                            <canvas id="platform-chart"></canvas>
+                        </div>
+
+                        <div class="chart-container">
+                            <canvas id="browser-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="charts-row">
+                        <div class="chart-container full-width">
+                            <canvas id="timeline-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Downloads Section -->
+            <section id="downloads-section" class="section hidden">
+                <div class="content-header">
+                    <h2>Download Analytics</h2>
+                    <div>
+                        <button id="filter-toggle" class="btn btn-secondary">
+                            <i class="fas fa-filter"></i> Filters
+                        </button>
+                        <button id="refresh-data" class="btn btn-primary">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div id="filter-content" class="filters-section hidden">
+                    <div class="filters-title">
+                        <i class="fas fa-filter"></i> Filter Download Records
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="filter-platform">Platform</label>
+                            <select id="filter-platform" class="form-control">
+                                <option value="">All Platforms</option>
+                                <option value="windows">Windows</option>
+                                <option value="mac">Mac</option>
+                                <option value="linux">Linux</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter-version">Version</label>
+                            <select id="filter-version" class="form-control">
+                                <option value="">All Versions</option>
+                                <option value="latest">Latest</option>
+                                <option value="beta">Beta</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter-start-date">Start Date</label>
+                            <input type="date" id="filter-start-date" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter-end-date">End Date</label>
+                            <input type="date" id="filter-end-date" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="filter-status">Status</label>
+                            <select id="filter-status" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="completed">Completed</option>
+                                <option value="failed">Failed</option>
+                                <option value="in_progress">In Progress</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-buttons">
+                        <button id="apply-filters" class="btn btn-primary">
+                            <i class="fas fa-check"></i> Apply Filters
+                        </button>
+                        <button id="reset-filters" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Loading indicator -->
+                <div id="downloads-loader" class="hidden">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Loading download records...
+                    </div>
+                </div>
+
+                <!-- Downloads Table -->
+                <div id="downloads-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Download Records</h3>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Platform</th>
+                                            <th>Version</th>
+                                            <th>User</th>
+                                            <th>Date</th>
+                                            <th>IP Address</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="downloads-table-body">
+                                        <!-- Download records will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="pagination">
+                                <div class="pagination-info">
+                                    Showing page <span id="current-page">1</span> of <span id="total-pages">1</span>
+                                    (<span id="total-records">0</span> records total)
+                                </div>
+
+                                <div class="pagination-controls">
+                                    <button id="prev-page" class="btn-icon" disabled>
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                    <button id="next-page" class="btn-icon" disabled>
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section (Placeholder) -->
+            <section id="users-section" class="section hidden">
+                <div class="content-header">
+                    <h2>Users Management</h2>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <p>User management functionality will be implemented in a future update.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subscriptions Section (Placeholder) -->
+            <section id="subscriptions-section" class="section hidden">
+                <div class="content-header">
+                    <h2>Subscription Management</h2>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <p>Subscription management functionality will be implemented in a future update.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/admin.js"></script>
+</body>
+</html>

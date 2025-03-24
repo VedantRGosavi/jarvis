@@ -28,7 +28,8 @@
                         <li><a href="#features" class="hover:text-gaming-gray-200 transition font-medium">Features</a></li>
                         <li><a href="#games" class="hover:text-gaming-gray-200 transition font-medium">Games</a></li>
                         <li><a href="#pricing" class="hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
-                        <li><a href="#download" class="hover:text-gaming-gray-200 transition font-medium">Download</a></li>
+                        <li><a href="download.html" class="hover:text-gaming-gray-200 transition font-medium">Download</a></li>
+                        <li id="admin-nav-item" class="hidden"><a href="admin/index.html" class="hover:text-gaming-gray-200 transition font-medium">Admin</a></li>
                         <li>
                             <button id="auth-button" class="hover:text-gaming-gray-200 transition font-medium" data-form="register">
                                 Create an Account
@@ -43,7 +44,8 @@
                         <li><a href="#features" class="block hover:text-gaming-gray-200 transition font-medium">Features</a></li>
                         <li><a href="#games" class="block hover:text-gaming-gray-200 transition font-medium">Games</a></li>
                         <li><a href="#pricing" class="block hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
-                        <li><a href="#download" class="block hover:text-gaming-gray-200 transition font-medium">Download</a></li>
+                        <li><a href="download.html" class="block hover:text-gaming-gray-200 transition font-medium">Download</a></li>
+                        <li id="admin-nav-item" class="hidden"><a href="admin/index.html" class="block hover:text-gaming-gray-200 transition font-medium">Admin</a></li>
                         <li>
                             <button id="mobile-auth-button" class="hover:text-gaming-gray-200 transition font-medium" data-form="register">
                                 Create an Account
@@ -640,6 +642,17 @@
                     }
                 });
             });
+
+            // Check for admin users to show admin link
+            if (window.authService && window.authService.isAuthenticated()) {
+                const user = window.authService.getCurrentUser();
+                if (user && user.subscription_status === 'admin') {
+                    document.getElementById('admin-nav-item').classList.remove('hidden');
+                }
+            }
+
+            // Initialize app
+            const app = new FridayAIApp();
         });
     </script>
 </body>
