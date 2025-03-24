@@ -22,9 +22,8 @@
   ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {
-    "tailwindcss": "^3.4.1"
-  },
+  "devDependencies": {},
   "dependencies": {
+    "tailwindcss": "^3.4.1"
   }
 }
