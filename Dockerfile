@@ -44,7 +44,8 @@ RUN mkdir -p /var/www/data/game_data
 RUN chmod -R 777 /var/www/data
 
 # Copy Apache configuration
-COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf || echo "Apache config file not found, using default"
+COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+RUN test -f /etc/apache2/sites-available/000-default.conf || echo "Apache config file not found, using default"
 
 # Expose port 80
 EXPOSE 80
