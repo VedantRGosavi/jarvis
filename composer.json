@@ -25,10 +25,5 @@
   },
   "require-dev": {
     "heroku/heroku-buildpack-php": "*"
-  },
-  "scripts": {
-    "post-install-cmd": [
-      "chmod -R 777 storage"
-    ]
   }
 }
