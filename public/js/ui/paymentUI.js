@@ -1,7 +1,9 @@
 /**
- * Payment UI Module
- * Handles payment form UI using Stripe Elements
+ * Payment UI
+ * Provides UI components for payment processing
  */
+
+import paymentService from '../data/paymentService.js';
 
 class PaymentUI {
   constructor() {
@@ -10,6 +12,7 @@ class PaymentUI {
     this.card = null;
     this.paymentContainer = null;
     this.isInitialized = false;
+    this.currentForm = null;
 
     // Templates
     this.paymentFormTemplate = `
@@ -464,13 +467,13 @@ class PaymentUI {
 }
 
 // Initialize payment UI
+const paymentUI = new PaymentUI();
+
+// Expose to global scope
+window.paymentUI = paymentUI;
+
+// Initialize when Stripe.js is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  const paymentUI = new PaymentUI();
-
-  // Expose to global scope
-  window.paymentUI = paymentUI;
-
-  // Initialize when Stripe.js is loaded
   if (window.Stripe) {
     paymentUI.initialize();
   } else {
@@ -480,3 +483,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+export default paymentUI;

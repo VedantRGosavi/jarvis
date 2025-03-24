@@ -643,9 +643,11 @@
             }
         });
     </script>
-    <script type="module" src="js/data/paymentService.js"></script>
-    <script type="module" src="js/ui/paymentUI.js"></script>
     <script type="module">
+        // Import modules
+        import paymentService from './js/data/paymentService.js';
+        import paymentUI from './js/ui/paymentUI.js';
+
         document.addEventListener('DOMContentLoaded', async () => {
             // Initialize tooltips
             const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];

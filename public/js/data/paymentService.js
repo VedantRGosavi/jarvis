@@ -253,10 +253,11 @@ class PaymentService {
   }
 }
 
-// Initialize payment service
-document.addEventListener('DOMContentLoaded', () => {
-  const paymentService = new PaymentService();
+// Initialize payment service and export
+const paymentService = new PaymentService();
 
-  // Expose to global scope for other scripts
-  window.paymentService = paymentService;
-});
+// Expose to global scope for other scripts
+window.paymentService = paymentService;
+
+// Export the service
+export default paymentService;
