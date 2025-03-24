@@ -183,7 +183,7 @@ switch ($action) {
     case 'oauth':
         // Handles OAuth provider authorization URLs
         if (empty($provider)) {
-            $provider = $api_segments[2] ?? '';
+            $provider = $_GET['provider'] ?? '';
         }
 
         if (empty($provider)) {
@@ -193,9 +193,21 @@ switch ($action) {
 
         try {
             $oauthProvider = OAuthFactory::getProvider($provider);
+
+            if (!$oauthProvider->isConfigured()) {
+                error_log("OAuth provider $provider is not properly configured");
+                Response::error("OAuth provider $provider is not properly configured", 500);
+                break;
+            }
+
             $authUrl = $oauthProvider->getAuthorizationUrl();
 
-            Response::success(['auth_url' => $authUrl]);
+            Response::success([
+                'success' => true,
+                'data' => [
+                    'auth_url' => $authUrl
+                ]
+            ]);
         } catch (\Exception $e) {
             error_log("OAuth URL error for $provider: " . $e->getMessage());
             Response::error($e->getMessage(), 400);

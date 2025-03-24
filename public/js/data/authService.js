@@ -203,9 +203,9 @@ export class AuthService {
       let apiUrl;
 
       if (hostname === 'fridayai.me') {
-        apiUrl = `https://fridayai.me/api/auth.php?action=oauth&provider=${provider}`;
+        apiUrl = `https://fridayai.me/api/auth/oauth/${provider}`;
       } else if (hostname === 'fridayai-gold.vercel.app') {
-        apiUrl = `https://fridayai-gold.vercel.app/api/auth.php?action=oauth&provider=${provider}`;
+        apiUrl = `https://fridayai-gold.vercel.app/api/auth/oauth/${provider}`;
       } else {
         apiUrl = `${this.baseUrl}/oauth/${provider}`;
       }
@@ -396,9 +396,9 @@ export class AuthService {
       let apiUrl;
 
       if (hostname === 'fridayai.me') {
-        apiUrl = 'https://fridayai.me/api/auth.php?action=register';
+        apiUrl = 'https://fridayai.me/api/auth/register';
       } else if (hostname === 'fridayai-gold.vercel.app') {
-        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=register';
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth/register';
       } else {
         apiUrl = `${this.baseUrl}/register`;
       }
