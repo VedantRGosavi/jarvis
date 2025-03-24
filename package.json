@@ -7,7 +7,7 @@
     "dev": "php -S localhost:8000 -t public",
     "build:css": "tailwindcss -i public/css/tailwind.src.css -o public/css/tailwind.css",
     "watch:css": "tailwindcss -i public/css/tailwind.src.css -o public/css/tailwind.css --watch",
-    "build": "chmod +x ./vercel-build.sh && ./vercel-build.sh"
+    "build": "npm run build:css"
   },
   "engines": {
     "node": ">=14.x"
@@ -23,11 +23,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "now-php": "^0.0.10",
     "tailwindcss": "^3.4.1"
   },
   "dependencies": {
-    "@vercel/static-build": "^1.0.0",
-    "vercel-php": "^0.6.0"
   }
 }
