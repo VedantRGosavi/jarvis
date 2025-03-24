@@ -7,7 +7,7 @@ setup:
     - plan: heroku-postgresql:hobby-dev
       as: DATABASE
   config:
-    S3_BUCKET: your-s3-bucket-name
+    S3_BUCKET: fridayai-downloads-2025
     S3_REGION: us-east-1
     APP_ENV: production
     APP_DEBUG: false

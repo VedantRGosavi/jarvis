@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# Install npm dependencies
+# Build and prepare the project for deployment
+composer install --no-dev --optimize-autoloader
 npm install
+npm run build
+
+# Verify database structure
+cd database && bash ./verify_databases.sh
 
 # Build Tailwind CSS
 npm run build:css

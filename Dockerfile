@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libzip-dev \
     libpq-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
+    libsqlite3-dev \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql pdo_sqlite mbstring exif pcntl bcmath gd zip
 
 # Install AWS CLI
 RUN apt-get update && \
@@ -36,10 +37,14 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 # Set permissions
 RUN chown -R www-data:www-data /var/www
-RUN chmod -R 755 /var/www/storage
+RUN chmod -R 755 /var/www/storage /var/www/data
+
+# Create data directories if they don't exist
+RUN mkdir -p /var/www/data/game_data
+RUN chmod -R 777 /var/www/data
 
 # Copy Apache configuration
-COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf || echo "Apache config file not found, using default"
 
 # Expose port 80
 EXPOSE 80
