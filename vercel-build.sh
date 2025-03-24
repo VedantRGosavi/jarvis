@@ -4,19 +4,27 @@
 echo "Building front-end assets..."
 npm run build:css
 
-# Download latest composer
-echo "Downloading composer..."
-curl -sS https://getcomposer.org/installer | php -- --install-dir=/tmp --filename=composer
+# Set PHP version explicitly
+export PHP_VERSION=7.4
 
-# Install PHP dependencies using a specific version of PHP if available
+# Create a custom PHP configuration
+echo "Creating PHP configuration..."
+mkdir -p /tmp/php
+cat > /tmp/php/php.ini << EOL
+extension=openssl.so
+extension=pdo.so
+extension=pdo_sqlite.so
+extension=sqlite3.so
+extension=json.so
+EOL
+
+# Download composer with specific PHP version and configuration
+echo "Downloading composer..."
+PHP_INI_SCAN_DIR=/tmp/php curl -sS https://getcomposer.org/installer | php7.4 -- --install-dir=/tmp --filename=composer
+
+# Install PHP dependencies
 echo "Installing PHP dependencies..."
-if command -v php8.0 &> /dev/null; then
-    /tmp/composer install --no-dev --optimize-autoloader
-elif command -v php7.4 &> /dev/null; then
-    php7.4 /tmp/composer install --no-dev --optimize-autoloader
-else
-    /tmp/composer install --no-dev --optimize-autoloader
-fi
+PHP_INI_SCAN_DIR=/tmp/php php7.4 /tmp/composer install --no-dev --optimize-autoloader
 
 # Create dist directory if it doesn't exist
 mkdir -p dist

@@ -1,12 +1,15 @@
 {
   "require": {
-    "php": "^8.0",
+    "php": "^7.4",
     "stripe/stripe-php": "^10.0",
     "vlucas/phpdotenv": "^5.5"
   },
   "config": {
     "optimize-autoloader": true,
     "preferred-install": "dist",
-    "sort-packages": true
+    "sort-packages": true,
+    "platform": {
+      "php": "7.4.33"
+    }
   }
 }
