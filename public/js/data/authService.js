@@ -301,9 +301,9 @@ export class AuthService {
       let apiUrl;
 
       if (hostname === 'fridayai.me') {
-        apiUrl = 'https://fridayai.me/api/auth.php?action=login';
+        apiUrl = 'https://fridayai.me/api/auth/login';
       } else if (hostname === 'fridayai-gold.vercel.app') {
-        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=login';
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth/login';
       } else {
         apiUrl = `${this.baseUrl}/login`;
       }

@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $data = json_decode(file_get_contents('php://input'), true);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Route to appropriate auth handler
+$action = $api_segments[1] ?? '';
+
 // Log the request for debugging
 error_log("API Request: " . $_SERVER['REQUEST_URI']);
 error_log("Request Method: " . $method);
@@ -50,7 +53,6 @@ if ($data) {
 }
 
 // Detect different parameter methods - direct access via query parameters or REST-style URL segments
-$action = $_GET['action'] ?? null;  // For direct access in the form /api/auth.php?action=register
 $provider = $_GET['provider'] ?? null; // For direct access in the form /api/auth.php?action=oauth&provider=github
 
 // If we don't have action from query param, use URL segment
@@ -181,76 +183,65 @@ switch ($action) {
         break;
 
     case 'oauth':
-        // Handles OAuth provider authorization URLs
-        if (empty($provider)) {
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $provider = $_GET['provider'] ?? '';
-        }
+            $oauthProvider = OAuthProvider::createProvider($provider);
 
-        if (empty($provider)) {
-            Response::error('Provider is required', 400);
-            break;
-        }
-
-        try {
-            $oauthProvider = OAuthFactory::getProvider($provider);
-
-            if (!$oauthProvider->isConfigured()) {
-                error_log("OAuth provider $provider is not properly configured");
-                Response::error("OAuth provider $provider is not properly configured", 500);
-                break;
+            if (!$oauthProvider) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid provider']);
+                exit;
             }
 
             $authUrl = $oauthProvider->getAuthorizationUrl();
-
-            Response::success([
-                'success' => true,
-                'data' => [
-                    'auth_url' => $authUrl
-                ]
-            ]);
-        } catch (\Exception $e) {
-            error_log("OAuth URL error for $provider: " . $e->getMessage());
-            Response::error($e->getMessage(), 400);
+            echo json_encode(['success' => true, 'url' => $authUrl]);
+            exit;
         }
         break;
 
     case 'callback':
-        // Handles OAuth callback
-        if (empty($provider)) {
-            $provider = $api_segments[2] ?? '';
-        }
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $provider = '';
 
-        if (empty($provider)) {
-            Response::error('Provider is required', 400);
-            break;
-        }
+            // Extract provider from path
+            if (preg_match('/\/auth\/callback\/([^\/]+)/', $path, $matches)) {
+                $provider = $matches[1];
+            }
 
-        try {
-            $oauthProvider = OAuthFactory::getProvider($provider);
+            $oauthProvider = OAuthProvider::createProvider($provider);
 
-            // Different providers have different callback parameters
+            if (!$oauthProvider) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid provider']);
+                exit;
+            }
+
+            // Handle special case for Steam which uses OpenID
             if ($provider === 'steam') {
-                $result = $oauthProvider->handleCallback($_GET);
+                $result = $oauthProvider->handleCallback(null);
             } else {
                 $code = $_GET['code'] ?? '';
+                $state = $_GET['state'] ?? null;
+
                 if (empty($code)) {
-                    Response::error('Authorization code is required', 400);
-                    break;
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'Authorization code missing']);
+                    exit;
                 }
-                $result = $oauthProvider->handleCallback($code);
+
+                $result = $oauthProvider->handleCallback($code, $state);
             }
 
             if ($result['success']) {
-                // Redirect to frontend with token
                 $redirectUrl = $_ENV['FRONTEND_URL'] . '/auth/callback?token=' . $result['token'];
-                header("Location: $redirectUrl");
+                header('Location: ' . $redirectUrl);
                 exit;
             } else {
-                Response::error($result['error'] ?? 'Authentication failed', 400);
+                $errorUrl = $_ENV['FRONTEND_URL'] . '/auth/callback?error=' . urlencode($result['error']);
+                header('Location: ' . $errorUrl);
+                exit;
             }
-        } catch (\Exception $e) {
-            error_log("OAuth callback error for $provider: " . $e->getMessage());
-            Response::error($e->getMessage(), 400);
         }
         break;
 
