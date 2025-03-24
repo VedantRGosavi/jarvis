@@ -191,16 +191,23 @@ switch ($action) {
     case 'oauth':
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $provider = $_GET['provider'] ?? '';
-            $oauthProvider = OAuthProvider::createProvider($provider);
 
-            if (!$oauthProvider) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Invalid provider']);
+            if (empty($provider)) {
+                Response::error('Provider is required', 400);
                 exit;
             }
 
-            $authUrl = $oauthProvider->getAuthorizationUrl();
-            echo json_encode(['success' => true, 'url' => $authUrl]);
+            try {
+                $oauthProvider = OAuthFactory::getProvider($provider);
+                $authUrl = $oauthProvider->getAuthorizationUrl();
+
+                // Return in the expected format
+                Response::success([
+                    'auth_url' => $authUrl
+                ]);
+            } catch (\Exception $e) {
+                Response::error($e->getMessage(), 400);
+            }
             exit;
         }
         break;

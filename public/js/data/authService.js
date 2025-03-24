@@ -60,22 +60,52 @@ export class AuthService {
    * Handle OAuth callback if present in URL
    */
   handleOAuthCallback() {
-    if (window.location.pathname.includes('/auth/callback')) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
+    // Check if we have a token in the URL (either from OAuth callback or from development mock)
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
 
-      if (token) {
-        // Store token
-        this.token = token;
-        localStorage.setItem(this.tokenKey, token);
+    if (token) {
+      console.log("OAuth token detected:", token.substring(0, 10) + '...');
 
-        // Get user info
-        this.fetchUserInfo(token);
+      // Store token
+      this.token = token;
+      localStorage.setItem(this.tokenKey, token);
 
-        // Remove callback parameters from URL
+      // Create mock user data for development if token starts with 'mock_'
+      if (token.startsWith('mock_')) {
+        console.log("Using mock user data for development");
+        this.user = {
+          id: "mock-user-" + Math.floor(Math.random() * 1000),
+          username: "MockUser",
+          name: "Mock User",
+          email: "mockuser@example.com",
+          avatar: "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
+        };
+        localStorage.setItem(this.userKey, JSON.stringify(this.user));
+
+        // Dispatch login event
+        document.dispatchEvent(new CustomEvent('userLogin', { detail: this.user }));
+
+        // Clean URL
         const newUrl = window.location.origin;
         window.history.replaceState({}, document.title, newUrl);
+
+        // Redirect to home if needed
+        setTimeout(() => {
+          window.location.href = '/index.html';
+        }, 500);
+      } else {
+        // For real tokens, fetch user info
+        this.fetchUserInfo(token);
       }
+    } else if (urlParams.get('error')) {
+      console.error("OAuth callback error:", urlParams.get('error'));
+
+      // Potentially show an error message to the user here
+      alert("Authentication failed: " + urlParams.get('error'));
+
+      // Redirect to login page
+      window.location.href = '/index.html';
     }
   }
 
@@ -198,16 +228,36 @@ export class AuthService {
    */
   async getOAuthUrl(provider) {
     try {
-      // Let's directly use the full API endpoint to bypass any routing issues
+      // In development/preview environment, use mock auth URLs
+      if (window.location.hostname === 'localhost' ||
+          window.location.hostname.includes('preview') ||
+          window.location.hostname.includes('staging')) {
+
+        console.log(`Using mock OAuth URL for ${provider} in development/preview environment`);
+
+        const mockAuthUrls = {
+          'google': 'https://accounts.google.com/o/oauth2/auth?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&response_type=code&scope=email%20profile',
+          'github': 'https://github.com/login/oauth/authorize?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&scope=user:email',
+          'playstation': 'https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?client_id=mock-client-id&redirect_uri=http://localhost:8000/auth-callback.html&response_type=code&scope=psn:s2s',
+          'steam': 'https://steamcommunity.com/openid/login?openid.ns=http://specs.openid.net/auth/2.0&openid.mode=checkid_setup&openid.return_to=http://localhost:8000/auth-callback.html&openid.realm=http://localhost:8000'
+        };
+
+        return {
+          success: true,
+          auth_url: mockAuthUrls[provider] || `https://example.com/oauth/${provider}?mock=true&redirect_uri=http://localhost:8000/auth-callback.html`
+        };
+      }
+
+      // For production environments, use real OAuth endpoints
       const hostname = window.location.hostname;
       let apiUrl;
 
       if (hostname === 'fridayai.me') {
-        apiUrl = `https://fridayai.me/api/auth/oauth/${provider}`;
+        apiUrl = `https://fridayai.me/api/auth.php?action=oauth&provider=${provider}`;
       } else if (hostname === 'fridayai-gold.vercel.app') {
-        apiUrl = `https://fridayai-gold.vercel.app/api/auth/oauth/${provider}`;
+        apiUrl = `https://fridayai-gold.vercel.app/api/auth.php?action=oauth&provider=${provider}`;
       } else {
-        apiUrl = `${this.baseUrl}/oauth/${provider}`;
+        apiUrl = `/api/auth.php?action=oauth&provider=${provider}`;
       }
 
       console.log(`Fetching OAuth URL for ${provider} from ${apiUrl}`);
@@ -220,65 +270,39 @@ export class AuthService {
         credentials: 'include'
       });
 
-      // Check response type
-      const contentType = response.headers.get('content-type');
-      console.log(`OAuth response content-type for ${provider}: ${contentType}`);
+      // Check response status
+      console.log(`OAuth response status for ${provider}: ${response.status}`);
 
-      if (!contentType || !contentType.includes('application/json')) {
-        console.error(`OAuth URL response has invalid content type: ${contentType} for ${provider}`);
+      // Get the raw text response
+      const textResponse = await response.text();
+
+      // Log a small preview of the response
+      console.log(`OAuth raw response for ${provider} (first 100 chars): ${textResponse.substring(0, 100)}`);
+
+      // If the response is HTML (contains opening tags), it's an error page
+      if (textResponse.includes('<!DOCTYPE') || textResponse.includes('<html') || textResponse.includes('<br />')) {
+        console.error(`Received HTML error page instead of JSON for ${provider}`);
         return {
           success: false,
-          message: `Authentication service unavailable for ${provider}`
+          message: `Authentication service for ${provider} returned an error. Please try again later.`
         };
       }
 
-      // Safely parse JSON
-      let data;
+      // Parse JSON response
       try {
-        const textResponse = await response.text();
-        console.log(`OAuth raw response for ${provider}: ${textResponse.substring(0, 200)}`);
-
         if (!textResponse.trim()) {
           throw new Error('Empty response received');
         }
 
-        data = JSON.parse(textResponse);
+        const data = JSON.parse(textResponse);
+        return this.parseOAuthResponse(data);
       } catch (e) {
         console.error(`Failed to parse OAuth URL response as JSON for ${provider}:`, e);
         return {
           success: false,
-          message: `Authentication service for ${provider} returned an invalid response`
+          message: `Authentication service for ${provider} returned an invalid response. Please try again later.`
         };
       }
-
-      if (!response.ok) {
-        throw new Error(data.message || `Failed to get ${provider} authentication URL`);
-      }
-
-      // Check if we're using the PHP direct path
-      if (apiUrl.includes('auth.php')) {
-        // In the direct PHP endpoint case, the auth_url is in data.data.auth_url
-        if (data.success && data.data && data.data.auth_url) {
-          return {
-            success: true,
-            auth_url: data.data.auth_url
-          };
-        }
-      } else {
-        // In the original case, the auth_url is directly in data.auth_url
-        if (data.auth_url) {
-          return {
-            success: true,
-            auth_url: data.auth_url
-          };
-        }
-      }
-
-      console.error(`OAuth URL response is missing auth_url for ${provider}`, data);
-      return {
-        success: false,
-        message: `Authentication service for ${provider} returned an invalid response`
-      };
     } catch (error) {
       console.error(`OAuth URL error for ${provider}:`, error);
       return {
@@ -493,6 +517,44 @@ export class AuthService {
 
     // Dispatch logout event
     document.dispatchEvent(new CustomEvent('userLogout'));
+  }
+
+  /**
+   * Parse the OAuth response into a consistent format
+   * @param {Object} data - Raw response data
+   * @returns {Object} Normalized response with success and auth_url
+   */
+  parseOAuthResponse(data) {
+    // Case 1: Direct auth_url property
+    if (data.auth_url) {
+      return {
+        success: true,
+        auth_url: data.auth_url
+      };
+    }
+
+    // Case 2: Success with data.auth_url structure
+    if (data.success && data.data && data.data.auth_url) {
+      return {
+        success: true,
+        auth_url: data.data.auth_url
+      };
+    }
+
+    // Case 3: Success with data.url structure (used in some endpoints)
+    if (data.success && data.url) {
+      return {
+        success: true,
+        auth_url: data.url
+      };
+    }
+
+    // Failed to find a valid auth URL
+    console.error('Failed to parse OAuth response:', data);
+    return {
+      success: false,
+      message: 'Invalid response format from authentication service'
+    };
   }
 }
 

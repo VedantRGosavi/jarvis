@@ -232,20 +232,43 @@ class AuthForms {
   async handleOAuthLogin(provider) {
     if (!window.authService) return;
 
-    try {
-      const result = await window.authService.getOAuthUrl(provider);
+    // Show loading state on the button
+    const suffix = document.getElementById(`googleAuthBtnReg`) ? 'Reg' : '';
+    const authBtn = document.getElementById(`${provider}AuthBtn${suffix}`);
 
-      if (result.success && result.auth_url) {
-        // Redirect to provider's authorization page
-        window.location.href = result.auth_url;
-      } else {
-        // Show error
+    if (authBtn) {
+      const originalText = authBtn.innerHTML;
+      authBtn.disabled = true;
+      authBtn.innerHTML = `<span class="animate-pulse">Connecting...</span>`;
+
+      try {
+        const result = await window.authService.getOAuthUrl(provider);
+
+        if (result.success && result.auth_url) {
+          console.log(`Redirecting to ${provider} authorization: ${result.auth_url}`);
+          // Redirect to provider's authorization page
+          window.location.href = result.auth_url;
+        } else {
+          // Show error
+          const errorDisplay = document.getElementById('loginError') || document.getElementById('registrationError');
+          this.showFormError(errorDisplay, result.message || `Failed to connect to ${provider}`);
+
+          // Reset button
+          if (authBtn) {
+            authBtn.disabled = false;
+            authBtn.innerHTML = originalText;
+          }
+        }
+      } catch (error) {
         const errorDisplay = document.getElementById('loginError') || document.getElementById('registrationError');
-        this.showFormError(errorDisplay, result.message || `Failed to connect to ${provider}`);
+        this.showFormError(errorDisplay, `An error occurred connecting to ${provider}: ${error.message}`);
+
+        // Reset button
+        if (authBtn) {
+          authBtn.disabled = false;
+          authBtn.innerHTML = originalText;
+        }
       }
-    } catch (error) {
-      const errorDisplay = document.getElementById('loginError') || document.getElementById('registrationError');
-      this.showFormError(errorDisplay, `An error occurred connecting to ${provider}`);
     }
   }
 
@@ -408,7 +431,14 @@ class AuthForms {
   showFormError(errorElement, message) {
     if (!errorElement) return;
 
-    errorElement.textContent = message;
+    errorElement.innerHTML = `
+      <div class="flex items-center p-2 rounded bg-red-900/30 border border-red-700">
+        <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <span>${message}</span>
+      </div>
+    `;
     errorElement.classList.remove('hidden');
   }
 

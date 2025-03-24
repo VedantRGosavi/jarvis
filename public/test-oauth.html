@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/js/data/auth-service-test.js"></script>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #results {
+            background-color: #2a2a2a;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body class="p-5">
+    <h1 class="text-2xl font-bold mb-5">OAuth Test Page</h1>
+
+    <div class="mb-5">
+        <h2 class="text-xl font-semibold mb-3">Test OAuth URLs</h2>
+        <div class="grid grid-cols-2 gap-4">
+            <button id="googleBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">Test Google OAuth</button>
+            <button id="githubBtn" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition">Test GitHub OAuth</button>
+            <button id="psnBtn" class="bg-blue-800 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded transition">Test PlayStation OAuth</button>
+            <button id="steamBtn" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-4 rounded transition">Test Steam OAuth</button>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-xl font-semibold mb-3">Results</h2>
+        <div id="results" class="text-green-300">Check OAuth provider URLs by clicking the buttons above.</div>
+    </div>
+
+    <script>
+        // Simple logger to display results
+        function log(message, isError = false) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = `[${timestamp}] ${message}`;
+            results.innerHTML += (isError ? `<span class="text-red-400">${entry}</span>\n` : `${entry}\n`);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        // Test OAuth URL function
+        async function testOAuthUrl(provider) {
+            log(`Testing OAuth URL for ${provider}...`);
+
+            try {
+                // Use the auth service
+                if (window.authService) {
+                    const result = await window.authService.getOAuthUrl(provider);
+                    log(`Result: ${JSON.stringify(result, null, 2)}`);
+
+                    if (result.success && result.auth_url) {
+                        log(`Would redirect to: ${result.auth_url}`);
+
+                        // Add a test link
+                        const linkId = `${provider}Link`;
+                        // Remove existing link if it exists
+                        const existingLink = document.getElementById(linkId);
+                        if (existingLink) {
+                            existingLink.remove();
+                        }
+
+                        // Create new test link
+                        const testLink = document.createElement('a');
+                        testLink.id = linkId;
+                        testLink.href = result.auth_url;
+                        testLink.target = '_blank';
+                        testLink.className = 'text-blue-400 hover:underline';
+                        testLink.textContent = `Test ${provider} OAuth URL (opens in new tab)`;
+
+                        results.appendChild(document.createElement('br'));
+                        results.appendChild(testLink);
+                        results.appendChild(document.createElement('br'));
+                    }
+                } else {
+                    // Auth service not available
+                    log(`Auth service not available`, true);
+                }
+            } catch (error) {
+                log(`Error testing ${provider} OAuth: ${error.message}`, true);
+            }
+        }
+
+        // Set up event listeners
+        document.getElementById('googleBtn').addEventListener('click', () => testOAuthUrl('google'));
+        document.getElementById('githubBtn').addEventListener('click', () => testOAuthUrl('github'));
+        document.getElementById('psnBtn').addEventListener('click', () => testOAuthUrl('playstation'));
+        document.getElementById('steamBtn').addEventListener('click', () => testOAuthUrl('steam'));
+
+        // Log initial status
+        if (window.authService) {
+            log('Auth service is available for testing.');
+        } else {
+            log('Auth service not detected. Please check console for errors.', true);
+        }
+    </script>
+</body>
+</html>

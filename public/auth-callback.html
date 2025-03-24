@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth Callback</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+        }
+        .card {
+            background-color: #2a2a2a;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .success {
+            color: #4ade80;
+        }
+        .error {
+            color: #f87171;
+        }
+    </style>
+</head>
+<body>
+    <div class="card text-center">
+        <div id="status-icon" class="text-5xl mb-4">⏳</div>
+        <h1 id="title" class="text-2xl font-bold mb-4">Processing Authentication...</h1>
+        <p id="message" class="mb-6">Please wait while we complete your authentication.</p>
+        <div id="debug" class="text-xs text-gray-400 mb-5 text-left hidden"></div>
+        <button id="close-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded transition hidden">
+            Continue
+        </button>
+    </div>
+
+    <script>
+        // Parse URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        const error = params.get('error');
+        const state = params.get('state');
+
+        // Get provider from path or state parameter
+        let provider = 'unknown';
+        if (window.location.pathname.includes('/callback/')) {
+            provider = window.location.pathname.split('/callback/')[1];
+        } else if (state) {
+            provider = state;
+        }
+
+        // Debug info display
+        const debugInfo = document.getElementById('debug');
+        debugInfo.textContent = `Provider: ${provider}
+Code: ${code || 'Not provided'}
+Error: ${error || 'None'}
+State: ${state || 'Not provided'}`;
+        debugInfo.classList.remove('hidden');
+
+        // Elements
+        const statusIcon = document.getElementById('status-icon');
+        const title = document.getElementById('title');
+        const message = document.getElementById('message');
+        const closeButton = document.getElementById('close-button');
+
+        // Handle success or error
+        if (error) {
+            // Show error state
+            statusIcon.textContent = '❌';
+            statusIcon.classList.add('error');
+            title.textContent = 'Authentication Failed';
+            message.textContent = `We couldn't complete your authentication with ${provider}. ${error}`;
+            closeButton.textContent = 'Try Again';
+        } else if (code || (provider === 'steam' && params.has('openid.identity'))) {
+            // Show success state and generate mock token
+            statusIcon.textContent = '✅';
+            statusIcon.classList.add('success');
+            title.textContent = 'Authentication Successful';
+            message.textContent = `You've successfully authenticated with ${provider}.`;
+
+            // Generate mock token and redirect
+            const mockToken = 'mock_token_' + Math.random().toString(36).substring(2);
+
+            // Simulate token processing delay
+            setTimeout(() => {
+                // Redirect with token
+                window.location.href = `/?token=${mockToken}`;
+            }, 2000);
+        } else {
+            // Show error for missing parameters
+            statusIcon.textContent = '❓';
+            statusIcon.classList.add('error');
+            title.textContent = 'Invalid Authentication';
+            message.textContent = 'Missing required authentication parameters.';
+        }
+
+        // Show close/retry button after 2 seconds
+        setTimeout(() => {
+            closeButton.classList.remove('hidden');
+        }, 2000);
+
+        // Close button behavior
+        closeButton.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html>
