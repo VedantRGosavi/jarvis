@@ -1,0 +1,35 @@
+# Git Leaks configuration file
+title = "GitLeaks config"
+
+# This section defines which files should be excluded from secret scanning
+[allowlist]
+  description = "Files and patterns excluded from secret scanning"
+
+  # Files to exclude
+  files = [
+    '''.env.example$''',
+    '''config/\.env.example$''',
+    '''\.secrets.baseline$''',
+    '''SECURITY\.md$''',
+    '''README\.md$''',
+    '''auth-example\.js$''',
+    '''\.gitignore$''',
+    '''\.pre-commit-config\.yaml$''',
+    '''deploy-instructions\.md$''',
+    '''examples/.*\.php$''',
+    '''documentation/.*\.md$''',
+    '''\.gitleaks\.toml$''',
+    '''\.github/workflows/.*\.yml$''',
+    '''clean-repo-history\.sh$'''
+  ]
+
+  # Regex patterns to exclude
+  regexes = [
+    '''your_[a-zA-Z0-9_]+''',
+    '''example''',
+    '''placeholder''',
+    '''your-[a-zA-Z0-9_]+''',
+    '''sk-proj-0123456789abcdef0123456789abcdef''',
+    '''PLACEHOLDER''',
+    '''INSERT_[A-Z_]+_HERE'''
+  ]
