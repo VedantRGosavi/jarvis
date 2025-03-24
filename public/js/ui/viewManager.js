@@ -54,6 +54,9 @@ class ViewManager {
     
     if (!this.contentArea) return;
     
+    const isMac = navigator.platform.includes('Mac');
+    const shortcutKey = isMac ? 'Cmd+Shift+J' : 'Ctrl+Shift+J';
+    
     this.contentArea.innerHTML = `
       <div class="bg-gaming-gray-800 p-2 rounded border border-gaming-gray-700">
         <h3 class="text-sm font-semibold mb-1">Quick Navigation</h3>
@@ -66,7 +69,7 @@ class ViewManager {
       </div>
       
       <div class="mt-3 text-xs text-gaming-gray-400">
-        <p>Press <span class="bg-gaming-gray-700 px-1 rounded">Ctrl+J</span> to toggle overlay visibility</p>
+        <p>Press <span class="bg-gaming-gray-700 px-1 rounded">${shortcutKey}</span> to toggle overlay visibility</p>
       </div>
     `;
     

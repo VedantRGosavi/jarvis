@@ -101,11 +101,21 @@ class OverlayController {
     
     // Initialize hotkeys if available
     if (window.gameHotkeys) {
-      window.gameHotkeys.registerHotkey('Ctrl+J', () => {
-        if (window.gameOverlay) {
-          window.gameOverlay.toggleVisibility();
-        }
-      });
+      // Register platform-specific hotkey
+      const isMac = navigator.platform.includes('Mac');
+      if (isMac) {
+        window.gameHotkeys.registerHotkey('Meta+Shift+J', () => {
+          if (window.gameOverlay) {
+            window.gameOverlay.toggleVisibility();
+          }
+        });
+      } else {
+        window.gameHotkeys.registerHotkey('Ctrl+Shift+J', () => {
+          if (window.gameOverlay) {
+            window.gameOverlay.toggleVisibility();
+          }
+        });
+      }
       
       window.gameHotkeys.registerHotkey('Escape', () => {
         if (window.viewManager && window.viewManager.currentView !== 'home') {

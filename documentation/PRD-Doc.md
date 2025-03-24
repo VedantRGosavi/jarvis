@@ -27,7 +27,9 @@ The Gaming Companion Overlay Tool addresses a common pain point for gamers: the 
 
 #### 4.1 Overlay System
 
-- **Activation Method:** Customizable hotkey combination (default: Ctrl+Shift+G)
+- **Activation Method:** Platform-specific hotkey combination:
+  - Windows: Ctrl+Shift+J
+  - macOS: Cmd+Shift+J
 - **Visibility Control:** Ability to show/hide overlay at will
 - **Positioning:** Draggable, resizable interface with position memory
 - **Transparency:** Adjustable opacity settings (25%-100%)

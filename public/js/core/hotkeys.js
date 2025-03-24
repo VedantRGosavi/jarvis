@@ -164,11 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameHotkeys = new GameHotkeys();
   
   // Register default hotkeys
-  gameHotkeys.registerHotkey('Ctrl+J', () => {
+  gameHotkeys.registerHotkey('Ctrl+Shift+J', () => {
     if (window.gameOverlay) {
       window.gameOverlay.toggleVisibility();
     }
   });
+
+  // Register macOS-specific hotkey
+  if (navigator.platform.includes('Mac')) {
+    gameHotkeys.registerHotkey('Meta+Shift+J', () => {
+      if (window.gameOverlay) {
+        window.gameOverlay.toggleVisibility();
+      }
+    });
+  }
   
   gameHotkeys.registerHotkey('Escape', () => {
     // Only handle Escape when overlay is visible

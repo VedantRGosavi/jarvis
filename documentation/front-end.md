@@ -91,7 +91,9 @@ The overlay system provides a transparent interface that can be activated during
 - Draggable and resizable interface
 - Configurable opacity levels (25%-100%)
 - Always-on-top functionality
-- Hotkey activation/deactivation (default: Ctrl+Shift+G)
+- Platform-specific hotkey activation:
+  - Windows: Ctrl+Shift+J
+  - macOS: Cmd+Shift+J
 - Position memory between sessions
 
 #### Implementation:

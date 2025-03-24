@@ -173,6 +173,12 @@
                                 <button class="tab-button active px-4 py-2 rounded-md text-gaming-light font-medium transition" data-tab="getting-started">
                                     Getting Started
                                 </button>
+                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="windows">
+                                    Windows Guide
+                                </button>
+                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="macos">
+                                    macOS Guide
+                                </button>
                                 <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="features">
                                     Features
                                 </button>
@@ -185,11 +191,35 @@
                             <div class="tab-content active" id="getting-started">
                                 <h3 class="text-xl font-semibold mb-4">Getting Started with FridayAI</h3>
                                 <div class="space-y-4 text-gaming-gray-300">
-                                    <p>1. Download and install FridayAI from the download section</p>
-                                    <p>2. Launch your game (Elden Ring or Baldur's Gate 3)</p>
-                                    <p>3. Press Ctrl+Shift+J to open the overlay</p>
-                                    <p>4. Position the overlay where you want it</p>
-                                    <p>5. Start exploring the game with enhanced information!</p>
+                                    <p>Welcome to FridayAI! Choose your platform guide below:</p>
+                                    <div class="flex space-x-4 mt-4">
+                                        <button class="px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition" onclick="document.querySelector('[data-tab=windows]').click()">Windows Guide</button>
+                                        <button class="px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition" onclick="document.querySelector('[data-tab=macos]').click()">macOS Guide</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-content hidden" id="windows">
+                                <h3 class="text-xl font-semibold mb-4">Windows Installation Guide</h3>
+                                <div class="space-y-4 text-gaming-gray-300">
+                                    <p>1. Download FridayAI for Windows from the download section</p>
+                                    <p>2. Run the installer (FridayAI-Setup.exe)</p>
+                                    <p>3. Follow the installation wizard</p>
+                                    <p>4. Launch your game (Elden Ring or Baldur's Gate 3)</p>
+                                    <p>5. Press Ctrl+Shift+J to open the overlay</p>
+                                    <p>6. Position the overlay where you want it</p>
+                                    <p class="mt-4 text-gaming-gray-400">Note: Make sure to run games in "Borderless Windowed" or "Windowed" mode for best compatibility</p>
+                                </div>
+                            </div>
+                            <div class="tab-content hidden" id="macos">
+                                <h3 class="text-xl font-semibold mb-4">macOS Installation Guide</h3>
+                                <div class="space-y-4 text-gaming-gray-300">
+                                    <p>1. Download FridayAI for macOS from the download section</p>
+                                    <p>2. Open the downloaded .dmg file</p>
+                                    <p>3. Drag FridayAI to your Applications folder</p>
+                                    <p>4. Launch your game (Elden Ring or Baldur's Gate 3)</p>
+                                    <p>5. Press Cmd+Shift+J to open the overlay</p>
+                                    <p>6. Position the overlay where you want it</p>
+                                    <p class="mt-4 text-gaming-gray-400">Note: First time users may need to approve FridayAI in System Settings > Security & Privacy</p>
                                 </div>
                             </div>
                             <div class="tab-content hidden" id="features">
