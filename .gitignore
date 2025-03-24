@@ -9,6 +9,14 @@
 .env
 .env.*
 !.env.example
+config/.env
+config/.env.*
+!config/.env.example
+
+# Secrets
+secrets.txt
+clean_secrets.sh
+
 # Service accounts
 *-service-key.json
 fridayai-service-key.json
