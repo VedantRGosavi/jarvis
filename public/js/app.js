@@ -376,11 +376,13 @@ export class FridayAIApp {
   }
 }
 
-// Initialize the app and expose to window
-export const fridayAIApp = new FridayAIApp();
+// Replace immediate instantiation with deferred instantiation
+export let fridayAIApp = null;
 
 // SAFEGUARD: Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+  // Instantiate the app after the DOM is ready
+  fridayAIApp = new FridayAIApp();
   // Ensure the app is available globally
   window.fridayAIApp = fridayAIApp;
 
@@ -390,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // If sections aren't visible, try force re-initialization
   const forceReinitialize = () => {
     // Make sure core UI sections are visible
-    const sections = ['features', 'games', 'pricing', 'docs'];
+    const sections = ['features', 'games', 'pricing', 'docs', 'footer'];
 
     sections.forEach(id => {
       const section = document.getElementById(id);
