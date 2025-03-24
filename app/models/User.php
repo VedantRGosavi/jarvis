@@ -36,61 +36,88 @@ class User {
     }
 
     public function register($name, $email, $password) {
-        // Check if user exists
-        $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
-        if ($this->db->fetchOne($stmt, [$email])) {
+        try {
+            // Check if user exists
+            $stmt = $this->db->prepare("SELECT id FROM users WHERE email = ?");
+            if ($this->db->fetchOne($stmt, [$email])) {
+                return [
+                    'success' => false,
+                    'message' => 'Email already registered'
+                ];
+            }
+
+            // Create user
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $timestamp = date('Y-m-d H:i:s');
+
+            $sql = "INSERT INTO users (name, email, password_hash, created_at, last_login, subscription_status)
+                    VALUES (?, ?, ?, ?, ?, ?)";
+
+            $stmt = $this->db->prepare($sql);
+            $this->db->exec($stmt, [
+                $name,
+                $email,
+                $passwordHash,
+                $timestamp,
+                $timestamp,
+                'none'
+            ]);
+
+            // Get last insert ID
+            $userId = $this->db->lastInsertId();
+
+            if (!$userId) {
+                error_log("Failed to get last insert ID after creating user");
+                return [
+                    'success' => false,
+                    'message' => 'Failed to create user'
+                ];
+            }
+
+            // Get user data
+            $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
+            $user = $this->db->fetchOne($stmt, [$userId]);
+
+            if (!$user) {
+                error_log("Failed to retrieve user with ID: " . $userId);
+                return [
+                    'success' => false,
+                    'message' => 'Failed to retrieve user data'
+                ];
+            }
+
+            // Remove sensitive data
+            unset($user['password_hash']);
+
+            // Generate JWT token
+            $token = Auth::generateToken($userId);
+
+            return [
+                'success' => true,
+                'token' => $token,
+                'user' => $user
+            ];
+        } catch (\Exception $e) {
+            error_log("Registration error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return [
                 'success' => false,
-                'message' => 'Email already registered'
+                'message' => 'Registration failed: ' . $e->getMessage()
             ];
         }
+    }
 
-        // Create user
-        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-        $timestamp = date('Y-m-d H:i:s');
-
-        $stmt = $this->db->prepare(
-            "INSERT INTO users (name, email, password_hash, created_at, last_login, subscription_status)
-             VALUES (?, ?, ?, ?, ?, ?)"
-        );
-
-        if (!$this->db->exec($stmt, [$name, $email, $passwordHash, $timestamp, $timestamp, 'none'])) {
-            return [
-                'success' => false,
-                'message' => 'Failed to create user'
-            ];
-        }
-
-        $userId = $this->db->lastInsertId();
-
-        // Get user data
+    public function getById($id) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
-        $user = $this->db->fetchOne($stmt, [$userId]);
+        $user = $this->db->fetchOne($stmt, [$id]);
 
         if (!$user) {
-            return [
-                'success' => false,
-                'message' => 'Failed to retrieve user data'
-            ];
+            return null;
         }
 
         // Remove sensitive data
         unset($user['password_hash']);
 
-        // Generate JWT token
-        $token = Auth::generateToken($userId);
-
-        return [
-            'success' => true,
-            'token' => $token,
-            'user' => $user
-        ];
-    }
-
-    public function getById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
+        return $user;
     }
 
     public function updateStripeCustomerId($userId, $stripeCustomerId) {
@@ -299,7 +326,7 @@ class User {
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
         $timestamp = date('Y-m-d H:i:s');
 
-        $sql = "INSERT INTO users (name, email, password, created_at, subscription_status, stripe_customer_id)
+        $sql = "INSERT INTO users (name, email, password_hash, created_at, subscription_status, stripe_customer_id)
                 VALUES (?, ?, ?, ?, ?, ?)";
 
         $stmt = $this->db->prepare($sql);
@@ -339,7 +366,7 @@ class User {
         }
 
         // Remove password before returning
-        unset($user['password']);
+        unset($user['password_hash']);
 
         return $user;
     }

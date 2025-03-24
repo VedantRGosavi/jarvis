@@ -70,13 +70,26 @@ class Response {
     public static function error($message, $statusCode = 400, $errors = null) {
         $response = [
             'success' => false,
-            'message' => $message
+            'message' => $message,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'debug_info' => [
+                'file' => debug_backtrace()[0]['file'] ?? 'unknown',
+                'line' => debug_backtrace()[0]['line'] ?? 'unknown',
+                'memory_usage' => memory_get_usage(true),
+                'php_version' => PHP_VERSION
+            ]
         ];
 
         if ($errors !== null) {
             $response['errors'] = $errors;
         }
 
+        if (ini_get('display_errors')) {
+            $e = new \Exception();
+            $response['debug_info']['stack_trace'] = $e->getTraceAsString();
+        }
+
+        error_log("API Error Response: " . json_encode($response));
         self::json($response, $statusCode);
     }
 

@@ -45,8 +45,34 @@ class Database {
         return $this->db->prepare($sql);
     }
 
-    public function exec($sql) {
-        return $this->db->exec($sql);
+    public function exec($sql, $params = []) {
+        if (is_string($sql)) {
+            return $this->db->exec($sql);
+        }
+
+        // If it's a prepared statement
+        $stmt = $sql;
+
+        if (!$stmt) {
+            throw new \Exception("Invalid statement");
+        }
+
+        // Bind parameters by index (1-based)
+        foreach ($params as $index => $value) {
+            $paramIndex = $index + 1;
+            $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
+            $stmt->bindValue($paramIndex, $value, $type);
+        }
+
+        $result = $stmt->execute();
+        if (!$result) {
+            throw new \Exception("Unable to execute statement: " . $this->db->lastErrorMsg());
+        }
+        return $result;
+    }
+
+    public function lastErrorMsg() {
+        return $this->db->lastErrorMsg();
     }
 
     // Execute a prepared statement with parameters
@@ -71,14 +97,24 @@ class Database {
 
     // Fetch methods
     public function fetchAll($sql, $params = []) {
-        $stmt = $this->db->prepare($sql);
+        $stmt = is_string($sql) ? $this->db->prepare($sql) : $sql;
 
-        foreach ($params as $param => $value) {
+        if (!$stmt) {
+            throw new \Exception("Failed to prepare statement");
+        }
+
+        // Bind parameters
+        foreach ($params as $index => $value) {
+            $paramIndex = $index + 1;
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
-            $stmt->bindValue($param, $value, $type);
+            $stmt->bindValue($paramIndex, $value, $type);
         }
 
         $result = $stmt->execute();
+
+        if (!$result) {
+            throw new \Exception("Failed to execute statement");
+        }
 
         $rows = [];
         while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
@@ -89,16 +125,29 @@ class Database {
     }
 
     public function fetchOne($sql, $params = []) {
-        $stmt = $this->db->prepare($sql);
+        $stmt = is_string($sql) ? $this->db->prepare($sql) : $sql;
 
-        foreach ($params as $param => $value) {
+        if (!$stmt) {
+            throw new \Exception("Failed to prepare statement");
+        }
+
+        // Bind parameters
+        foreach ($params as $index => $value) {
+            $paramIndex = $index + 1;
             $type = is_int($value) ? SQLITE3_INTEGER : SQLITE3_TEXT;
-            $stmt->bindValue($param, $value, $type);
+            $stmt->bindValue($paramIndex, $value, $type);
         }
 
         $result = $stmt->execute();
 
-        return $result->fetchArray(SQLITE3_ASSOC);
+        if (!$result) {
+            throw new \Exception("Failed to execute statement");
+        }
+
+        $row = $result->fetchArray(SQLITE3_ASSOC);
+
+        // Return false if no rows found instead of empty array
+        return $row === false ? false : $row;
     }
 
     /**

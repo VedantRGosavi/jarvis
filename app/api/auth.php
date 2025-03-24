@@ -1,4 +1,8 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 require_once BASE_PATH . '/app/utils/Response.php';
 require_once BASE_PATH . '/app/models/User.php';
 require_once BASE_PATH . '/app/utils/OAuthProvider.php';
@@ -139,8 +143,10 @@ switch ($action) {
         }
 
         try {
+            error_log("Starting registration process for email: " . $data['email']);
             $user = new User();
             $result = $user->register($data['name'], $data['email'], $data['password']);
+            error_log("Registration result: " . json_encode($result));
 
             if ($result['success']) {
                 Response::success([
@@ -151,7 +157,7 @@ switch ($action) {
                 Response::error($result['message'] ?? 'Registration failed', 400);
             }
         } catch (\Exception $e) {
-            error_log("Registration error: " . $e->getMessage());
+            error_log("Registration error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             Response::error('Registration failed: ' . $e->getMessage(), 500);
         }
         break;
