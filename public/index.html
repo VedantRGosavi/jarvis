@@ -13,39 +13,61 @@
     <!-- Integrated layout with seamless transitions -->
     <div class="page-container relative">
         <!-- Navbar -->
-        <header class="navbar-container">
-            <div class="container mx-auto px-6 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-gaming-light">FridayAI</h1>
-                <nav>
+        <header class="navbar-container relative">
+            <div class="container mx-auto px-4 sm:px-6 flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold text-gaming-light">FridayAI</h1>
+                
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-button" class="md:hidden text-gaming-light hover:text-gaming-gray-200 focus:outline-none">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+
+                <!-- Desktop navigation -->
+                <nav class="hidden md:block">
                     <ul class="flex space-x-8">
                         <li><a href="#features" class="hover:text-gaming-gray-200 transition font-medium">Features</a></li>
                         <li><a href="#games" class="hover:text-gaming-gray-200 transition font-medium">Games</a></li>
                         <li><a href="#pricing" class="hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
                         <li><a href="#download" class="hover:text-gaming-gray-200 transition font-medium">Download</a></li>
                         <li>
-                            <button id="auth-button" class="hover:text-gaming-gray-200 transition font-medium">
-                                Login
+                            <button id="auth-button" class="hover:text-gaming-gray-200 transition font-medium" data-form="register">
+                                Create an Account
                             </button>
                         </li>
                     </ul>
                 </nav>
+
+                <!-- Mobile navigation -->
+                <div id="mobile-menu" class="hidden absolute top-full left-0 right-0 bg-gaming-gray-800/95 backdrop-blur-sm md:hidden">
+                    <ul class="flex flex-col py-4 px-6 space-y-4">
+                        <li><a href="#features" class="block hover:text-gaming-gray-200 transition font-medium">Features</a></li>
+                        <li><a href="#games" class="block hover:text-gaming-gray-200 transition font-medium">Games</a></li>
+                        <li><a href="#pricing" class="block hover:text-gaming-gray-200 transition font-medium">Pricing</a></li>
+                        <li><a href="#download" class="block hover:text-gaming-gray-200 transition font-medium">Download</a></li>
+                        <li>
+                            <button id="mobile-auth-button" class="hover:text-gaming-gray-200 transition font-medium" data-form="register">
+                                Create an Account
+                            </button>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </header>
         
         <!-- Hero Section -->
         <section class="hero-section">
             <div class="hero-image">
-                <img src="assets/images/hero-image.jpg" alt="Gamer working at night" class="hero-image">
+                <img src="assets/images/hero-image.jpg" alt="Gamer working at night" class="hero-image w-full h-auto">
             </div>
-            <div class="container mx-auto px-6">
-                <div class="hero-content mt-24 fade-in-element">
-                    <h1 class="text-5xl font-bold mb-6 leading-tight">Your Ultimate Gaming Companion</h1>
-                    <p class="text-xl mb-10 text-gaming-gray-200">A minimalist overlay tool for games like Elden Ring and Baldur's Gate 3.</p>
-                    <div class="flex space-x-4">
-                        <a href="#download" class="bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 px-8 rounded-md transition">
+            <div class="container mx-auto px-4 sm:px-6">
+                <div class="hero-content mt-16 sm:mt-24 fade-in-element">
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">Your Ultimate Gaming Companion</h1>
+                    <p class="text-lg sm:text-xl mb-8 sm:mb-10 text-gaming-gray-200">A minimalist overlay tool for games like Elden Ring and Baldur's Gate 3.</p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#download" class="w-full sm:w-auto text-center bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 px-8 rounded-md transition">
                             Get Started
                         </a>
-                        <a href="#features" class="border border-gaming-gray-400 hover:border-gaming-gray-200 text-gaming-light font-bold py-3 px-8 rounded-md transition">
+                        <a href="#features" class="w-full sm:w-auto text-center border border-gaming-gray-400 hover:border-gaming-gray-200 text-gaming-light font-bold py-3 px-8 rounded-md transition">
                             Learn More
                         </a>
                     </div>
@@ -54,20 +76,20 @@
         </section>
         
         <!-- Features Section -->
-        <section id="features" class="features-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="features-title text-4xl font-bold text-center fade-in-element">Key Features</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl fade-in-element">
-                        <h3 class="text-xl font-semibold mb-4">Minimalist Design</h3>
+        <section id="features" class="features-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="features-title text-3xl sm:text-4xl font-bold text-center mb-12 fade-in-element">Key Features</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Minimalist Design</h3>
                         <p class="text-gaming-gray-300">Clean black and white interface that won't distract from your gameplay experience.</p>
                     </div>
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl fade-in-element">
-                        <h3 class="text-xl font-semibold mb-4">Game-Specific Data</h3>
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Game-Specific Data</h3>
                         <p class="text-gaming-gray-300">Tailored information for each supported game, from quests to item locations.</p>
                     </div>
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl fade-in-element">
-                        <h3 class="text-xl font-semibold mb-4">Customizable Overlay</h3>
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Customizable Overlay</h3>
                         <p class="text-gaming-gray-300">Drag, resize, and adjust opacity to make it fit perfectly with your setup.</p>
                     </div>
                 </div>
@@ -75,46 +97,46 @@
         </section>
         
         <!-- Games Section -->
-        <section id="games" class="games-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="games-title text-4xl font-bold text-center fade-in-element">Supported Games</h2>
+        <section id="games" class="games-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="games-title text-3xl sm:text-4xl font-bold text-center mb-12 fade-in-element">Supported Games</h2>
                 
                 <!-- Current Games -->
-                <div class="games-grid grid md:grid-cols-2 gap-10 mb-16">
-                    <div class="game-card bg-gaming-gray-800 p-8 rounded-lg shadow-xl fade-in-element">
+                <div class="games-grid grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 mb-16">
+                    <div class="game-card bg-gaming-gray-800 p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
                         <div class="game-image mb-6">
-                            <img src="assets/images/elden-ring.jpg" alt="Elden Ring" class="w-full h-64 object-cover rounded-lg">
+                            <img src="assets/images/elden-ring.jpg" alt="Elden Ring" class="w-full h-48 sm:h-64 object-cover rounded-lg">
                         </div>
-                        <h3 class="text-2xl font-semibold mb-4">Elden Ring</h3>
+                        <h3 class="text-xl sm:text-2xl font-semibold mb-4">Elden Ring</h3>
                         <p class="text-gaming-gray-300 mb-6">Navigate the Lands Between with confidence. Quest tracking, boss information, item locations, and more.</p>
                         <span class="inline-block bg-gaming-gray-700 px-4 py-2 rounded-full text-sm">Available Now</span>
                     </div>
-                    <div class="game-card bg-gaming-gray-800 p-8 rounded-lg shadow-xl fade-in-element">
+                    <div class="game-card bg-gaming-gray-800 p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
                         <div class="game-image mb-6">
-                            <img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3" class="w-full h-64 object-cover rounded-lg">
+                            <img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3" class="w-full h-48 sm:h-64 object-cover rounded-lg">
                         </div>
-                        <h3 class="text-2xl font-semibold mb-4">Baldur's Gate 3</h3>
+                        <h3 class="text-xl sm:text-2xl font-semibold mb-4">Baldur's Gate 3</h3>
                         <p class="text-gaming-gray-300 mb-6">Companion quests, dialogue options, consequence tracking, and area guides for your adventure.</p>
                         <span class="inline-block bg-gaming-gray-700 px-4 py-2 rounded-full text-sm">Available Now</span>
                     </div>
                 </div>
 
                 <!-- Coming Soon Games -->
-                <h3 class="text-2xl font-bold text-center mb-8 fade-in-element">Coming Soon</h3>
-                <div class="games-grid grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-center mb-8 fade-in-element">Coming Soon</h3>
+                <div class="games-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 sm:gap-6">
                     <div class="game-card bg-gaming-gray-800 p-4 rounded-lg shadow-xl fade-in-element">
                         <div class="game-image mb-4">
                             <img src="assets/images/witcher3.jpg" alt="The Witcher 3" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">The Witcher 3</h3>
-                        <p class="text-gaming-gray-300 text-sm mb-3">Track contracts, alchemy recipes, and Gwent card locations across the Northern Realms.</p>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">The Witcher 3</h3>
+                        <p class="text-gaming-gray-300 text-sm mb-3">Track contracts, alchemy recipes, and Gwent card locations.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
                     <div class="game-card bg-gaming-gray-800 p-4 rounded-lg shadow-xl fade-in-element">
                         <div class="game-image mb-4">
                             <img src="assets/images/cyberpunk.jpg" alt="Cyberpunk 2077" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Cyberpunk 2077</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Cyberpunk 2077</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Navigate Night City with detailed maps, cyberware guides, and mission choices.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -122,7 +144,7 @@
                         <div class="game-image mb-4">
                             <img src="assets/images/fallout4.jpg" alt="Fallout 4" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Fallout 4</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Fallout 4</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Survive the Commonwealth with settlement guides, crafting recipes, and quest tracking.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -130,7 +152,7 @@
                         <div class="game-image mb-4">
                             <img src="assets/images/kingdom-come-deliverance-2.jpg" alt="Kingdom Come: Deliverance 2" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Kingdom Come: Deliverance 2</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Kingdom Come: Deliverance 2</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Continue the medieval saga with enhanced combat, deeper RPG systems, and a new chapter in Bohemian history.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -138,7 +160,7 @@
                         <div class="game-image mb-4">
                             <img src="assets/images/bloodborne.jpg" alt="Bloodborne" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Bloodborne</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Bloodborne</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Hunt through Yharnam with detailed boss strategies and weapon upgrade paths.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -146,7 +168,7 @@
                         <div class="game-image mb-4">
                             <img src="assets/images/dark-souls.jpg" alt="Dark Souls" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Dark Souls</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Dark Souls</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Explore Lordran with detailed maps, boss guides, and equipment locations.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -154,7 +176,7 @@
                         <div class="game-image mb-4">
                             <img src="assets/images/kingdome-come.jpg" alt="Kingdom Come: Deliverance" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
-                        <h3 class="text-lg font-semibold mb-2">Kingdom Come: Deliverance</h3>
+                        <h3 class="text-base sm:text-lg font-semibold mb-2">Kingdom Come: Deliverance</h3>
                         <p class="text-gaming-gray-300 text-sm mb-3">Master medieval combat, alchemy, and historical quests in 15th century Bohemia.</p>
                         <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
                     </div>
@@ -163,83 +185,40 @@
         </section>
         
         <!-- Documentation Section -->
-        <section id="docs" class="docs-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Documentation</h2>
+        <section id="docs" class="docs-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">Documentation</h2>
                 <div class="max-w-4xl mx-auto">
                     <div class="bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden">
-                        <div class="border-b border-gaming-gray-700">
-                            <nav class="flex space-x-2 p-4" role="tablist">
-                                <button class="tab-button active px-4 py-2 rounded-md text-gaming-light font-medium transition" data-tab="getting-started">
+                        <div class="border-b border-gaming-gray-700 overflow-x-auto">
+                            <nav class="flex flex-nowrap space-x-2 p-4 min-w-max" role="tablist">
+                                <button class="tab-button active px-3 sm:px-4 py-2 rounded-md text-gaming-light font-medium transition whitespace-nowrap" data-tab="getting-started">
                                     Getting Started
                                 </button>
-                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="windows">
+                                <button class="tab-button px-3 sm:px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition whitespace-nowrap" data-tab="windows">
                                     Windows Guide
                                 </button>
-                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="macos">
+                                <button class="tab-button px-3 sm:px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition whitespace-nowrap" data-tab="macos">
                                     macOS Guide
                                 </button>
-                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="features">
+                                <button class="tab-button px-3 sm:px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition whitespace-nowrap" data-tab="features">
                                     Features
                                 </button>
-                                <button class="tab-button px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition" data-tab="customization">
+                                <button class="tab-button px-3 sm:px-4 py-2 rounded-md text-gaming-gray-400 hover:text-gaming-light font-medium transition whitespace-nowrap" data-tab="customization">
                                     Customization
                                 </button>
                             </nav>
                         </div>
-                        <div class="p-6">
+                        <div class="p-4 sm:p-6">
+                            <!-- Tab content with responsive text and spacing -->
                             <div class="tab-content active" id="getting-started">
-                                <h3 class="text-xl font-semibold mb-4">Getting Started with FridayAI</h3>
+                                <h3 class="text-lg sm:text-xl font-semibold mb-4">Getting Started with FridayAI</h3>
                                 <div class="space-y-4 text-gaming-gray-300">
-                                    <p>Welcome to FridayAI! Choose your platform guide below:</p>
-                                    <div class="flex space-x-4 mt-4">
-                                        <button class="px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition" onclick="document.querySelector('[data-tab=windows]').click()">Windows Guide</button>
-                                        <button class="px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition" onclick="document.querySelector('[data-tab=macos]').click()">macOS Guide</button>
+                                    <p class="text-sm sm:text-base">Welcome to FridayAI! Choose your platform guide below:</p>
+                                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-4">
+                                        <button class="w-full sm:w-auto px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition text-sm sm:text-base" onclick="document.querySelector('[data-tab=windows]').click()">Windows Guide</button>
+                                        <button class="w-full sm:w-auto px-4 py-2 bg-gaming-gray-700 rounded-md hover:bg-gaming-gray-600 transition text-sm sm:text-base" onclick="document.querySelector('[data-tab=macos]').click()">macOS Guide</button>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="tab-content hidden" id="windows">
-                                <h3 class="text-xl font-semibold mb-4">Windows Installation Guide</h3>
-                                <div class="space-y-4 text-gaming-gray-300">
-                                    <p>1. Download FridayAI for Windows from the download section</p>
-                                    <p>2. Run the installer (FridayAI-Setup.exe)</p>
-                                    <p>3. Follow the installation wizard</p>
-                                    <p>4. Launch your game (Elden Ring or Baldur's Gate 3)</p>
-                                    <p>5. Press Ctrl+Shift+J to open the overlay</p>
-                                    <p>6. Position the overlay where you want it</p>
-                                    <p class="mt-4 text-gaming-gray-400">Note: Make sure to run games in "Borderless Windowed" or "Windowed" mode for best compatibility</p>
-                                </div>
-                            </div>
-                            <div class="tab-content hidden" id="macos">
-                                <h3 class="text-xl font-semibold mb-4">macOS Installation Guide</h3>
-                                <div class="space-y-4 text-gaming-gray-300">
-                                    <p>1. Download FridayAI for macOS from the download section</p>
-                                    <p>2. Open the downloaded .dmg file</p>
-                                    <p>3. Drag FridayAI to your Applications folder</p>
-                                    <p>4. Launch your game (Elden Ring or Baldur's Gate 3)</p>
-                                    <p>5. Press Cmd+Shift+J to open the overlay</p>
-                                    <p>6. Position the overlay where you want it</p>
-                                    <p class="mt-4 text-gaming-gray-400">Note: First time users may need to approve FridayAI in System Settings > Security & Privacy</p>
-                                </div>
-                            </div>
-                            <div class="tab-content hidden" id="features">
-                                <h3 class="text-xl font-semibold mb-4">Feature Details</h3>
-                                <div class="space-y-4 text-gaming-gray-300">
-                                    <p>1. Real-time quest tracking and updates</p>
-                                    <p>2. Interactive maps with points of interest</p>
-                                    <p>3. Character build recommendations</p>
-                                    <p>4. Item and loot locations</p>
-                                    <p>5. Boss strategies and weaknesses</p>
-                                </div>
-                            </div>
-                            <div class="tab-content hidden" id="customization">
-                                <h3 class="text-xl font-semibold mb-4">Customizing Your Experience</h3>
-                                <div class="space-y-4 text-gaming-gray-300">
-                                    <p>1. Adjust overlay opacity (Alt + Scroll)</p>
-                                    <p>2. Resize the window (Ctrl + Drag)</p>
-                                    <p>3. Change theme colors</p>
-                                    <p>4. Customize hotkeys</p>
-                                    <p>5. Set up automatic triggers</p>
                                 </div>
                             </div>
                         </div>
@@ -249,69 +228,118 @@
         </section>
 
         <!-- Authentication Section -->
-        <section id="auth" class="auth-section py-32 bg-gaming-gray-900">
-            <div class="container mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Your Account</h2>
-                <div id="auth-container" class="max-w-md mx-auto fade-in-element">
+        <section id="auth" class="auth-section py-16 sm:py-24 lg:py-32 bg-gaming-gray-900">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">Your Account</h2>
+                <div id="auth-container" class="max-w-md mx-auto px-4 sm:px-0 fade-in-element">
                     <!-- Auth forms will be dynamically inserted here -->
+                    <div id="register-form" class="auth-form active">
+                        <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-center">Create Your Account</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label for="register-username" class="block text-sm font-medium text-gaming-gray-300 mb-1">Username</label>
+                                <input type="text" id="register-username" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
+                            </div>
+                            <div>
+                                <label for="register-email" class="block text-sm font-medium text-gaming-gray-300 mb-1">Email</label>
+                                <input type="email" id="register-email" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
+                            </div>
+                            <div>
+                                <label for="register-password" class="block text-sm font-medium text-gaming-gray-300 mb-1">Password</label>
+                                <input type="password" id="register-password" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-medium py-2 px-4 rounded-md transition">Create Account</button>
+                            </div>
+                        </form>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm text-gaming-gray-400">
+                                Already have an account? 
+                                <button id="show-login" class="text-gaming-accent hover:text-gaming-accent-hover">Login</button>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div id="login-form" class="auth-form hidden">
+                        <h3 class="text-xl sm:text-2xl font-semibold mb-6 text-center">Login to Your Account</h3>
+                        <form class="space-y-4">
+                            <div>
+                                <label for="login-email" class="block text-sm font-medium text-gaming-gray-300 mb-1">Email</label>
+                                <input type="email" id="login-email" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
+                            </div>
+                            <div>
+                                <label for="login-password" class="block text-sm font-medium text-gaming-gray-300 mb-1">Password</label>
+                                <input type="password" id="login-password" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
+                            </div>
+                            <div>
+                                <button type="submit" class="w-full bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-medium py-2 px-4 rounded-md transition">Login</button>
+                            </div>
+                        </form>
+                        <div class="mt-4 text-center">
+                            <p class="text-sm text-gaming-gray-400">
+                                Don't have an account? 
+                                <button id="show-register" class="text-gaming-accent hover:text-gaming-accent-hover">Create an Account</button>
+                            </p>
+                        </div>
+                    </div>
                 </div>
                 <div id="account-actions" class="mt-6 text-center">
-                    <a href="#" class="account-link text-gaming-gray-400 hover:text-gaming-gray-300">View My Account</a>
+                    <a href="#" class="account-link text-gaming-gray-400 hover:text-gaming-gray-300 text-sm sm:text-base">Forgot Password?</a>
                 </div>
             </div>
         </section>
 
         <!-- System Requirements Section -->
-        <section id="requirements" class="requirements-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">System Requirements</h2>
-                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl fade-in-element">
-                        <h3 class="text-xl font-semibold mb-6">Minimum Requirements</h3>
-                        <ul class="space-y-4 text-gaming-gray-300">
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">OS:</span>
+        <section id="requirements" class="requirements-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">System Requirements</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-6">Minimum Requirements</h3>
+                        <ul class="space-y-4 text-gaming-gray-300 text-sm sm:text-base">
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">OS:</span>
                                 <span>Windows 10 64-bit</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">CPU:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">CPU:</span>
                                 <span>Intel Core i5-4460 / AMD Ryzen 3 1200</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">RAM:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">RAM:</span>
                                 <span>8 GB</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">Storage:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">Storage:</span>
                                 <span>2 GB available space</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">DirectX:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">DirectX:</span>
                                 <span>Version 11</span>
                             </li>
                         </ul>
                     </div>
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl fade-in-element">
-                        <h3 class="text-xl font-semibold mb-6">Recommended Requirements</h3>
-                        <ul class="space-y-4 text-gaming-gray-300">
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">OS:</span>
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl fade-in-element">
+                        <h3 class="text-lg sm:text-xl font-semibold mb-6">Recommended Requirements</h3>
+                        <ul class="space-y-4 text-gaming-gray-300 text-sm sm:text-base">
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">OS:</span>
                                 <span>Windows 10/11 64-bit</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">CPU:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">CPU:</span>
                                 <span>Intel Core i7-8700K / AMD Ryzen 5 3600</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">RAM:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">RAM:</span>
                                 <span>16 GB</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">Storage:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">Storage:</span>
                                 <span>4 GB SSD</span>
                             </li>
-                            <li class="flex items-center">
-                                <span class="w-24 text-gaming-gray-400">DirectX:</span>
+                            <li class="flex flex-col sm:flex-row sm:items-center">
+                                <span class="w-full sm:w-24 text-gaming-gray-400 mb-1 sm:mb-0">DirectX:</span>
                                 <span>Version 12</span>
                             </li>
                         </ul>
@@ -321,42 +349,42 @@
         </section>
 
         <!-- FAQ Section -->
-        <section id="faq" class="faq-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Frequently Asked Questions</h2>
+        <section id="faq" class="faq-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">Frequently Asked Questions</h2>
                 <div class="max-w-3xl mx-auto">
                     <div class="space-y-4">
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-6 py-4 text-left flex justify-between items-center">
-                                <span class="text-lg font-medium">How does FridayAI affect game performance?</span>
-                                <svg class="transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                                <span class="text-base sm:text-lg font-medium">How does FridayAI affect game performance?</span>
+                                <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="faq-answer">
-                                <p class="text-gaming-gray-300">FridayAI is designed to be lightweight and uses minimal system resources. It typically has less than 1% CPU usage and under 100MB RAM usage.</p>
+                            <div class="faq-answer px-4 sm:px-6 pb-4">
+                                <p class="text-sm sm:text-base text-gaming-gray-300">FridayAI is designed to be lightweight and uses minimal system resources. It typically has less than 1% CPU usage and under 100MB RAM usage.</p>
                             </div>
                         </div>
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-6 py-4 text-left flex justify-between items-center">
-                                <span class="text-lg font-medium">Is FridayAI compatible with game mods?</span>
-                                <svg class="transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                                <span class="text-base sm:text-lg font-medium">Is FridayAI compatible with game mods?</span>
+                                <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="faq-answer">
-                                <p class="text-gaming-gray-300">Yes! FridayAI works alongside most game mods as it operates as an overlay and doesn't modify any game files.</p>
+                            <div class="faq-answer px-4 sm:px-6 pb-4">
+                                <p class="text-sm sm:text-base text-gaming-gray-300">Yes! FridayAI works alongside most game mods as it operates as an overlay and doesn't modify any game files.</p>
                             </div>
                         </div>
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-6 py-4 text-left flex justify-between items-center">
-                                <span class="text-lg font-medium">Will more games be supported in the future?</span>
-                                <svg class="transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                                <span class="text-base sm:text-lg font-medium">Will more games be supported in the future?</span>
+                                <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
-                            <div class="faq-answer">
-                                <p class="text-gaming-gray-300">Absolutely! We're actively working on adding support for more popular RPGs and action games. Stay tuned for updates!</p>
+                            <div class="faq-answer px-4 sm:px-6 pb-4">
+                                <p class="text-sm sm:text-base text-gaming-gray-300">Absolutely! We're actively working on adding support for more popular RPGs and action games. Stay tuned for updates!</p>
                             </div>
                         </div>
                     </div>
@@ -365,31 +393,31 @@
         </section>
         
         <!-- Pricing Section -->
-        <section id="pricing" class="pricing-section py-32">
-            <div class="container mx-auto px-6">
-                <div id="pricing-section" class="flex flex-col items-center gap-10"></div>
+        <section id="pricing" class="pricing-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <div id="pricing-section" class="flex flex-col items-center gap-6 sm:gap-10"></div>
             </div>
         </section>
 
         <!-- Community Section -->
-        <section id="community" class="community-section py-32">
-            <div class="container mx-auto px-6">
-                <h2 class="text-4xl font-bold text-center mb-12 fade-in-element">Join Our Community</h2>
-                <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl text-center fade-in-element">
+        <section id="community" class="community-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">Join Our Community</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl text-center fade-in-element">
                         <div class="game-image mb-6">
-                            <img src="assets/images/elden-ring.jpg" alt="Elden Ring" class="w-full h-48 object-cover rounded-lg">
+                            <img src="assets/images/elden-ring.jpg" alt="Elden Ring" class="w-full h-40 sm:h-48 object-cover rounded-lg">
                         </div>
-                        <h3 class="text-xl font-semibold mb-4">Elden Ring Community</h3>
-                        <p class="text-gaming-gray-300 mb-6">Join fellow Tarnished in discussing strategies, sharing discoveries, and mastering the Lands Between.</p>
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Elden Ring Community</h3>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Join fellow Tarnished in discussing strategies, sharing discoveries, and mastering the Lands Between.</p>
                         <a href="#" class="inline-block bg-gaming-gray-700 hover:bg-gaming-gray-600 text-white font-medium py-2 px-6 rounded-md transition">Join Discord</a>
                     </div>
-                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-8 rounded-lg shadow-xl text-center fade-in-element">
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl text-center fade-in-element">
                         <div class="game-image mb-6">
-                            <img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3" class="w-full h-48 object-cover rounded-lg">
+                            <img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3" class="w-full h-40 sm:h-48 object-cover rounded-lg">
                         </div>
-                        <h3 class="text-xl font-semibold mb-4">Baldur's Gate 3 Community</h3>
-                        <p class="text-gaming-gray-300 mb-6">Connect with other adventurers to share builds, discuss choices, and explore Faerûn together.</p>
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Baldur's Gate 3 Community</h3>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Connect with other adventurers to share builds, discuss choices, and explore Faerûn together.</p>
                         <a href="#" class="inline-block bg-gaming-gray-700 hover:bg-gaming-gray-600 text-white font-medium py-2 px-6 rounded-md transition">Join Discord</a>
                     </div>
                 </div>
@@ -397,31 +425,48 @@
         </section>
 
         <!-- Download Section -->
-        <section id="download" class="download-section py-32">
-            <div class="container mx-auto px-6 text-center">
-                <h2 class="text-4xl font-bold mb-8 fade-in-element">Ready to Enhance Your Gameplay?</h2>
-                <p class="text-xl mb-10 text-gaming-gray-300 max-w-2xl mx-auto fade-in-element">Download FridayAI now and experience seamless access to game information without breaking immersion.</p>
-                <a href="#" class="download-btn bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-4 px-12 rounded-md text-lg transition inline-block fade-in-element">
+        <section id="download" class="download-section py-16 sm:py-24 lg:py-32">
+            <div class="container mx-auto px-4 sm:px-6 text-center">
+                <h2 class="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 fade-in-element">Ready to Enhance Your Gameplay?</h2>
+                <p class="text-base sm:text-xl mb-8 sm:mb-10 text-gaming-gray-300 max-w-2xl mx-auto fade-in-element">Download FridayAI now and experience seamless access to game information without breaking immersion.</p>
+                <a href="#" class="download-btn bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 sm:py-4 px-8 sm:px-12 rounded-md text-base sm:text-lg transition inline-block fade-in-element" onclick="document.querySelector('#auth-button').click(); document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });">
                     Download FridayAI
                 </a>
-                <p class="mt-6 text-gaming-gray-400 fade-in-element">Version 1.0.0 • Windows & Mac</p>
+                <p class="mt-4 sm:mt-6 text-sm sm:text-base text-gaming-gray-400 fade-in-element">Version 1.0.0 • Windows & Mac</p>
             </div>
         </section>
     </div>
     
     <!-- Footer -->
-    <footer class="footer-section py-16 bg-gaming-primary text-gaming-gray-300">
-        <div class="container mx-auto px-6">
+    <footer class="footer-section py-12 sm:py-16 bg-gaming-primary text-gaming-gray-300">
+        <div class="container mx-auto px-4 sm:px-6">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-8 md:mb-0 fade-in-element">
-                    <h2 class="text-xl font-bold text-gaming-light mb-3">FridayAI</h2>
-                    <p>&copy; 2024 FridayAI Gaming Companion</p>
+                <div class="mb-8 md:mb-0 text-center md:text-left fade-in-element">
+                    <h2 class="text-lg sm:text-xl font-bold text-gaming-light mb-3">FridayAI</h2>
+                    <p>&copy; 2025 FridayAI Gaming Companion</p>
                 </div>
                 <nav class="fade-in-element">
-                    <ul class="flex space-x-8">
-                        <li><a href="#features" class="hover:text-gaming-light transition">Features</a></li>
-                        <li><a href="#games" class="hover:text-gaming-light transition">Games</a></li>
-                        <li><a href="#download" class="hover:text-gaming-light transition">Download</a></li>
+                    <ul class="flex flex-wrap justify-center space-x-8 sm:space-x-16 items-center">
+                        <li class="mb-4 sm:mb-0">
+                            <a href="https://x.com" target="_blank" class="hover:text-gaming-light transition">
+                                <i class="fa-brands fa-twitter text-xl sm:text-2xl"></i>
+                            </a>
+                        </li>
+                        <li class="mb-4 sm:mb-0">
+                            <a href="https://discord.com" target="_blank" class="hover:text-gaming-light transition">
+                                <i class="fab fa-discord text-xl sm:text-2xl"></i>
+                            </a>
+                        </li>
+                        <li class="mb-4 sm:mb-0">
+                            <a href="https://github.com" target="_blank" class="hover:text-gaming-light transition">
+                                <i class="fab fa-github text-xl sm:text-2xl"></i>
+                            </a>
+                        </li>
+                        <li class="mb-4 sm:mb-0">
+                            <a href="https://youtube.com" target="_blank" class="hover:text-gaming-light transition">
+                                <i class="fab fa-youtube text-xl sm:text-2xl"></i>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -453,6 +498,49 @@
     <script type="module" src="js/ui/paymentUI.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu functionality
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const authButton = document.getElementById('auth-button');
+            const mobileAuthButton = document.getElementById('mobile-auth-button');
+            
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.contains(e.target) && !mobileMenuButton.contains(e.target)) {
+                    mobileMenu.classList.add('hidden');
+                }
+            });
+
+            // Close mobile menu when clicking a link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Make mobile auth button navigate to register form
+            mobileAuthButton.addEventListener('click', () => {
+                document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });
+                // Trigger register form display if you have such functionality
+                if (typeof showRegisterForm === 'function') {
+                    showRegisterForm();
+                }
+                mobileMenu.classList.add('hidden');
+            });
+
+            // Make desktop auth button navigate to register form
+            authButton.addEventListener('click', () => {
+                document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });
+                // Trigger register form display if you have such functionality
+                if (typeof showRegisterForm === 'function') {
+                    showRegisterForm();
+                }
+            });
+
             // Navbar scroll effect
             const navbar = document.querySelector('.navbar-container');
             let lastScroll = window.pageYOffset;
@@ -509,6 +597,49 @@
             
             // Check elements on scroll
             window.addEventListener('scroll', checkFade);
+
+            // Auth form switching logic
+            const showLoginBtn = document.getElementById('show-login');
+            const showRegisterBtn = document.getElementById('show-register');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            // Define the showRegisterForm function for global access
+            window.showRegisterForm = function() {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            };
+            
+            // Define the showLoginForm function for global access
+            window.showLoginForm = function() {
+                registerForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+            };
+            
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', function() {
+                    window.showLoginForm();
+                });
+            }
+            
+            if (showRegisterBtn) {
+                showRegisterBtn.addEventListener('click', function() {
+                    window.showRegisterForm();
+                });
+            }
+            
+            // Check if there's a data-form attribute on the button that was clicked
+            const authButtons = document.querySelectorAll('[data-form]');
+            authButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const formType = this.getAttribute('data-form');
+                    if (formType === 'register') {
+                        window.showRegisterForm();
+                    } else if (formType === 'login') {
+                        window.showLoginForm();
+                    }
+                });
+            });
         });
     </script>
 </body>
