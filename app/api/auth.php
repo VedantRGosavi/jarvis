@@ -49,11 +49,21 @@ if ($data) {
     error_log("Request Data: " . json_encode($data));
 }
 
-// Route to appropriate auth handler
-$action = $api_segments[1] ?? '';
+// Detect different parameter methods - direct access via query parameters or REST-style URL segments
+$action = $_GET['action'] ?? null;  // For direct access in the form /api/auth.php?action=register
+$provider = $_GET['provider'] ?? null; // For direct access in the form /api/auth.php?action=oauth&provider=github
+
+// If we don't have action from query param, use URL segment
+if (!$action) {
+    $action = $api_segments[1] ?? '';
+}
+
+// Log for debugging
+error_log("Auth action: " . $action);
+error_log("Provider (if any): " . $provider);
 
 // Check if the request is for CSRF token
-if (isset($api_segments[1]) && $api_segments[1] === 'csrf') {
+if ($action === 'csrf') {
     // Handle CSRF token request
     require_once BASE_PATH . '/app/utils/Security.php';
 
@@ -65,8 +75,10 @@ if (isset($api_segments[1]) && $api_segments[1] === 'csrf') {
 }
 
 // OAuth debug endpoint - only available in development mode
-if (isset($api_segments[1]) && $api_segments[1] === 'debug' && ($_ENV['APP_ENV'] ?? getenv('APP_ENV')) === 'development') {
-    $provider = $api_segments[2] ?? '';
+if ($action === 'debug' && ($_ENV['APP_ENV'] ?? getenv('APP_ENV')) === 'development') {
+    if (empty($provider)) {
+        $provider = $api_segments[2] ?? '';
+    }
 
     if (empty($provider)) {
         Response::error('Provider is required', 400);
@@ -170,7 +182,9 @@ switch ($action) {
 
     case 'oauth':
         // Handles OAuth provider authorization URLs
-        $provider = $api_segments[2] ?? '';
+        if (empty($provider)) {
+            $provider = $api_segments[2] ?? '';
+        }
 
         if (empty($provider)) {
             Response::error('Provider is required', 400);
@@ -190,7 +204,9 @@ switch ($action) {
 
     case 'callback':
         // Handles OAuth callback
-        $provider = $api_segments[2] ?? '';
+        if (empty($provider)) {
+            $provider = $api_segments[2] ?? '';
+        }
 
         if (empty($provider)) {
             Response::error('Provider is required', 400);

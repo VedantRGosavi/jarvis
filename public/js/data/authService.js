@@ -85,19 +85,55 @@ export class AuthService {
    */
   async fetchUserInfo(token) {
     try {
-      const response = await fetch(`${this.baseUrl}/verify`, {
+      // Let's directly use the full API endpoint to bypass any routing issues
+      const hostname = window.location.hostname;
+      let apiUrl;
+
+      if (hostname === 'fridayai.me') {
+        apiUrl = 'https://fridayai.me/api/auth.php?action=verify';
+      } else if (hostname === 'fridayai-gold.vercel.app') {
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=verify';
+      } else {
+        apiUrl = `${this.baseUrl}/verify`;
+      }
+
+      console.log(`Fetching user info from ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {
         throw new Error('Failed to get user info');
       }
 
-      const data = await response.json();
-      this.user = data.user;
+      const textResponse = await response.text();
+      console.log(`User info raw response: ${textResponse.substring(0, 200)}`);
+
+      if (!textResponse.trim()) {
+        throw new Error('Empty response received');
+      }
+
+      const data = JSON.parse(textResponse);
+
+      // Extract user data based on response format
+      let userData;
+      if (data.success && data.data && data.data.user) {
+        // Direct PHP endpoint format
+        userData = data.data.user;
+      } else if (data.user) {
+        // Original format
+        userData = data.user;
+      } else {
+        throw new Error('Invalid user data format in response');
+      }
+
+      this.user = userData;
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
 
       // Dispatch login event
@@ -119,11 +155,27 @@ export class AuthService {
    */
   async validateToken() {
     try {
-      const response = await fetch(`${this.baseUrl}/verify`, {
+      // Let's directly use the full API endpoint to bypass any routing issues
+      const hostname = window.location.hostname;
+      let apiUrl;
+
+      if (hostname === 'fridayai.me') {
+        apiUrl = 'https://fridayai.me/api/auth.php?action=verify';
+      } else if (hostname === 'fridayai-gold.vercel.app') {
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=verify';
+      } else {
+        apiUrl = `${this.baseUrl}/verify`;
+      }
+
+      console.log(`Validating token at ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.token}`
-        }
+          'Authorization': `Bearer ${this.token}`,
+          'Accept': 'application/json'
+        },
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -146,9 +198,21 @@ export class AuthService {
    */
   async getOAuthUrl(provider) {
     try {
-      console.log(`Fetching OAuth URL for ${provider} from ${this.baseUrl}/oauth/${provider}`);
+      // Let's directly use the full API endpoint to bypass any routing issues
+      const hostname = window.location.hostname;
+      let apiUrl;
 
-      const response = await fetch(`${this.baseUrl}/oauth/${provider}`, {
+      if (hostname === 'fridayai.me') {
+        apiUrl = `https://fridayai.me/api/auth.php?action=oauth&provider=${provider}`;
+      } else if (hostname === 'fridayai-gold.vercel.app') {
+        apiUrl = `https://fridayai-gold.vercel.app/api/auth.php?action=oauth&provider=${provider}`;
+      } else {
+        apiUrl = `${this.baseUrl}/oauth/${provider}`;
+      }
+
+      console.log(`Fetching OAuth URL for ${provider} from ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
@@ -158,6 +222,8 @@ export class AuthService {
 
       // Check response type
       const contentType = response.headers.get('content-type');
+      console.log(`OAuth response content-type for ${provider}: ${contentType}`);
+
       if (!contentType || !contentType.includes('application/json')) {
         console.error(`OAuth URL response has invalid content type: ${contentType} for ${provider}`);
         return {
@@ -169,7 +235,14 @@ export class AuthService {
       // Safely parse JSON
       let data;
       try {
-        data = await response.json();
+        const textResponse = await response.text();
+        console.log(`OAuth raw response for ${provider}: ${textResponse.substring(0, 200)}`);
+
+        if (!textResponse.trim()) {
+          throw new Error('Empty response received');
+        }
+
+        data = JSON.parse(textResponse);
       } catch (e) {
         console.error(`Failed to parse OAuth URL response as JSON for ${provider}:`, e);
         return {
@@ -182,17 +255,29 @@ export class AuthService {
         throw new Error(data.message || `Failed to get ${provider} authentication URL`);
       }
 
-      if (!data.auth_url) {
-        console.error(`OAuth URL response is missing auth_url for ${provider}`, data);
-        return {
-          success: false,
-          message: `Authentication service for ${provider} returned an invalid response`
-        };
+      // Check if we're using the PHP direct path
+      if (apiUrl.includes('auth.php')) {
+        // In the direct PHP endpoint case, the auth_url is in data.data.auth_url
+        if (data.success && data.data && data.data.auth_url) {
+          return {
+            success: true,
+            auth_url: data.data.auth_url
+          };
+        }
+      } else {
+        // In the original case, the auth_url is directly in data.auth_url
+        if (data.auth_url) {
+          return {
+            success: true,
+            auth_url: data.auth_url
+          };
+        }
       }
 
+      console.error(`OAuth URL response is missing auth_url for ${provider}`, data);
       return {
-        success: true,
-        auth_url: data.auth_url
+        success: false,
+        message: `Authentication service for ${provider} returned an invalid response`
       };
     } catch (error) {
       console.error(`OAuth URL error for ${provider}:`, error);
@@ -211,7 +296,21 @@ export class AuthService {
    */
   async login(email, password) {
     try {
-      const response = await fetch(`${this.baseUrl}/login`, {
+      // Let's directly use the full API endpoint to bypass any routing issues
+      const hostname = window.location.hostname;
+      let apiUrl;
+
+      if (hostname === 'fridayai.me') {
+        apiUrl = 'https://fridayai.me/api/auth.php?action=login';
+      } else if (hostname === 'fridayai-gold.vercel.app') {
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=login';
+      } else {
+        apiUrl = `${this.baseUrl}/login`;
+      }
+
+      console.log(`Sending login request to ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -221,8 +320,12 @@ export class AuthService {
         body: JSON.stringify({ email, password })
       });
 
+      console.log(`Login response status: ${response.status}`);
+
       // Check response type
       const contentType = response.headers.get('content-type');
+      console.log(`Login response content-type: ${contentType}`);
+
       if (!contentType || !contentType.includes('application/json')) {
         console.error(`Login response has invalid content type: ${contentType}`);
         throw new Error('Login service is temporarily unavailable.');
@@ -231,7 +334,14 @@ export class AuthService {
       // Safely parse JSON
       let data;
       try {
-        data = await response.json();
+        const textResponse = await response.text();
+        console.log(`Login raw response: ${textResponse.substring(0, 200)}`);
+
+        if (!textResponse.trim()) {
+          throw new Error('Empty response received');
+        }
+
+        data = JSON.parse(textResponse);
       } catch (e) {
         console.error('Failed to parse login response as JSON:', e);
         throw new Error('Invalid response from login service.');
@@ -241,9 +351,20 @@ export class AuthService {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store authentication data
-      this.token = data.token;
-      this.user = data.user;
+      // Check if we're using the PHP direct path
+      if (apiUrl.includes('auth.php')) {
+        // In the direct PHP endpoint case, the token is in data.data.token
+        if (data.success && data.data) {
+          this.token = data.data.token;
+          this.user = data.data.user;
+        } else {
+          throw new Error('Invalid response format from login service');
+        }
+      } else {
+        // In the original case, the token is directly in data.token
+        this.token = data.token;
+        this.user = data.user;
+      }
 
       localStorage.setItem(this.tokenKey, this.token);
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
@@ -270,9 +391,21 @@ export class AuthService {
    */
   async register(name, email, password) {
     try {
-      console.log(`Sending registration request to ${this.baseUrl}/register`);
+      // Let's directly use the full API endpoint to bypass any routing issues
+      const hostname = window.location.hostname;
+      let apiUrl;
 
-      const response = await fetch(`${this.baseUrl}/register`, {
+      if (hostname === 'fridayai.me') {
+        apiUrl = 'https://fridayai.me/api/auth.php?action=register';
+      } else if (hostname === 'fridayai-gold.vercel.app') {
+        apiUrl = 'https://fridayai-gold.vercel.app/api/auth.php?action=register';
+      } else {
+        apiUrl = `${this.baseUrl}/register`;
+      }
+
+      console.log(`Sending registration request to ${apiUrl}`);
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -313,9 +446,20 @@ export class AuthService {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Store authentication data
-      this.token = data.token;
-      this.user = data.user;
+      // Check if we're using the PHP direct path
+      if (apiUrl.includes('auth.php')) {
+        // In the direct PHP endpoint case, the token is in data.data.token
+        if (data.success && data.data) {
+          this.token = data.data.token;
+          this.user = data.data.user;
+        } else {
+          throw new Error('Invalid response format from registration service');
+        }
+      } else {
+        // In the original case, the token is directly in data.token
+        this.token = data.token;
+        this.user = data.user;
+      }
 
       localStorage.setItem(this.tokenKey, this.token);
       localStorage.setItem(this.userKey, JSON.stringify(this.user));
