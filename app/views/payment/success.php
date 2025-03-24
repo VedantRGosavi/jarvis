@@ -1,16 +1,32 @@
 <?php
 require_once BASE_PATH . '/app/utils/Response.php';
+require_once BASE_PATH . '/app/utils/SchemaGenerator.php';
+
+use App\Utils\SchemaGenerator;
+
+// Set SEO meta variables for this page
+$pageTitle = 'Payment Successful';
+$pageDescription = 'Your payment has been successfully processed. Thank you for your purchase with FridayAI Gaming Assistant.';
+$pageKeywords = 'payment successful, transaction complete, FridayAI, gaming assistant, purchase confirmation';
+$pageImage = '/images/payment-success.png';
+
+// Add breadcrumb schema
+$breadcrumbs = [
+    ['name' => 'Home', 'url' => 'https://fridayai.com/'],
+    ['name' => 'Games', 'url' => 'https://fridayai.com/games'],
+    ['name' => 'Payment', 'url' => 'https://fridayai.com/payment'],
+    ['name' => 'Payment Successful', 'url' => 'https://fridayai.com/payment/success']
+];
+$breadcrumbSchema = SchemaGenerator::generateBreadcrumbSchema($breadcrumbs);
+
+// Combine schemas
+$schemaMarkup = $breadcrumbSchema;
+
+// Start output buffering to capture the content
+ob_start();
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Successful - FridayAI Gaming Assistant</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gaming-primary text-gaming-light min-h-screen flex items-center justify-center">
+<div class="bg-gaming-primary text-gaming-light min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full mx-4 p-8 bg-gaming-secondary rounded-lg shadow-xl">
         <div class="text-center">
             <div class="mb-4">
@@ -33,11 +49,26 @@ require_once BASE_PATH . '/app/utils/Response.php';
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        // Clear any payment-related session data
-        sessionStorage.removeItem('payment_intent');
-        sessionStorage.removeItem('payment_method');
-    </script>
-</body>
-</html>
+<?php
+// Store the buffered content
+$content = ob_get_clean();
+
+// Additional scripts specific to this page
+$additionalScripts = <<<HTML
+<script>
+    // Clear any payment-related session data
+    sessionStorage.removeItem('payment_intent');
+    sessionStorage.removeItem('payment_method');
+</script>
+HTML;
+
+// Additional head content specific to this page
+$additionalHead = <<<HTML
+<script src="https://cdn.tailwindcss.com"></script>
+HTML;
+
+// Include the layout template
+require_once BASE_PATH . '/app/views/layout.php';
+?>

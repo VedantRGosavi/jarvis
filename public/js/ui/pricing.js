@@ -1,4 +1,6 @@
 // Improved Pricing component for FridayAI
+import analyticsManager from '../analytics.js';
+
 class PricingSection {
     constructor(containerId, options = {}) {
         this.container = document.getElementById(containerId);
@@ -171,6 +173,24 @@ class PricingSection {
         this.container.querySelectorAll('.pricing-card button').forEach((button, index) => {
             button.addEventListener('click', () => {
                 const tier = this.options.tiers[index];
+
+                // Add data-tier attribute for analytics tracking
+                button.setAttribute('data-tier', tier.name);
+                button.classList.add('subscribe-button');
+
+                // Track click event
+                analyticsManager.trackEvent('click_subscribe_button', {
+                    tier_name: tier.name,
+                    tier_price: tier.price.monthly,
+                    tier_type: tier.type
+                });
+
+                // Track funnel step
+                analyticsManager.trackFunnelStep('conversion', 'click_subscribe', {
+                    tier_name: tier.name,
+                    tier_price: tier.price.monthly
+                });
+
                 this.handlePurchase(tier);
             });
         });
@@ -224,6 +244,26 @@ class PricingSection {
                 (result) => {
                     console.log('Subscription success:', result);
 
+                    // Track successful subscription
+                    analyticsManager.trackConversion('purchase', {
+                        transactionId: result.id || `sub_${Date.now()}`,
+                        value: tier.price.monthly,
+                        currency: 'USD',
+                        items: [{
+                            name: tier.name,
+                            category: 'subscription',
+                            price: tier.price.monthly,
+                            quantity: 1
+                        }]
+                    });
+
+                    // Track funnel completion
+                    analyticsManager.trackFunnelStep('conversion', 'complete_payment', {
+                        tier_name: tier.name,
+                        tier_price: tier.price.monthly,
+                        payment_method: result.paymentMethod || 'unknown'
+                    });
+
                     // Call custom onPurchase handler if provided
                     if (typeof this.options.onPurchase === 'function') {
                         this.options.onPurchase(tier, result);
@@ -231,6 +271,12 @@ class PricingSection {
                 },
                 () => {
                     console.log('Subscription cancelled');
+
+                    // Track cancellation
+                    analyticsManager.trackEvent('subscription_cancelled', {
+                        tier_name: tier.name,
+                        tier_price: tier.price.monthly
+                    });
                 }
             );
         } else {
@@ -243,6 +289,26 @@ class PricingSection {
                 },
                 (result) => {
                     console.log('Purchase success:', result);
+
+                    // Track successful one-time purchase
+                    analyticsManager.trackConversion('purchase', {
+                        transactionId: result.id || `purchase_${Date.now()}`,
+                        value: tier.price.monthly || tier.price,
+                        currency: 'USD',
+                        items: [{
+                            name: tier.name,
+                            category: 'one-time',
+                            price: tier.price.monthly || tier.price,
+                            quantity: 1
+                        }]
+                    });
+
+                    // Track funnel completion
+                    analyticsManager.trackFunnelStep('conversion', 'complete_payment', {
+                        tier_name: tier.name,
+                        tier_price: tier.price.monthly || tier.price,
+                        payment_method: result.paymentMethod || 'unknown'
+                    });
 
                     // Call custom onPurchase handler if provided
                     if (typeof this.options.onPurchase === 'function') {

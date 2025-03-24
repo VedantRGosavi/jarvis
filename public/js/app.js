@@ -3,6 +3,8 @@
  * Main application initialization
  */
 
+import analyticsManager from './analytics.js';
+
 export class FridayAIApp {
   constructor() {
     this.version = '1.0.0';
@@ -29,6 +31,21 @@ export class FridayAIApp {
 
     // Initialize auth button
     this.initializeAuthButton();
+
+    // Initialize analytics
+    this.initializeAnalytics();
+  }
+
+  initializeAnalytics() {
+    // Make sure analytics is initialized
+    if (!analyticsManager.initialized) {
+      analyticsManager.initialize();
+    }
+
+    // Track page view if not already tracked in main.js
+    if (window.location.pathname !== analyticsManager.lastTrackedPath) {
+      analyticsManager.trackPageView(window.location.pathname);
+    }
   }
 
   loadThemePreference() {
@@ -41,6 +58,11 @@ export class FridayAIApp {
   toggleDarkMode(isDark) {
     const isDarkMode = document.documentElement.classList.toggle('dark');
     localStorage.setItem('fridayai_dark_mode', isDarkMode);
+
+    // Track theme preference
+    analyticsManager.trackEvent('toggle_theme', {
+      theme: isDarkMode ? 'dark' : 'light'
+    });
   }
 
   initEventListeners() {
@@ -64,14 +86,84 @@ export class FridayAIApp {
       });
     }
 
-    // Search form
+    // Features section visibility tracking
+    const featuresSection = document.getElementById('features');
+    if (featuresSection) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            analyticsManager.trackFunnelStep('acquisition', 'view_features');
+            observer.unobserve(featuresSection);
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(featuresSection);
+    }
+
+    // Pricing section visibility tracking
+    const pricingSection = document.getElementById('pricing');
+    if (pricingSection) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            analyticsManager.trackFunnelStep('acquisition', 'view_pricing');
+            analyticsManager.trackFunnelStep('conversion', 'view_pricing');
+            observer.unobserve(pricingSection);
+          }
+        });
+      }, { threshold: 0.5 });
+      observer.observe(pricingSection);
+    }
+
+    // Track subscribe button clicks
+    const subscribeButtons = document.querySelectorAll('.subscribe-button');
+    subscribeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        const tier = button.getAttribute('data-tier') || 'unknown';
+        analyticsManager.trackFunnelStep('conversion', 'click_subscribe', { tier });
+      });
+    });
+
+    // Track downloads
+    const downloadButtons = document.querySelectorAll('.download-button');
+    downloadButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        const platform = button.getAttribute('data-platform') || 'unknown';
+        const version = button.getAttribute('data-version') || this.version;
+
+        analyticsManager.trackConversion('download_initiated', {
+          platform,
+          version
+        });
+
+        analyticsManager.trackFunnelStep('conversion', 'download_app', {
+          platform,
+          version
+        });
+
+        // Track download completion after a delay
+        // This is a simplification - in a real app you'd track after the download is confirmed
+        setTimeout(() => {
+          analyticsManager.trackConversion('download_complete', {
+            platform,
+            version
+          });
+        }, 5000); // Simulate 5-second download
+      });
+    });
+
+    // Search form tracking
     const searchForm = document.getElementById('search-form');
     if (searchForm) {
       searchForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const searchInput = searchForm.querySelector('input[type="text"]');
         if (searchInput && searchInput.value.trim() !== '') {
-          this.performSearch(searchInput.value);
+          const query = searchInput.value;
+          this.performSearch(query);
+
+          // Track search event
+          analyticsManager.trackEvent('search', { query });
         }
       });
     }
@@ -117,6 +209,12 @@ export class FridayAIApp {
 
       // Update UI to reflect active game
       this.updateGameUI(gameId);
+
+      // Track game selection
+      analyticsManager.trackEvent('select_game', {
+        game_id: gameId,
+        game_name: this.gameModules[gameId].gameName
+      });
 
       return true;
     }
@@ -193,6 +291,13 @@ export class FridayAIApp {
   handleResultClick(result) {
     console.log('Result clicked:', result);
     // Implementation depends on result type and content
+
+    // Track result click
+    analyticsManager.trackEvent('search_result_click', {
+      result_id: result.id,
+      result_type: result.type,
+      search_term: result.searchTerm
+    });
   }
 
   handleNavigation() {
@@ -223,6 +328,12 @@ export class FridayAIApp {
         const user = window.authService.getCurrentUser();
         authButton.textContent = user?.name || 'Account';
         authButton.classList.add('logged-in');
+
+        // If user is logged in, set user ID for analytics
+        const userId = localStorage.getItem('fridayai_user_id');
+        if (userId) {
+          analyticsManager.setUserId(userId);
+        }
       } else {
         authButton.textContent = 'Create an Account';
         authButton.classList.remove('logged-in');

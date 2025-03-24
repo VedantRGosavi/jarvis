@@ -1,0 +1,22 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "AllowIAMUserAccess",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::381492029785:user/VedantGosavi"
+            },
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::fridayai-downloads-20250324",
+                "arn:aws:s3:::fridayai-downloads-20250324/*"
+            ]
+        }
+    ]
+}

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and sensitive paths
+Disallow: /admin/
+Disallow: /api/
+Disallow: /internal/
+Disallow: /private/
+
+# Sitemap location
+Sitemap: https://fridayai.com/sitemap.xml

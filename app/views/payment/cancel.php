@@ -1,5 +1,29 @@
 <?php
 require_once BASE_PATH . '/app/utils/Response.php';
+require_once BASE_PATH . '/app/utils/SchemaGenerator.php';
+
+use App\Utils\SchemaGenerator;
+
+// Set SEO meta variables for this page
+$pageTitle = 'Payment Cancelled';
+$pageDescription = 'Your payment process has been cancelled. No charges were made to your account.';
+$pageKeywords = 'payment cancelled, transaction cancelled, FridayAI, gaming assistant, payment';
+$pageImage = '/images/payment-cancel.png';
+
+// Add breadcrumb schema
+$breadcrumbs = [
+    ['name' => 'Home', 'url' => 'https://fridayai.com/'],
+    ['name' => 'Games', 'url' => 'https://fridayai.com/games'],
+    ['name' => 'Payment', 'url' => 'https://fridayai.com/payment'],
+    ['name' => 'Payment Cancelled', 'url' => 'https://fridayai.com/payment/cancel']
+];
+$breadcrumbSchema = SchemaGenerator::generateBreadcrumbSchema($breadcrumbs);
+
+// Combine schemas
+$schemaMarkup = $breadcrumbSchema;
+
+// Start output buffering to capture the content
+ob_start();
 ?>
 
 <!DOCTYPE html>
@@ -41,3 +65,25 @@ require_once BASE_PATH . '/app/utils/Response.php';
     </script>
 </body>
 </html>
+
+<?php
+// Store the buffered content
+$content = ob_get_clean();
+
+// Additional scripts specific to this page
+$additionalScripts = <<<HTML
+<script>
+    // Clear any payment-related session data
+    sessionStorage.removeItem('payment_intent');
+    sessionStorage.removeItem('payment_method');
+</script>
+HTML;
+
+// Additional head content specific to this page
+$additionalHead = <<<HTML
+<script src="https://cdn.tailwindcss.com"></script>
+HTML;
+
+// Include the layout template
+require_once BASE_PATH . '/app/views/layout.php';
+?>

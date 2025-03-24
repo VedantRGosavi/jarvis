@@ -1,9 +1,27 @@
 // Import modules
 import { PricingSection } from './ui/pricing.js';
 import { PRICING_TIERS } from './data/pricing.js';
+import analyticsManager from './analytics.js';
+import { DownloadManager } from './ui/downloadUI.js';
 
 // Documentation Tabs
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize analytics
+    analyticsManager.initialize();
+
+    // Track page view
+    analyticsManager.trackPageView(window.location.pathname);
+
+    // Track initial funnel step
+    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+        analyticsManager.trackFunnelStep('acquisition', 'visit_home');
+    }
+
+    // Initialize download manager if on download page
+    if (window.location.pathname.includes('download.html')) {
+        window.downloadManager = new DownloadManager();
+    }
+
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 

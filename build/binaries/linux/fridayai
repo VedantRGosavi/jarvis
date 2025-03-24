@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# FridayAI for Linux
+# Version 1.0.0
+
+import sys
+import os
+import time
+
+def main():
+    print("Starting FridayAI v1.0.0 for Linux...")
+    print("Initializing application components...")
+    time.sleep(1)
+    print("Loading user preferences...")
+    time.sleep(0.5)
+    print("Connecting to game services...")
+    time.sleep(0.5)
+    print("Ready! FridayAI is now running.")
+    print("Press Ctrl+C to exit")
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("\nShutting down FridayAI...")
+        time.sleep(0.5)
+        print("Goodbye!")
+
+if __name__ == "__main__":
+    main()

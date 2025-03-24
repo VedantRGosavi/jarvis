@@ -8,12 +8,15 @@
     "vlucas/phpdotenv": "^5.5",
     "ext-sqlite3": "*",
     "ext-pdo": "*",
-    "ext-json": "*"
+    "ext-json": "*",
+    "firebase/php-jwt": "^6.0",
+    "aws/aws-sdk-php": "^3.235"
   },
   "autoload": {
     "psr-4": {
       "App\\Models\\": "app/models/",
-      "App\\Utils\\": "app/utils/"
+      "App\\Utils\\": "app/utils/",
+      "App\\": "app/"
     }
   },
   "config": {

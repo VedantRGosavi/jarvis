@@ -1,0 +1,23 @@
+# FridayAI Software Checksums
+# SHA256 checksums for verifying file integrity
+# Last updated: 2025-03-24
+
+# Windows Builds
+# ================================================
+1fe5541fe21c818c91faa4c31ba8b87c97719b4f383890faeee94c82eb6bcff0  FridayAI-Win-latest.zip
+3922ca17e794ea5087193c058370d659e3e73a161e0bfd9c255f773a55508837  FridayAI-Win-beta.zip
+
+# macOS Builds
+# ================================================
+dd267bf6a7c8e9f0ef8e73beb5973263cbe3fd38299b2a19ccac334b0fb6d417  FridayAI-Mac-latest.dmg
+28b2ed8e5200cfb46a2c5f993e3e7cc1f8cb7e2f4b4ba085dcea7b5e2eaa0c50  FridayAI-Mac-beta.dmg
+
+# Linux Builds
+# ================================================
+0f47abda5135a37f068203fe8ae6f3c2a2d7b039b526c6c3c9f37238696343e6  FridayAI-Linux-latest.tar.gz
+6bd0ad6e6c98cb9e2afcb8d353010c6688853015e4a62c79546e6fb4bffceb72  FridayAI-Linux-beta.tar.gz
+
+# To verify checksums, run:
+# Windows: certutil -hashfile filename.zip SHA256
+# macOS: shasum -a 256 filename.dmg
+# Linux: sha256sum filename.tar.gz
