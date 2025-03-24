@@ -385,4 +385,3 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export default fridayAIApp;
-export { FridayAIApp };
