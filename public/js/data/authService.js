@@ -5,7 +5,14 @@
 
 export class AuthService {
   constructor() {
-    this.baseUrl = '/api/auth';
+    // Determine if we're in production based on the hostname
+    const isProduction = window.location.hostname === 'fridayai-gold.vercel.app';
+
+    // Set base URL accordingly
+    this.baseUrl = isProduction
+      ? 'https://fridayai-gold.vercel.app/api/auth'
+      : '/api/auth';
+
     this.tokenKey = 'fridayai_auth_token';
     this.userKey = 'fridayai_user';
     this.token = localStorage.getItem(this.tokenKey);
@@ -138,6 +145,16 @@ export class AuthService {
         method: 'GET'
       });
 
+      // Check if response is HTML (error page) instead of JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        console.error(`OAuth URL response is HTML, not JSON for ${provider}`);
+        return {
+          success: false,
+          message: `Authentication service unavailable for ${provider}`
+        };
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -152,7 +169,7 @@ export class AuthService {
       console.error(`OAuth URL error for ${provider}:`, error);
       return {
         success: false,
-        message: error.message
+        message: `Authentication service for ${provider} is currently unavailable.`
       };
     }
   }
@@ -216,7 +233,20 @@ export class AuthService {
         body: JSON.stringify({ name, email, password })
       });
 
-      const data = await response.json();
+      // Handle potential HTML responses or empty responses
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('text/html')) {
+        console.error('Registration response is HTML, not JSON');
+        throw new Error('Registration service is temporarily unavailable.');
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        console.error('Failed to parse response as JSON:', e);
+        throw new Error('Invalid response from registration service.');
+      }
 
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');

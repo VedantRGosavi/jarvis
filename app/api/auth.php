@@ -12,6 +12,17 @@ use App\Utils\Response;
 use App\Utils\OAuthFactory;
 use App\Models\User;
 
+// Enable CORS for API requests
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+// Handle preflight OPTIONS requests
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit;
+}
+
 // Get request data
 $data = json_decode(file_get_contents('php://input'), true);
 $method = $_SERVER['REQUEST_METHOD'];
@@ -77,9 +88,14 @@ switch ($action) {
         break;
 
     case 'register':
-        if ($method !== 'POST') {
+        if ($method !== 'POST' && $method !== 'OPTIONS') {
             Response::error('Method not allowed', 405);
             break;
+        }
+
+        if ($method === 'OPTIONS') {
+            http_response_code(200);
+            exit;
         }
 
         if (!isset($data['name']) || !isset($data['email']) || !isset($data['password'])) {
