@@ -182,11 +182,17 @@ h3 {
   transition: opacity 0.5s ease;
 }
 
-/* Fade in animation */
+/* Fade in animation - ENHANCED FOR RELIABILITY */
 .fade-in-element {
+  opacity: 1; /* Start visible by default */
+  transform: translateY(0); /* Start in final position */
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* When JS is working, apply animations */
+.js-animation-ready .fade-in-element:not(.visible) {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .fade-in-element.visible {
@@ -361,72 +367,42 @@ html {
   display: flex;
 }
 
-/* EMERGENCY OVERRIDE - Ensure content visibility */
-body.force-display section,
-body.force-display footer,
-body.app-initialized section,
-body.app-initialized footer,
-body.force-display #features,
-body.force-display #games,
-body.force-display #pricing,
-body.force-display #docs,
-body.app-initialized #features,
-body.app-initialized #games,
-body.app-initialized #pricing,
-body.app-initialized #docs,
-.force-visible,
-.features-section,
-.games-section,
-.pricing-section,
-.docs-section,
-.footer-section {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+/* Custom class to replace flex without conflicting with hidden */
+.fridayai-flex {
+  display: flex;
 }
 
-/* Core content must always be visible */
-#features, #games, #pricing, #docs, footer {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
+/* Add a CSS rule to properly show the overlay when not hidden */
+#auth-check-overlay:not(.hidden) {
+  display: flex;
 }
 
-/* Ensure page container is properly displayed */
+/* Ensure page container is visible at all times */
 .page-container {
-    display: block !important;
-    visibility: visible !important;
     opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
 }
 
-/* Base visibility styles */
-.page-container {
-    opacity: 0;
-    transition: opacity 0.3s ease-in-out;
-}
-
-/* Show content when app is initialized */
-.app-initialized .page-container {
-    opacity: 1;
-}
-
-/* Section visibility */
+/* Make sure all sections are visible by default */
 section, footer {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+/* Mobile navigation */
+#mobile-menu {
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#mobile-menu.hidden {
     opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+    visibility: hidden;
 }
 
-.app-initialized section,
-.app-initialized footer {
+#mobile-menu:not(.hidden) {
     opacity: 1;
-    transform: translateY(0);
+    visibility: visible;
 }
-
-/* Staggered section animations */
-.app-initialized section:nth-child(1) { transition-delay: 0.1s; }
-.app-initialized section:nth-child(2) { transition-delay: 0.2s; }
-.app-initialized section:nth-child(3) { transition-delay: 0.3s; }
-.app-initialized section:nth-child(4) { transition-delay: 0.4s; }
-.app-initialized section:nth-child(5) { transition-delay: 0.5s; }
-.app-initialized footer { transition-delay: 0.6s; }

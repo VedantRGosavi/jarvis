@@ -13,6 +13,9 @@ export class FridayAIApp {
     this.isInitialized = false;
 
     console.log(`FridayAI App instance created`);
+
+    // Ensure content is visible immediately in case of slow loading
+    this.forceDisplayAllContent();
   }
 
   initialize() {
@@ -43,6 +46,11 @@ export class FridayAIApp {
 
     // Mark as initialized
     this.isInitialized = true;
+
+    // Ensure content visibility
+    this.forceDisplayAllContent();
+
+    // Add the class last, to ensure all content is already visible
     document.body.classList.add('app-initialized');
 
     // Dispatch event for other components to know app is ready
@@ -386,10 +394,43 @@ export class FridayAIApp {
     // Initial state
     updateAuthButton();
   }
+
+  /**
+   * Ensure all content is visible - consolidated from emergency fixes
+   * This is a reliable method to ensure content visibility regardless of initialization state
+   */
+  forceDisplayAllContent() {
+    // Make page container visible
+    const pageContainer = document.querySelector('.page-container');
+    if (pageContainer) {
+      pageContainer.style.opacity = '1';
+    }
+
+    // Make sure all sections are visible
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+      section.style.opacity = '1';
+      section.style.visibility = 'visible';
+      section.style.display = 'block';
+      section.style.transform = 'translateY(0)';
+    });
+
+    // Make sure footer is visible
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footer.style.opacity = '1';
+      footer.style.visibility = 'visible';
+      footer.style.display = 'block';
+      footer.style.transform = 'translateY(0)';
+    }
+
+    // Apply visible class to fade-in elements
+    const fadeInElements = document.querySelectorAll('.fade-in-element');
+    fadeInElements.forEach(element => {
+      element.classList.add('visible');
+    });
+
+    // Apply force-visible class to the body as a fallback
+    document.body.classList.add('force-visible');
+  }
 }
-
-// Create but do not initialize the app instance
-const fridayAIApp = new FridayAIApp();
-
-// Export both the class and the singleton instance
-export default fridayAIApp;

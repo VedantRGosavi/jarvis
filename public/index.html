@@ -10,6 +10,24 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/tailwind.css?v=20250324">
     <link rel="stylesheet" href="css/custom.css?v=20250324">
+
+    <!-- Immediate visibility styles -->
+    <style>
+        /* Ensure content is visible immediately, without waiting for JS */
+        .page-container {
+            opacity: 1 !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+        section, footer {
+            opacity: 1 !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+        .fade-in-element {
+            opacity: 1 !important;
+        }
+    </style>
 </head>
 <body class="bg-gaming-primary text-gaming-light font-sans">
     <!-- Integrated layout with seamless transitions -->
@@ -181,13 +199,12 @@
                             <img src="assets/images/kingdome-come.jpg" alt="Kingdom Come: Deliverance" class="w-full h-32 object-cover rounded-lg opacity-75">
                         </div>
                         <h3 class="text-base sm:text-lg font-semibold mb-2">Kingdom Come: Deliverance</h3>
-                        <p class="text-gaming-gray-300 text-sm mb-3">Master medieval combat, alchemy, and historical quests in 15th century Bohemia.</p>
-                        <span class="inline-block bg-gaming-purple-600/50 px-3 py-1 rounded-full text-xs">Coming Soon</span>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Connect with other adventurers to share builds, discuss choices, and explore the rich world of Faerûn together.</p>
+                        <a href="#" class="inline-block bg-gaming-gray-700 hover:bg-gaming-gray-600 text-white font-medium py-2 px-6 rounded-md transition">Join Discord</a>
                     </div>
                 </div>
             </div>
         </section>
-
         <!-- Documentation Section -->
         <section id="docs" class="docs-section py-16 sm:py-24 lg:py-32">
             <div class="container mx-auto px-4 sm:px-6">
@@ -367,6 +384,7 @@
                                 <label for="login-password" class="block text-sm font-medium text-gaming-gray-300 mb-1">Password</label>
                                 <input type="password" id="login-password" class="w-full bg-gaming-gray-700 border border-gaming-gray-600 rounded-md py-2 px-4 text-gaming-light focus:outline-none focus:ring-2 focus:ring-gaming-accent">
                             </div>
+                            <div id="loginError" class="text-red-500 text-sm hidden"></div>
                             <div>
                                 <button type="submit" class="w-full bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-medium py-2 px-4 rounded-md transition">Login</button>
                             </div>
@@ -567,7 +585,7 @@
                             <img src="assets/images/baldurs-gate-3.jpg" alt="Baldur's Gate 3" class="w-full h-40 sm:h-48 object-cover rounded-lg">
                         </div>
                         <h3 class="text-lg sm:text-xl font-semibold mb-4">Baldur's Gate 3 Community</h3>
-                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Connect with other adventurers to share builds, discuss choices, and explore Faerûn together.</p>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Connect with other adventurers to share builds, discuss choices, and explore the rich world of Faerûn together.</p>
                         <a href="#" class="inline-block bg-gaming-gray-700 hover:bg-gaming-gray-600 text-white font-medium py-2 px-6 rounded-md transition">Join Discord</a>
                     </div>
                 </div>
@@ -575,63 +593,86 @@
         </section>
 
         <!-- Download Section -->
-        <section id="download" class="download-section py-16 sm:py-24 lg:py-32">
-            <div class="container mx-auto px-4 sm:px-6 text-center">
-                <h2 class="text-3xl sm:text-4xl font-bold mb-4 sm:mb-8 fade-in-element">Ready to Enhance Your Gameplay?</h2>
-                <p class="text-base sm:text-xl mb-8 sm:mb-10 text-gaming-gray-300 max-w-2xl mx-auto fade-in-element">Download FridayAI now and experience seamless access to game information without breaking immersion.</p>
-                <a href="#" class="download-btn bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 sm:py-4 px-8 sm:px-12 rounded-md text-base sm:text-lg transition inline-block fade-in-element" onclick="document.querySelector('#auth-button').click(); document.querySelector('#auth').scrollIntoView({ behavior: 'smooth' });">
-                    Download FridayAI
-                </a>
-                <p class="mt-4 sm:mt-6 text-sm sm:text-base text-gaming-gray-400 fade-in-element">Version 1.0.0 • Windows & Mac</p>
+        <section id="download" class="download-section py-16 sm:py-24 lg:py-32 bg-gaming-gray-900">
+            <div class="container mx-auto px-4 sm:px-6">
+                <h2 class="text-3xl sm:text-4xl font-bold text-center mb-8 sm:mb-12 fade-in-element">Download FridayAI</h2>
+                <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl text-center fade-in-element">
+                        <i class="fab fa-windows text-4xl sm:text-5xl mb-4"></i>
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">Windows</h3>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Compatible with Windows 10 and 11</p>
+                        <a href="#" class="inline-block bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-medium py-2 px-6 rounded-md transition">Download for Windows</a>
+                    </div>
+                    <div class="bg-gaming-gray-800/90 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-xl text-center fade-in-element">
+                        <i class="fab fa-apple text-4xl sm:text-5xl mb-4"></i>
+                        <h3 class="text-lg sm:text-xl font-semibold mb-4">macOS</h3>
+                        <p class="text-sm sm:text-base text-gaming-gray-300 mb-6">Compatible with macOS 11.0 and later</p>
+                        <a href="#" class="inline-block bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-medium py-2 px-6 rounded-md transition">Download for macOS</a>
+                    </div>
+                </div>
+                <div class="mt-12 text-center">
+                    <p class="text-sm sm:text-base text-gaming-gray-400">By downloading, you agree to our <a href="#" class="text-gaming-accent hover:text-gaming-accent-hover">Terms of Service</a> and <a href="#" class="text-gaming-accent hover:text-gaming-accent-hover">Privacy Policy</a></p>
+                </div>
             </div>
         </section>
+
+        <!-- Footer -->
+        <footer class="footer-section py-12 sm:py-16 bg-gaming-gray-900">
+            <div class="container mx-auto px-4 sm:px-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 sm:gap-12 mb-8 sm:mb-12">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">FridayAI</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#features" class="text-gaming-gray-400 hover:text-gaming-gray-300">Features</a></li>
+                            <li><a href="#games" class="text-gaming-gray-400 hover:text-gaming-gray-300">Games</a></li>
+                            <li><a href="#pricing" class="text-gaming-gray-400 hover:text-gaming-gray-300">Pricing</a></li>
+                            <li><a href="#download" class="text-gaming-gray-400 hover:text-gaming-gray-300">Download</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Community</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Discord</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Twitter</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Reddit</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Blog</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Support</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Help Center</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Documentation</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Contact Us</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Status</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Legal</h3>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Terms of Service</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Privacy Policy</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">Cookie Policy</a></li>
+                            <li><a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300">EULA</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="border-t border-gaming-gray-800 pt-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-center">
+                        <p class="text-sm text-gaming-gray-400 mb-4 sm:mb-0">&copy; 2025 FridayAI. All rights reserved.</p>
+                        <div class="flex space-x-6">
+                            <a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300"><i class="fab fa-discord"></i></a>
+                            <a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300"><i class="fab fa-twitter"></i></a>
+                            <a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300"><i class="fab fa-reddit"></i></a>
+                            <a href="#" class="text-gaming-gray-400 hover:text-gaming-gray-300"><i class="fab fa-github"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <!-- Footer -->
-    <footer class="footer-section py-12 sm:py-16 bg-gaming-primary text-gaming-gray-300">
-        <div class="container mx-auto px-4 sm:px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-8 md:mb-0 text-center md:text-left fade-in-element">
-                    <h2 class="text-lg sm:text-xl font-bold text-gaming-light mb-3">FridayAI</h2>
-                    <p>&copy; 2025 FridayAI Gaming Companion</p>
-                </div>
-                <nav class="fade-in-element">
-                    <ul class="flex flex-wrap justify-center space-x-8 sm:space-x-16 items-center">
-                        <li class="mb-4 sm:mb-0">
-                            <a href="https://x.com" target="_blank" class="hover:text-gaming-light transition">
-                                <i class="fa-brands fa-twitter text-xl sm:text-2xl"></i>
-                            </a>
-                        </li>
-                        <li class="mb-4 sm:mb-0">
-                            <a href="https://discord.com" target="_blank" class="hover:text-gaming-light transition">
-                                <i class="fab fa-discord text-xl sm:text-2xl"></i>
-                            </a>
-                        </li>
-                        <li class="mb-4 sm:mb-0">
-                            <a href="https://github.com" target="_blank" class="hover:text-gaming-light transition">
-                                <i class="fab fa-github text-xl sm:text-2xl"></i>
-                            </a>
-                        </li>
-                        <li class="mb-4 sm:mb-0">
-                            <a href="https://youtube.com" target="_blank" class="hover:text-gaming-light transition">
-                                <i class="fab fa-youtube text-xl sm:text-2xl"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Core application scripts -->
-    <script type="module">
-        import { FridayAIApp } from './js/app.js';
-
-        // Initialize app when DOM is ready
-        document.addEventListener('DOMContentLoaded', () => {
-            window.fridayAI = new FridayAIApp();
-            window.fridayAI.initialize();
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="js/main.js?v=20250324"></script>
 </body>
 </html>

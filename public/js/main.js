@@ -27,26 +27,24 @@ document.addEventListener('DOMContentLoaded', function() {
         window.downloadManager = new DownloadManager();
     }
 
-    // Initialize tabs
-    initializeTabs();
-
-    // Initialize FAQ accordions
-    initializeFaqAccordions();
-
-    // Initialize pricing section
-    initializePricingSection();
-
-    // Ensure content visibility as a final check
-    if (window.emergencyForceDisplay) {
-        window.emergencyForceDisplay();
-    } else if (window.forceDisplayContent) {
-        window.forceDisplayContent();
-    } else if (fridayAIApp && fridayAIApp.forceDisplayAllContent) {
+    // First, ensure content is visible immediately (no waiting for JS)
+    if (fridayAIApp) {
         fridayAIApp.forceDisplayAllContent();
     } else {
-        // Final fallback
+        // If app isn't available yet, use the fallback
         ensureContentVisibility();
     }
+
+    // Then proceed with normal initialization
+    initializeTabs();
+    initializeFaqAccordions();
+    initializePricingSection();
+
+    // Enable animations only after ensuring content is visible
+    setTimeout(() => {
+        document.documentElement.classList.add('js-animation-ready');
+        activateFadeInElements();
+    }, 100);
 });
 
 // Documentation Tab initialization
@@ -115,6 +113,8 @@ function initializeFaqAccordions() {
         const answer = item.querySelector('.faq-answer');
         const arrow = item.querySelector('svg');
 
+        if (!button || !answer || !arrow) return;
+
         button.addEventListener('click', () => {
             const isOpen = answer.classList.contains('active');
 
@@ -122,8 +122,8 @@ function initializeFaqAccordions() {
             faqItems.forEach(otherItem => {
                 const otherAnswer = otherItem.querySelector('.faq-answer');
                 const otherArrow = otherItem.querySelector('svg');
-                otherAnswer.classList.remove('active');
-                otherArrow.style.transform = 'rotate(0deg)';
+                if (otherAnswer) otherAnswer.classList.remove('active');
+                if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
             });
 
             // Toggle clicked item
@@ -147,35 +147,60 @@ function initializePricingSection() {
     }
 }
 
-// Fallback content visibility function
-function ensureContentVisibility() {
-    // Force display all major sections
-    ['features', 'games', 'pricing', 'docs'].forEach(function(id) {
-        var section = document.getElementById(id);
-        if (section) {
-            section.style.display = 'block';
-            section.style.visibility = 'visible';
-            section.style.opacity = '1';
-        }
+// Function to activate fade-in elements as they become visible
+function activateFadeInElements() {
+    const fadeElements = document.querySelectorAll('.fade-in-element');
+
+    if (!fadeElements.length) return;
+
+    // Create an intersection observer
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // Stop observing once it's visible
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        root: null, // viewport
+        threshold: 0.1, // trigger when 10% is visible
+        rootMargin: '0px 0px -50px 0px' // slightly before coming into view
     });
 
-    // Check all sections for visibility
-    var sections = document.querySelectorAll('section');
-    sections.forEach(function(section) {
-        if (window.getComputedStyle(section).display === 'none') {
-            section.style.display = 'block';
-            section.style.visibility = 'visible';
-            section.style.opacity = '1';
-        }
+    // Observe each element
+    fadeElements.forEach(element => {
+        observer.observe(element);
     });
 
-    // Make sure footer is visible
-    var footer = document.querySelector('footer');
-    if (footer) {
-        footer.style.display = 'block';
-        footer.style.visibility = 'visible';
-        footer.style.opacity = '1';
+    // Fallback for browsers that don't support IntersectionObserver
+    if (!('IntersectionObserver' in window)) {
+        fadeElements.forEach(element => {
+            element.classList.add('visible');
+        });
     }
+}
+
+// Fallback content visibility function (simplified and reliable)
+function ensureContentVisibility() {
+    // Force display all sections
+    document.querySelectorAll('section, footer, .page-container').forEach(function(element) {
+        if (element) {
+            element.style.display = 'block';
+            element.style.visibility = 'visible';
+            element.style.opacity = '1';
+
+            // If it's a fade-in element, make it visible
+            if (element.classList.contains('fade-in-element')) {
+                element.classList.add('visible');
+            }
+        }
+    });
+
+    // Apply visible class to fade-in elements
+    document.querySelectorAll('.fade-in-element').forEach(function(element) {
+        element.classList.add('visible');
+    });
 
     console.log('Content visibility ensured by main.js');
 }
