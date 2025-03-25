@@ -8,102 +8,10 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/tailwind.css?v=20250325">
-    <link rel="stylesheet" href="css/custom.css?v=20250325">
-    <style>
-        /* Direct CSS override to force visibility */
-        body section,
-        body footer,
-        #features, #games, #pricing, #docs,
-        .features-section, .games-section, .pricing-section, .docs-section, .footer-section {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        }
-
-        /* Debug outlines */
-        .debug-mode section {
-            border: 3px solid rgba(255, 0, 0, 0.5) !important;
-            margin: 5px !important;
-            position: relative !important;
-        }
-
-        .debug-mode footer {
-            border: 3px solid rgba(0, 255, 0, 0.5) !important;
-            margin: 5px !important;
-            position: relative !important;
-        }
-
-        .debug-section-name {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 5px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-    </style>
-    <!-- Debug tool to identify rendering issues -->
-    <script>
-        // Add to window load to ensure it runs after all other scripts
-        window.addEventListener('load', function() {
-            console.log('🐞 Debug helper initialized');
-
-            // Add debug mode toggle button
-            const debugButton = document.createElement('button');
-            debugButton.innerText = 'Debug Mode';
-            debugButton.style.cssText = 'position: fixed; bottom: 10px; left: 10px; z-index: 10000; background: #333; color: white; padding: 10px; border-radius: 5px;';
-
-            debugButton.addEventListener('click', function() {
-                document.body.classList.toggle('debug-mode');
-
-                // Add section names for debugging
-                if (document.body.classList.contains('debug-mode')) {
-                    const sections = document.querySelectorAll('section, footer');
-                    sections.forEach(section => {
-                        const label = document.createElement('div');
-                        label.className = 'debug-section-name';
-                        label.innerText = section.id || section.className || 'unnamed section';
-                        section.appendChild(label);
-
-                        console.log('Section: ', section.id || section.className, section);
-                    });
-
-                    // Check computed styles
-                    const footer = document.querySelector('footer');
-                    if (footer) {
-                        const style = window.getComputedStyle(footer);
-                        console.log('Footer computed styles:', {
-                            display: style.display,
-                            visibility: style.visibility,
-                            opacity: style.opacity,
-                            height: style.height,
-                            overflow: style.overflow
-                        });
-                    }
-                } else {
-                    document.querySelectorAll('.debug-section-name').forEach(el => el.remove());
-                }
-            });
-
-            document.body.appendChild(debugButton);
-
-            // Force layout recalculation
-            document.body.offsetHeight;
-
-            // Verify content is visible
-            const sections = document.querySelectorAll('section, footer');
-            sections.forEach(section => {
-                section.style.cssText += 'display: block !important; visibility: visible !important; opacity: 1 !important;';
-            });
-
-            console.log('🐞 Debug helper completed initialization, found ' + document.querySelectorAll('section').length + ' sections and ' + document.querySelectorAll('footer').length + ' footers');
-        });
-    </script>
+    <link rel="stylesheet" href="css/tailwind.css?v=20250324">
+    <link rel="stylesheet" href="css/custom.css?v=20250324">
 </head>
-<body class="bg-gaming-primary text-gaming-light font-sans force-display app-initialized">
+<body class="bg-gaming-primary text-gaming-light font-sans">
     <!-- Integrated layout with seamless transitions -->
     <div class="page-container relative">
         <!-- Navbar -->
@@ -715,75 +623,15 @@
         </div>
     </footer>
 
-    <!-- Main application initialization -->
+    <!-- Core application scripts -->
     <script type="module">
-        // Import app module
-        import fridayAIApp from './js/app.js?v=20250325';
+        import { FridayAIApp } from './js/app.js';
 
-        // Initialize the app when the DOM is ready
-        function initApp() {
-            console.log('Initializing FridayAI application');
-
-            // Initialize and make globally available
-            window.fridayAIApp = fridayAIApp.initialize();
-        }
-
-        // Initialize when DOM is loaded
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            // DOM already loaded, initialize immediately
-            initApp();
-        }
-
-        // Ensure content visibility on window load
-        window.addEventListener('load', () => fridayAIApp.forceDisplayAllContent());
-    </script>
-
-    <!-- Authentication Scripts with cache busting -->
-    <script type="module" src="js/data/authService.js?v=20250324"></script>
-    <script type="module" src="js/ui/icons.js?v=20250324"></script>
-    <script type="module" src="js/ui/authForms.js?v=20250324"></script>
-    <script type="module" src="js/ui/accountUI.js?v=20250324"></script>
-    <script type="module" src="js/ui/accountPage.js?v=20250324"></script>
-
-    <!-- Payment Scripts -->
-    <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        // Dispatch event when Stripe is loaded
+        // Initialize app when DOM is ready
         document.addEventListener('DOMContentLoaded', () => {
-            if (window.Stripe) {
-                document.dispatchEvent(new CustomEvent('stripe-loaded'));
-            }
+            window.fridayAI = new FridayAIApp();
+            window.fridayAI.initialize();
         });
     </script>
-    <script type="module">
-        // Import modules
-        import paymentService from './js/data/paymentService.js?v=20250324';
-        import paymentUI from './js/ui/paymentUI.js?v=20250324';
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize tooltips
-            const tooltipTriggerList = [...document.querySelectorAll('[data-bs-toggle="tooltip"]')];
-            tooltipTriggerList.forEach(tooltipTriggerEl => {
-                bootstrap.Tooltip.getOrCreateInstance(tooltipTriggerEl, {
-                    container: 'body',
-                    trigger: 'hover'
-                });
-            });
-
-            // Check for admin users to show admin link
-            if (window.authService && window.authService.isAuthenticated()) {
-                const user = window.authService.getCurrentUser();
-                if (user && user.subscription_status === 'admin') {
-                    document.getElementById('admin-nav-item').classList.remove('hidden');
-                }
-            }
-        });
-    </script>
-
-    <!-- Core scripts -->
-    <script src="js/analytics-init.js?v=20250324" type="module"></script>
-    <script src="js/main.js?v=20250325" type="module"></script>
 </body>
 </html>

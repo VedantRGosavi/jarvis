@@ -9,13 +9,6 @@ import fridayAIApp from './app.js';
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Main.js initialization started');
 
-    // Initialize FridayAI App - this ensures content is visible
-    if (fridayAIApp && typeof fridayAIApp.initialize === 'function') {
-        fridayAIApp.initialize();
-    } else {
-        console.error('FridayAI App not properly loaded. Check module imports.');
-    }
-
     // Initialize analytics if not already initialized
     if (!analyticsManager.initialized) {
         analyticsManager.initialize();
@@ -43,12 +36,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize pricing section
     initializePricingSection();
 
-    // Final check for content visibility
-    setTimeout(function() {
-        if (fridayAIApp && typeof fridayAIApp.forceDisplayAllContent === 'function') {
-            fridayAIApp.forceDisplayAllContent();
-        }
-    }, 500);
+    // Ensure content visibility as a final check
+    if (window.emergencyForceDisplay) {
+        window.emergencyForceDisplay();
+    } else if (window.forceDisplayContent) {
+        window.forceDisplayContent();
+    } else if (fridayAIApp && fridayAIApp.forceDisplayAllContent) {
+        fridayAIApp.forceDisplayAllContent();
+    } else {
+        // Final fallback
+        ensureContentVisibility();
+    }
 });
 
 // Documentation Tab initialization
@@ -147,4 +145,37 @@ function initializePricingSection() {
             tiers: PRICING_TIERS
         });
     }
+}
+
+// Fallback content visibility function
+function ensureContentVisibility() {
+    // Force display all major sections
+    ['features', 'games', 'pricing', 'docs'].forEach(function(id) {
+        var section = document.getElementById(id);
+        if (section) {
+            section.style.display = 'block';
+            section.style.visibility = 'visible';
+            section.style.opacity = '1';
+        }
+    });
+
+    // Check all sections for visibility
+    var sections = document.querySelectorAll('section');
+    sections.forEach(function(section) {
+        if (window.getComputedStyle(section).display === 'none') {
+            section.style.display = 'block';
+            section.style.visibility = 'visible';
+            section.style.opacity = '1';
+        }
+    });
+
+    // Make sure footer is visible
+    var footer = document.querySelector('footer');
+    if (footer) {
+        footer.style.display = 'block';
+        footer.style.visibility = 'visible';
+        footer.style.opacity = '1';
+    }
+
+    console.log('Content visibility ensured by main.js');
 }

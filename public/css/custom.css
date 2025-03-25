@@ -361,68 +361,72 @@ html {
   display: flex;
 }
 
-/* Content Visibility - Standardized Approach */
-/* This ensures all core content is always visible */
-html body section,
-html body footer,
-html body #features,
-html body #games,
-html body #pricing,
-html body #docs,
-html .features-section,
-html .games-section,
-html .pricing-section,
-html .docs-section,
-html .footer-section,
-html .page-container,
-section[id],
-footer {
+/* EMERGENCY OVERRIDE - Ensure content visibility */
+body.force-display section,
+body.force-display footer,
+body.app-initialized section,
+body.app-initialized footer,
+body.force-display #features,
+body.force-display #games,
+body.force-display #pricing,
+body.force-display #docs,
+body.app-initialized #features,
+body.app-initialized #games,
+body.app-initialized #pricing,
+body.app-initialized #docs,
+.force-visible,
+.features-section,
+.games-section,
+.pricing-section,
+.docs-section,
+.footer-section {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    min-height: 10px !important;
-    overflow: visible !important;
-    position: relative !important;
 }
 
-/* Class-based approach for ensuring visibility */
-html .force-display section,
-html .force-display footer,
-html .app-initialized section,
-html .app-initialized footer,
-html .force-visible,
-html .footer-section {
+/* Core content must always be visible */
+#features, #games, #pricing, #docs, footer {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    height: auto !important;
-    min-height: 10px !important;
-    overflow: visible !important;
-    position: relative !important;
 }
 
 /* Ensure page container is properly displayed */
-html .page-container {
+.page-container {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    min-height: 100vh !important;
 }
 
-/* Temporary super emergency override for footer */
-footer,
-.footer-section,
-footer.footer-section,
-body > footer,
-body > div > footer,
-.page-container > footer {
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    min-height: 100px !important;
-    margin-top: 50px !important;
-    border-top: 1px solid rgba(255,255,255,0.1) !important;
-    position: relative !important;
-    z-index: 10 !important;
+/* Base visibility styles */
+.page-container {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
 }
+
+/* Show content when app is initialized */
+.app-initialized .page-container {
+    opacity: 1;
+}
+
+/* Section visibility */
+section, footer {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.app-initialized section,
+.app-initialized footer {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Staggered section animations */
+.app-initialized section:nth-child(1) { transition-delay: 0.1s; }
+.app-initialized section:nth-child(2) { transition-delay: 0.2s; }
+.app-initialized section:nth-child(3) { transition-delay: 0.3s; }
+.app-initialized section:nth-child(4) { transition-delay: 0.4s; }
+.app-initialized section:nth-child(5) { transition-delay: 0.5s; }
+.app-initialized footer { transition-delay: 0.6s; }

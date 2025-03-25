@@ -10,161 +10,52 @@ export class FridayAIApp {
     this.version = '1.0.0';
     this.gameModules = {};
     this.activeGame = null;
+    this.isInitialized = false;
 
     console.log(`FridayAI App instance created`);
   }
 
   initialize() {
-    try {
-      console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
-
-      // Force display all content immediately before any other initialization
-      this.forceDisplayAllContent();
-
-      // Load theme preference
-      this.loadThemePreference();
-
-      // Initialize event listeners
-      this.initEventListeners();
-
-      // Register available game modules
-      this.detectGameModules();
-
-      // Handle navigation
-      this.handleNavigation();
-
-      // Initialize auth button
-      this.initializeAuthButton();
-
-      // Initialize analytics
-      this.initializeAnalytics();
-
-      // Add initialization complete class
-      document.body.classList.add('app-initialized');
-
-      // Force display again after initialization
-      setTimeout(() => this.forceDisplayAllContent(), 100);
-
-      // Set up continuous monitoring to ensure content remains visible
-      this.setupVisibilityMonitoring();
-
-      // Dispatch event for other components to know app is ready
-      document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
-
-      return this;
-    } catch (error) {
-      console.error('Error initializing FridayAI App:', error);
-      // Still force display content despite any errors
-      this.forceDisplayAllContent();
-      // Setup fallback visibility monitoring
-      this.setupVisibilityMonitoring();
+    if (this.isInitialized) {
+      console.warn('FridayAI App already initialized');
       return this;
     }
-  }
 
-  // Force display all content
-  forceDisplayAllContent() {
-    try {
-      console.log('FridayAI: Forcing display of all content');
+    console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
 
-      // Add force-display class to body
-      document.body.classList.add('force-display');
+    // Load theme preference
+    this.loadThemePreference();
 
-      // Force display all major sections
-      const criticalSections = ['features', 'games', 'pricing', 'docs'];
-      criticalSections.forEach(id => {
-        const section = document.getElementById(id);
-        if (section) {
-          section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
-        }
-      });
+    // Initialize event listeners
+    this.initEventListeners();
 
-      // Force display ALL sections
-      const allSections = document.querySelectorAll('section');
-      allSections.forEach(section => {
-        section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
-      });
+    // Register available game modules
+    this.detectGameModules();
 
-      // Force display the footer
-      const footer = document.querySelector('footer');
-      if (footer) {
-        footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 100px !important; margin-top: 50px !important; position: relative !important; z-index: 10 !important;';
-      }
+    // Handle navigation
+    this.handleNavigation();
 
-      // Force display any other critical page elements
-      const criticalElements = [
-        '.page-container',
-        '.features-section',
-        '.games-section',
-        '.pricing-section',
-        '.docs-section',
-        '.footer-section'
-      ];
+    // Initialize auth button
+    this.initializeAuthButton();
 
-      criticalElements.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(element => {
-          element.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
-        });
-      });
+    // Initialize analytics
+    this.initializeAnalytics();
 
-      // ALTERNATIVE APPROACH: Use direct DOM insertion for footer if missing
-      if (!document.querySelector('footer:not([style*="display: none"])')) {
-        console.log('Footer may be hidden, trying alternate approach');
-        const container = document.querySelector('.page-container');
-        if (container) {
-          const existingFooter = document.querySelector('footer');
-          if (existingFooter) {
-            // Clone and replace the existing footer
-            const newFooter = existingFooter.cloneNode(true);
-            newFooter.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 100px !important; position: relative !important; z-index: 10 !important;';
-            container.appendChild(newFooter);
-          }
-        }
-      }
+    // Mark as initialized
+    this.isInitialized = true;
+    document.body.classList.add('app-initialized');
 
-      console.log('FridayAI: All sections have been force displayed');
-    } catch (error) {
-      console.error('Error in forceDisplayAllContent:', error);
-      // Last resort approach - direct DOM manipulation
-      try {
-        document.body.classList.add('force-display');
-        document.querySelectorAll('section, footer, #features, #games, #pricing, #docs').forEach(el => {
-          el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important;';
-        });
-      } catch (e) {
-        console.error('Critical rendering error:', e);
-      }
-    }
-  }
+    // Dispatch event for other components to know app is ready
+    document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
 
-  // Set up monitoring to ensure content visibility is maintained
-  setupVisibilityMonitoring() {
-    // Run visibility check multiple times to handle race conditions
-    setTimeout(() => this.forceDisplayAllContent(), 500);
-    setTimeout(() => this.forceDisplayAllContent(), 1000);
-    setTimeout(() => this.forceDisplayAllContent(), 2000);
-
-    // Continuous monitoring for footer visibility
-    setInterval(() => {
-      const footer = document.querySelector('footer');
-      if (footer) {
-        const style = window.getComputedStyle(footer);
-        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
-          console.log('Footer visibility issue detected, fixing...');
-          this.forceDisplayAllContent();
-        }
-      }
-    }, 5000);
+    return this;
   }
 
   initializeAnalytics() {
-    // Make sure analytics is initialized
     if (!analyticsManager.initialized) {
       analyticsManager.initialize();
     }
 
-    // Track page view if not already tracked in main.js
     if (window.location.pathname !== analyticsManager.lastTrackedPath) {
       analyticsManager.trackPageView(window.location.pathname);
     }
@@ -177,11 +68,10 @@ export class FridayAIApp {
     }
   }
 
-  toggleDarkMode(isDark) {
+  toggleDarkMode() {
     const isDarkMode = document.documentElement.classList.toggle('dark');
     localStorage.setItem('fridayai_dark_mode', isDarkMode);
 
-    // Track theme preference
     analyticsManager.trackEvent('toggle_theme', {
       theme: isDarkMode ? 'dark' : 'light'
     });
@@ -191,7 +81,7 @@ export class FridayAIApp {
     // Dark mode toggle (if present on the page)
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     if (darkModeToggle) {
-      darkModeToggle.addEventListener('click', () => this.toggleDarkMode(true));
+      darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
     }
 
     // Download button
