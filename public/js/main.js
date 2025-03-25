@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ensureContentVisibility();
     }
 
+    // Initialize mobile menu toggle
+    initializeMobileMenu();
+
     // Then proceed with normal initialization
     initializeTabs();
     initializeFaqAccordions();
@@ -46,6 +49,34 @@ document.addEventListener('DOMContentLoaded', function() {
         activateFadeInElements();
     }, 100);
 });
+
+// Mobile menu toggle
+function initializeMobileMenu() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const mobileAuthButton = document.getElementById('mobile-auth-button');
+
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Close menu when clicking a link
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenu.classList.add('hidden');
+            });
+        });
+
+        // Close menu when auth button is clicked
+        if (mobileAuthButton) {
+            mobileAuthButton.addEventListener('click', function() {
+                mobileMenu.classList.add('hidden');
+            });
+        }
+    }
+}
 
 // Documentation Tab initialization
 function initializeTabs() {

@@ -407,13 +407,21 @@ export class FridayAIApp {
     }
 
     // Make sure all sections are visible
-    const sections = document.querySelectorAll('section');
+    const sections = document.querySelectorAll('section:not(.hero-section)'); // Exclude hero section
     sections.forEach(section => {
       section.style.opacity = '1';
       section.style.visibility = 'visible';
       section.style.display = 'block';
       section.style.transform = 'translateY(0)';
     });
+
+    // Special handling for hero section
+    const heroSection = document.querySelector('.hero-section');
+    if (heroSection) {
+      heroSection.style.opacity = '1';
+      heroSection.style.visibility = 'visible';
+      // Don't modify other hero section styles that affect positioning
+    }
 
     // Make sure footer is visible
     const footer = document.querySelector('footer');
