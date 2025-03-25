@@ -8,8 +8,8 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/tailwind.css?v=20250324">
-    <link rel="stylesheet" href="css/custom.css?v=20250324">
+    <link rel="stylesheet" href="css/tailwind.css?v=20250325">
+    <link rel="stylesheet" href="css/custom.css?v=20250325">
     <style>
         /* Direct CSS override to force visibility */
         body section,
@@ -20,7 +20,88 @@
             visibility: visible !important;
             opacity: 1 !important;
         }
+
+        /* Debug outlines */
+        .debug-mode section {
+            border: 3px solid rgba(255, 0, 0, 0.5) !important;
+            margin: 5px !important;
+            position: relative !important;
+        }
+
+        .debug-mode footer {
+            border: 3px solid rgba(0, 255, 0, 0.5) !important;
+            margin: 5px !important;
+            position: relative !important;
+        }
+
+        .debug-section-name {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
     </style>
+    <!-- Debug tool to identify rendering issues -->
+    <script>
+        // Add to window load to ensure it runs after all other scripts
+        window.addEventListener('load', function() {
+            console.log('🐞 Debug helper initialized');
+
+            // Add debug mode toggle button
+            const debugButton = document.createElement('button');
+            debugButton.innerText = 'Debug Mode';
+            debugButton.style.cssText = 'position: fixed; bottom: 10px; left: 10px; z-index: 10000; background: #333; color: white; padding: 10px; border-radius: 5px;';
+
+            debugButton.addEventListener('click', function() {
+                document.body.classList.toggle('debug-mode');
+
+                // Add section names for debugging
+                if (document.body.classList.contains('debug-mode')) {
+                    const sections = document.querySelectorAll('section, footer');
+                    sections.forEach(section => {
+                        const label = document.createElement('div');
+                        label.className = 'debug-section-name';
+                        label.innerText = section.id || section.className || 'unnamed section';
+                        section.appendChild(label);
+
+                        console.log('Section: ', section.id || section.className, section);
+                    });
+
+                    // Check computed styles
+                    const footer = document.querySelector('footer');
+                    if (footer) {
+                        const style = window.getComputedStyle(footer);
+                        console.log('Footer computed styles:', {
+                            display: style.display,
+                            visibility: style.visibility,
+                            opacity: style.opacity,
+                            height: style.height,
+                            overflow: style.overflow
+                        });
+                    }
+                } else {
+                    document.querySelectorAll('.debug-section-name').forEach(el => el.remove());
+                }
+            });
+
+            document.body.appendChild(debugButton);
+
+            // Force layout recalculation
+            document.body.offsetHeight;
+
+            // Verify content is visible
+            const sections = document.querySelectorAll('section, footer');
+            sections.forEach(section => {
+                section.style.cssText += 'display: block !important; visibility: visible !important; opacity: 1 !important;';
+            });
+
+            console.log('🐞 Debug helper completed initialization, found ' + document.querySelectorAll('section').length + ' sections and ' + document.querySelectorAll('footer').length + ' footers');
+        });
+    </script>
 </head>
 <body class="bg-gaming-primary text-gaming-light font-sans force-display app-initialized">
     <!-- Integrated layout with seamless transitions -->

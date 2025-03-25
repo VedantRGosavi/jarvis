@@ -45,6 +45,9 @@ export class FridayAIApp {
       // Force display again after initialization
       setTimeout(() => this.forceDisplayAllContent(), 100);
 
+      // Set up continuous monitoring to ensure content remains visible
+      this.setupVisibilityMonitoring();
+
       // Dispatch event for other components to know app is ready
       document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
 
@@ -53,6 +56,8 @@ export class FridayAIApp {
       console.error('Error initializing FridayAI App:', error);
       // Still force display content despite any errors
       this.forceDisplayAllContent();
+      // Setup fallback visibility monitoring
+      this.setupVisibilityMonitoring();
       return this;
     }
   }
@@ -70,20 +75,20 @@ export class FridayAIApp {
       criticalSections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
-          section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+          section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
         }
       });
 
       // Force display ALL sections
       const allSections = document.querySelectorAll('section');
       allSections.forEach(section => {
-        section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+        section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
       });
 
       // Force display the footer
       const footer = document.querySelector('footer');
       if (footer) {
-        footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+        footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 100px !important; margin-top: 50px !important; position: relative !important; z-index: 10 !important;';
       }
 
       // Force display any other critical page elements
@@ -99,9 +104,24 @@ export class FridayAIApp {
       criticalElements.forEach(selector => {
         const elements = document.querySelectorAll(selector);
         elements.forEach(element => {
-          element.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+          element.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 20px !important; overflow: visible !important;';
         });
       });
+
+      // ALTERNATIVE APPROACH: Use direct DOM insertion for footer if missing
+      if (!document.querySelector('footer:not([style*="display: none"])')) {
+        console.log('Footer may be hidden, trying alternate approach');
+        const container = document.querySelector('.page-container');
+        if (container) {
+          const existingFooter = document.querySelector('footer');
+          if (existingFooter) {
+            // Clone and replace the existing footer
+            const newFooter = existingFooter.cloneNode(true);
+            newFooter.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; min-height: 100px !important; position: relative !important; z-index: 10 !important;';
+            container.appendChild(newFooter);
+          }
+        }
+      }
 
       console.log('FridayAI: All sections have been force displayed');
     } catch (error) {
@@ -110,12 +130,32 @@ export class FridayAIApp {
       try {
         document.body.classList.add('force-display');
         document.querySelectorAll('section, footer, #features, #games, #pricing, #docs').forEach(el => {
-          el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+          el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important;';
         });
       } catch (e) {
         console.error('Critical rendering error:', e);
       }
     }
+  }
+
+  // Set up monitoring to ensure content visibility is maintained
+  setupVisibilityMonitoring() {
+    // Run visibility check multiple times to handle race conditions
+    setTimeout(() => this.forceDisplayAllContent(), 500);
+    setTimeout(() => this.forceDisplayAllContent(), 1000);
+    setTimeout(() => this.forceDisplayAllContent(), 2000);
+
+    // Continuous monitoring for footer visibility
+    setInterval(() => {
+      const footer = document.querySelector('footer');
+      if (footer) {
+        const style = window.getComputedStyle(footer);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') {
+          console.log('Footer visibility issue detected, fixing...');
+          this.forceDisplayAllContent();
+        }
+      }
+    }, 5000);
   }
 
   initializeAnalytics() {

@@ -363,37 +363,66 @@ html {
 
 /* Content Visibility - Standardized Approach */
 /* This ensures all core content is always visible */
-body section,
-body footer,
-body #features,
-body #games,
-body #pricing,
-body #docs,
-.features-section,
-.games-section,
-.pricing-section,
-.docs-section,
-.footer-section,
-.page-container {
+html body section,
+html body footer,
+html body #features,
+html body #games,
+html body #pricing,
+html body #docs,
+html .features-section,
+html .games-section,
+html .pricing-section,
+html .docs-section,
+html .footer-section,
+html .page-container,
+section[id],
+footer {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    height: auto !important;
+    min-height: 10px !important;
+    overflow: visible !important;
+    position: relative !important;
 }
 
 /* Class-based approach for ensuring visibility */
-.force-display section,
-.force-display footer,
-.app-initialized section,
-.app-initialized footer,
-.force-visible {
+html .force-display section,
+html .force-display footer,
+html .app-initialized section,
+html .app-initialized footer,
+html .force-visible,
+html .footer-section {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    height: auto !important;
+    min-height: 10px !important;
+    overflow: visible !important;
+    position: relative !important;
 }
 
 /* Ensure page container is properly displayed */
-.page-container {
+html .page-container {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
+    min-height: 100vh !important;
+}
+
+/* Temporary super emergency override for footer */
+footer,
+.footer-section,
+footer.footer-section,
+body > footer,
+body > div > footer,
+.page-container > footer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 100px !important;
+    margin-top: 50px !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    position: relative !important;
+    z-index: 10 !important;
 }
