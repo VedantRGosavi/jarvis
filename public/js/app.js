@@ -17,6 +17,9 @@ export class FridayAIApp {
   initializeApp() {
     console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
 
+    // Force display all content immediately before any other initialization
+    this.forceDisplayAllContent();
+
     // Load theme preference
     this.loadThemePreference();
 
@@ -34,6 +37,43 @@ export class FridayAIApp {
 
     // Initialize analytics
     this.initializeAnalytics();
+
+    // Add initialization complete class
+    document.body.classList.add('app-initialized');
+
+    // Force display again after initialization
+    setTimeout(() => this.forceDisplayAllContent(), 100);
+  }
+
+  // New method to force display all content
+  forceDisplayAllContent() {
+    console.log('FridayAI: Forcing display of all content');
+
+    // Add force-display class to body
+    document.body.classList.add('force-display');
+
+    // Force display all major sections
+    const criticalSections = ['features', 'games', 'pricing', 'docs'];
+    criticalSections.forEach(id => {
+      const section = document.getElementById(id);
+      if (section) {
+        section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+      }
+    });
+
+    // Force display ALL sections
+    const allSections = document.querySelectorAll('section');
+    allSections.forEach(section => {
+      section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+    });
+
+    // Force display the footer
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+    }
+
+    console.log('FridayAI: All sections have been force displayed');
   }
 
   initializeAnalytics() {
@@ -376,33 +416,35 @@ export class FridayAIApp {
   }
 }
 
-// Replace immediate instantiation with deferred instantiation
+// Initialize immediately but make sure the DOM is ready
 export let fridayAIApp = null;
 
-// SAFEGUARD: Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  // Instantiate the app after the DOM is ready
+// Create the app instance immediately
+function initApp() {
+  console.log('Initializing FridayAI App instance');
   fridayAIApp = new FridayAIApp();
-  // Ensure the app is available globally
+
+  // Make app available globally
   window.fridayAIApp = fridayAIApp;
 
-  // Check if all UI elements are visible by adding a class to the body
-  document.body.classList.add('app-initialized');
+  // Dispatch event that app is ready
+  document.dispatchEvent(new CustomEvent('fridayai-initialized'));
+}
 
-  // If sections aren't visible, try force re-initialization
-  const forceReinitialize = () => {
-    // Make sure core UI sections are visible
-    const sections = ['features', 'games', 'pricing', 'docs', 'footer'];
+// Execute immediately, but also ensure it runs after DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  // DOM already loaded, initialize immediately
+  initApp();
+}
 
-    sections.forEach(id => {
-      const section = document.getElementById(id);
-      if (section && window.getComputedStyle(section).display === 'none') {
-        console.log(`Re-showing section: ${id}`);
-        section.style.display = 'block';
-      }
-    });
-  };
-
-  // Try to force re-initialize after a short delay
-  setTimeout(forceReinitialize, 500);
+// Also initialize on load to make absolutely sure
+window.addEventListener('load', () => {
+  if (!fridayAIApp) {
+    initApp();
+  } else {
+    // If already initialized, just force display content again
+    fridayAIApp.forceDisplayAllContent();
+  }
 });

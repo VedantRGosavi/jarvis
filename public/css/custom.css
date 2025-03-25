@@ -361,48 +361,40 @@ html {
   display: flex;
 }
 
-/* EMERGENCY FIX - Force content visibility */
+/* EMERGENCY OVERRIDE - Ensure content visibility */
 body.force-display section,
 body.force-display footer,
+body.app-initialized section,
+body.app-initialized footer,
 body.force-display #features,
 body.force-display #games,
 body.force-display #pricing,
 body.force-display #docs,
-body.force-display .features-section,
-body.force-display .games-section,
-body.force-display .pricing-section,
-body.force-display .docs-section,
-body.force-display .footer-section,
-body.app-initialized section,
-body.app-initialized footer,
 body.app-initialized #features,
 body.app-initialized #games,
 body.app-initialized #pricing,
 body.app-initialized #docs,
-body.app-initialized .features-section,
-body.app-initialized .games-section,
-body.app-initialized .pricing-section,
-body.app-initialized .docs-section,
-body.app-initialized .footer-section,
 .force-visible,
-section, #features, #games, #pricing, #docs, footer {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
+.features-section,
+.games-section,
+.pricing-section,
+.docs-section,
+.footer-section {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
-/* App Initialization Safeguards */
-body.app-initialized #features,
-body.app-initialized #games,
-body.app-initialized #pricing,
-body.app-initialized #docs,
-body.app-initialized .features-section,
-body.app-initialized .games-section,
-body.app-initialized .pricing-section,
-body.app-initialized .docs-section,
-body.app-initialized .footer-section {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+/* Core content must always be visible */
+#features, #games, #pricing, #docs, footer {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Ensure page container is properly displayed */
+.page-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }

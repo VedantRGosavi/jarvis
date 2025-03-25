@@ -646,55 +646,129 @@
     <!-- Force display script - early load -->
     <script>
         // Immediate execution - force display all sections
-        document.addEventListener('DOMContentLoaded', function() {
-            const sections = ['features', 'games', 'pricing', 'docs', 'footer'];
-            sections.forEach(function(id) {
-                const element = id === 'footer' ? document.querySelector('footer') : document.getElementById(id);
-                if (element) {
-                    element.style.display = 'block';
-                    element.style.visibility = 'visible';
-                    element.style.opacity = '1';
-                }
-            });
+        (function() {
+            // Force display function
+            function forceDisplay() {
+                // Add classes to body
+                document.body.classList.add('app-initialized');
+                document.body.classList.add('force-display');
 
-            // Force display all section elements
-            document.querySelectorAll('section').forEach(function(section) {
-                section.style.display = 'block';
-                section.style.visibility = 'visible';
-                section.style.opacity = '1';
-            });
-        });
+                // Force all sections to display
+                const sectionIds = ['features', 'games', 'pricing', 'docs'];
+                sectionIds.forEach(function(id) {
+                    const section = document.getElementById(id);
+                    if (section) {
+                        section.style.display = 'block';
+                        section.style.visibility = 'visible';
+                        section.style.opacity = '1';
+                    }
+                });
+
+                // Force all section elements
+                document.querySelectorAll('section').forEach(function(section) {
+                    section.style.display = 'block';
+                    section.style.visibility = 'visible';
+                    section.style.opacity = '1';
+                });
+
+                // Force footer display
+                const footer = document.querySelector('footer');
+                if (footer) {
+                    footer.style.display = 'block';
+                    footer.style.visibility = 'visible';
+                    footer.style.opacity = '1';
+                }
+            }
+
+            // Run immediately
+            forceDisplay();
+
+            // Run again when DOM is loaded
+            document.addEventListener('DOMContentLoaded', forceDisplay);
+
+            // Run again on load
+            window.addEventListener('load', forceDisplay);
+
+            // Also run with delays to catch any issues
+            setTimeout(forceDisplay, 500);
+            setTimeout(forceDisplay, 1000);
+        })();
     </script>
 
     <!-- Core scripts with cache busting -->
     <script type="module" src="js/main.js?v=20250324"></script>
     <script type="module">
-        // Direct import with inline force display
-        import { fridayAIApp } from './js/app.js?v=20250324';
+        // Import app module - this should happen early to ensure everything is initialized
+        import { fridayAIApp } from './js/app.js?v=20250325';
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Make sure app is initialized and available globally
-            window.fridayAIApp = fridayAIApp;
+            // Ensure all sections are force displayed
+            const forceDisplaySections = () => {
+                document.body.classList.add('app-initialized', 'force-display');
 
-            // Force display all sections
-            const sections = ['features', 'games', 'pricing', 'docs'];
-            sections.forEach(id => {
-                const section = document.getElementById(id);
-                if (section) {
-                    section.style.display = 'block';
-                    section.style.visibility = 'visible';
-                    section.style.opacity = '1';
+                // Critical sections
+                ['features', 'games', 'pricing', 'docs'].forEach(id => {
+                    const section = document.getElementById(id);
+                    if (section) {
+                        section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+                    }
+                });
+
+                // All sections
+                document.querySelectorAll('section').forEach(section => {
+                    section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+                });
+
+                // Footer
+                const footer = document.querySelector('footer');
+                if (footer) {
+                    footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
                 }
-            });
+            };
 
-            // Ensure all UI elements are properly rendered
-            if (fridayAIApp) {
+            // Initial force display
+            forceDisplaySections();
+
+            // Double-check fridayAIApp initialization
+            if (window.fridayAIApp) {
                 console.log('FridayAI app successfully initialized');
 
-                // Manually re-run initialization for critical UI elements
-                fridayAIApp.initEventListeners();
-                fridayAIApp.handleNavigation();
+                // Reinitialize critical UI elements if needed
+                if (typeof window.fridayAIApp.forceDisplayAllContent === 'function') {
+                    window.fridayAIApp.forceDisplayAllContent();
+                }
+
+                if (typeof window.fridayAIApp.initEventListeners === 'function') {
+                    window.fridayAIApp.initEventListeners();
+                }
+
+                if (typeof window.fridayAIApp.handleNavigation === 'function') {
+                    window.fridayAIApp.handleNavigation();
+                }
+            } else {
+                console.warn('FridayAI app not initialized from module import, trying fallback initialization');
+                // Fallback: Try importing again with a delay
+                setTimeout(() => {
+                    import('./js/app.js?v=20250325').then(module => {
+                        if (module.fridayAIApp) {
+                            window.fridayAIApp = module.fridayAIApp;
+                            console.log('FridayAI app initialized via fallback');
+                            forceDisplaySections();
+                        }
+                    }).catch(err => console.error('Failed to import app.js:', err));
+                }, 500);
             }
+
+            // Final force display with delay
+            setTimeout(forceDisplaySections, 1000);
+        });
+
+        // Also run on window load as a final fallback
+        window.addEventListener('load', () => {
+            // Ensure all sections are visible
+            document.querySelectorAll('section, footer').forEach(el => {
+                el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+            });
         });
     </script>
 
