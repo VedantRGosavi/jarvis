@@ -674,5 +674,43 @@
 
     <!-- Scripts -->
     <script src="js/main.js?v=20250324"></script>
+    <!-- Pricing section fallback initialization -->
+    <script type="module">
+        import { PricingSection } from './js/ui/pricing.js';
+        import { PRICING_TIERS } from './js/data/pricing.js';
+
+        // Wait for DOM to be fully loaded and give main.js a chance to initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Delay slightly to let main.js do its initialization first
+            setTimeout(function() {
+                // Check if pricing section exists but has no children (indicating main.js failed to populate it)
+                const pricingSection = document.getElementById('pricing-section');
+                if (pricingSection && (!pricingSection.children || pricingSection.children.length === 0)) {
+                    console.log('Main initialization did not populate pricing section, using fallback');
+
+                    try {
+                        // Verify that PRICING_TIERS is available and valid
+                        if (!PRICING_TIERS || !Array.isArray(PRICING_TIERS)) {
+                            console.error('Fallback: PRICING_TIERS is not properly defined');
+                            return;
+                        }
+
+                        // Initialize pricing section with the pricing tiers data
+                        new PricingSection('pricing-section', {
+                            title: "Choose Your Gaming Pack",
+                            subtitle: "Enhance your gaming experience with our specialized tools",
+                            tiers: PRICING_TIERS
+                        });
+
+                        console.log('Pricing section initialized by fallback script');
+                    } catch (error) {
+                        console.error('Error in fallback pricing initialization:', error);
+                    }
+                } else {
+                    console.log('Pricing section already initialized or not found, fallback not needed');
+                }
+            }, 500); // Half-second delay to let main.js do its thing first
+        });
+    </script>
 </body>
 </html>

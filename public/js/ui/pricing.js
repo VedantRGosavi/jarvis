@@ -105,6 +105,9 @@ class PricingSection {
                 cardClasses.push(`ring-opacity-60`);
             }
 
+            // Ensure features array exists and is valid
+            const features = Array.isArray(tier.features) ? tier.features : [];
+
             return `
                 <div class="${cardClasses.join(' ')}">
                     ${isHighlighted ? `<div class="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 rounded-2xl"></div>` : ''}
@@ -129,7 +132,7 @@ class PricingSection {
                         <div class="flex-grow mb-8">
                             <h4 class="text-sm font-semibold uppercase tracking-wider text-${this.options.theme.primary} mb-4">What's included</h4>
                             <ul class="space-y-4">
-                                ${tier.features.map(feature => `
+                                ${features.map(feature => `
                                     <li class="flex items-start gap-3">
                                         <span class="flex-shrink-0 rounded-full p-1 bg-${this.options.theme.primary}/20">
                                             <svg class="h-4 w-4 text-${this.options.theme.primary}" fill="currentColor" viewBox="0 0 20 20">

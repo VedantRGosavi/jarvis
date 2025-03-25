@@ -137,13 +137,36 @@ function initializeFaqAccordions() {
 
 // Pricing section initialization
 function initializePricingSection() {
-    if (document.getElementById('pricing-section')) {
-        // Initialize pricing section with the pricing tiers data
-        new PricingSection('pricing-section', {
-            title: "Choose Your Gaming Pack",
-            subtitle: "Enhance your gaming experience with our specialized tools",
-            tiers: PRICING_TIERS
-        });
+    try {
+        const pricingSection = document.getElementById('pricing-section');
+        if (pricingSection) {
+            console.log('Initializing pricing section from main.js');
+
+            // Verify that PRICING_TIERS is available
+            if (!PRICING_TIERS || !Array.isArray(PRICING_TIERS) || PRICING_TIERS.length === 0) {
+                console.error('PRICING_TIERS is not properly defined:', PRICING_TIERS);
+                return;
+            }
+
+            // Check if PricingSection class is available
+            if (typeof PricingSection !== 'function') {
+                console.error('PricingSection class is not properly imported');
+                return;
+            }
+
+            // Initialize pricing section with the pricing tiers data
+            const pricingComponent = new PricingSection('pricing-section', {
+                title: "Choose Your Gaming Pack",
+                subtitle: "Enhance your gaming experience with our specialized tools",
+                tiers: PRICING_TIERS
+            });
+
+            console.log('Pricing section initialized successfully, tiers:', PRICING_TIERS.length);
+        } else {
+            console.warn('Pricing section element not found in the document');
+        }
+    } catch (error) {
+        console.error('Error initializing pricing section:', error);
     }
 }
 
