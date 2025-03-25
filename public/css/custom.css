@@ -361,32 +361,31 @@ html {
   display: flex;
 }
 
-/* EMERGENCY OVERRIDE - Ensure content visibility */
-body.force-display section,
-body.force-display footer,
-body.app-initialized section,
-body.app-initialized footer,
-body.force-display #features,
-body.force-display #games,
-body.force-display #pricing,
-body.force-display #docs,
-body.app-initialized #features,
-body.app-initialized #games,
-body.app-initialized #pricing,
-body.app-initialized #docs,
-.force-visible,
+/* Content Visibility - Standardized Approach */
+/* This ensures all core content is always visible */
+body section,
+body footer,
+body #features,
+body #games,
+body #pricing,
+body #docs,
 .features-section,
 .games-section,
 .pricing-section,
 .docs-section,
-.footer-section {
+.footer-section,
+.page-container {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
 
-/* Core content must always be visible */
-#features, #games, #pricing, #docs, footer {
+/* Class-based approach for ensuring visibility */
+.force-display section,
+.force-display footer,
+.app-initialized section,
+.app-initialized footer,
+.force-visible {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;

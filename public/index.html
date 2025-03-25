@@ -6,9 +6,6 @@
     <title>FridayAI - Gaming Companion</title>
     <meta name="google-analytics-id" content="G-XXXXXXXXXX">
 
-    <!-- EMERGENCY FIX - NO PHP REQUIRED -->
-    <script src="js/emergency-fix.js?v=20250324"></script>
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/tailwind.css?v=20250324">
@@ -26,9 +23,6 @@
     </style>
 </head>
 <body class="bg-gaming-primary text-gaming-light font-sans force-display app-initialized">
-    <!-- Emergency fix script - loads as early as possible -->
-    <script src="js/fix-content.js"></script>
-
     <!-- Integrated layout with seamless transitions -->
     <div class="page-container relative">
         <!-- Navbar -->
@@ -645,48 +639,15 @@
         // Import app module
         import fridayAIApp from './js/app.js?v=20250325';
 
-        // Force display first (before any other initialization)
-        function forceDisplayContent() {
-            console.log('Emergency content display: Ensuring all content is visible');
-
-            // Classes on body
-            document.body.classList.add('app-initialized', 'force-display');
-
-            // Force display all sections by ID
-            ['features', 'games', 'pricing', 'docs'].forEach(id => {
-                const section = document.getElementById(id);
-                if (section) {
-                    section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important;';
-                }
-            });
-
-            // All sections
-            document.querySelectorAll('section').forEach(section => {
-                section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important;';
-            });
-
-            // Footer
-            const footer = document.querySelector('footer');
-            if (footer) {
-                footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important;';
-            }
-        }
-
-        // Run immediately first
-        forceDisplayContent();
-
         // Initialize the app when the DOM is ready
         function initApp() {
             console.log('Initializing FridayAI application');
 
             // Initialize and make globally available
             window.fridayAIApp = fridayAIApp.initialize();
-
-            // Force display again after initialization
-            forceDisplayContent();
         }
 
-        // Initialize when DOM is loaded (defer initialization until DOM is ready)
+        // Initialize when DOM is loaded
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initApp);
         } else {
@@ -694,13 +655,8 @@
             initApp();
         }
 
-        // Run force display multiple times to ensure content is visible
-        window.addEventListener('load', forceDisplayContent);
-        setTimeout(forceDisplayContent, 500);
-        setTimeout(forceDisplayContent, 1000);
-
-        // Make forceDisplayContent available globally
-        window.forceDisplayContent = forceDisplayContent;
+        // Ensure content visibility on window load
+        window.addEventListener('load', () => fridayAIApp.forceDisplayAllContent());
     </script>
 
     <!-- Authentication Scripts with cache busting -->

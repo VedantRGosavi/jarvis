@@ -15,70 +15,107 @@ export class FridayAIApp {
   }
 
   initialize() {
-    console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
+    try {
+      console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
 
-    // Force display all content immediately before any other initialization
-    this.forceDisplayAllContent();
+      // Force display all content immediately before any other initialization
+      this.forceDisplayAllContent();
 
-    // Load theme preference
-    this.loadThemePreference();
+      // Load theme preference
+      this.loadThemePreference();
 
-    // Initialize event listeners
-    this.initEventListeners();
+      // Initialize event listeners
+      this.initEventListeners();
 
-    // Register available game modules
-    this.detectGameModules();
+      // Register available game modules
+      this.detectGameModules();
 
-    // Handle navigation
-    this.handleNavigation();
+      // Handle navigation
+      this.handleNavigation();
 
-    // Initialize auth button
-    this.initializeAuthButton();
+      // Initialize auth button
+      this.initializeAuthButton();
 
-    // Initialize analytics
-    this.initializeAnalytics();
+      // Initialize analytics
+      this.initializeAnalytics();
 
-    // Add initialization complete class
-    document.body.classList.add('app-initialized');
+      // Add initialization complete class
+      document.body.classList.add('app-initialized');
 
-    // Force display again after initialization
-    setTimeout(() => this.forceDisplayAllContent(), 100);
+      // Force display again after initialization
+      setTimeout(() => this.forceDisplayAllContent(), 100);
 
-    // Dispatch event for other components to know app is ready
-    document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
+      // Dispatch event for other components to know app is ready
+      document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
 
-    return this;
+      return this;
+    } catch (error) {
+      console.error('Error initializing FridayAI App:', error);
+      // Still force display content despite any errors
+      this.forceDisplayAllContent();
+      return this;
+    }
   }
 
   // Force display all content
   forceDisplayAllContent() {
-    console.log('FridayAI: Forcing display of all content');
+    try {
+      console.log('FridayAI: Forcing display of all content');
 
-    // Add force-display class to body
-    document.body.classList.add('force-display');
+      // Add force-display class to body
+      document.body.classList.add('force-display');
 
-    // Force display all major sections
-    const criticalSections = ['features', 'games', 'pricing', 'docs'];
-    criticalSections.forEach(id => {
-      const section = document.getElementById(id);
-      if (section) {
+      // Force display all major sections
+      const criticalSections = ['features', 'games', 'pricing', 'docs'];
+      criticalSections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+          section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+        }
+      });
+
+      // Force display ALL sections
+      const allSections = document.querySelectorAll('section');
+      allSections.forEach(section => {
         section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+      });
+
+      // Force display the footer
+      const footer = document.querySelector('footer');
+      if (footer) {
+        footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
       }
-    });
 
-    // Force display ALL sections
-    const allSections = document.querySelectorAll('section');
-    allSections.forEach(section => {
-      section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
-    });
+      // Force display any other critical page elements
+      const criticalElements = [
+        '.page-container',
+        '.features-section',
+        '.games-section',
+        '.pricing-section',
+        '.docs-section',
+        '.footer-section'
+      ];
 
-    // Force display the footer
-    const footer = document.querySelector('footer');
-    if (footer) {
-      footer.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+      criticalElements.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+          element.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+        });
+      });
+
+      console.log('FridayAI: All sections have been force displayed');
+    } catch (error) {
+      console.error('Error in forceDisplayAllContent:', error);
+      // Last resort approach - direct DOM manipulation
+      try {
+        document.body.classList.add('force-display');
+        document.querySelectorAll('section, footer, #features, #games, #pricing, #docs').forEach(el => {
+          el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important';
+        });
+      } catch (e) {
+        console.error('Critical rendering error:', e);
+      }
     }
-
-    console.log('FridayAI: All sections have been force displayed');
   }
 
   initializeAnalytics() {
