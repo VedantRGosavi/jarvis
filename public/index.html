@@ -77,10 +77,10 @@
 
         /* FAQ accordion styling */
         .faq-answer {
-            transition: max-height 0.3s ease, opacity 0.3s ease;
             max-height: 0;
             overflow: hidden;
             opacity: 0;
+            transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
         }
 
         .faq-answer.active {
@@ -666,6 +666,28 @@
                             </button>
                             <div class="faq-answer px-4 sm:px-6 pb-4">
                                 <p class="text-sm sm:text-base text-gaming-gray-300">Absolutely! We're actively working on adding support for more popular RPGs and action games. Stay tuned for updates!</p>
+                            </div>
+                        </div>
+                        <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
+                            <button type="button" class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                                <span class="text-base sm:text-lg font-medium">Can I use FridayAI on multiple devices?</span>
+                                <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="faq-answer px-4 sm:px-6 pb-4">
+                                <p class="text-sm sm:text-base text-gaming-gray-300">Yes, your FridayAI subscription allows installation on up to 3 devices simultaneously with the same account.</p>
+                            </div>
+                        </div>
+                        <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
+                            <button type="button" class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                                <span class="text-base sm:text-lg font-medium">How often is the game data updated?</span>
+                                <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="faq-answer px-4 sm:px-6 pb-4">
+                                <p class="text-sm sm:text-base text-gaming-gray-300">We update our game databases weekly with new discoveries, quest solutions, and item locations. After major game patches, we push updates within 24-48 hours.</p>
                             </div>
                         </div>
                     </div>

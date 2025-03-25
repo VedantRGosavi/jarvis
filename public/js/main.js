@@ -39,9 +39,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMobileMenu();
 
     // Then proceed with normal initialization
-    initializeTabs();
-    initializeFaqAccordions();
-    initializePricingSection();
+    setTimeout(() => {
+        initializeTabs();
+        initializeFaqAccordions();
+        initializePricingSection();
+    }, 50);
 
     // Enable animations only after ensuring content is visible
     setTimeout(() => {
@@ -90,7 +92,7 @@ function initializeTabs() {
 
     console.log('Initializing tab functionality with', tabButtons.length, 'buttons and', tabContents.length, 'content areas');
 
-    // Set initial state - show only getting started
+    // Set initial state
     tabContents.forEach(content => {
         if (content.id === 'getting-started') {
             content.classList.remove('hidden');
@@ -109,7 +111,8 @@ function initializeTabs() {
     }
 
     tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
             const tabId = button.getAttribute('data-tab');
             console.log('Tab clicked:', tabId);
 
@@ -125,7 +128,7 @@ function initializeTabs() {
             button.classList.remove('text-gaming-gray-400');
             button.classList.add('text-gaming-light');
 
-            // Handle content switching with proper transitions
+            // Handle content switching
             tabContents.forEach(content => {
                 if (content.id === tabId) {
                     // Show new content
@@ -140,7 +143,7 @@ function initializeTabs() {
                         if (!content.classList.contains('active')) {
                             content.classList.add('hidden');
                         }
-                    }, 300); // Shorter transition for better UX
+                    }, 300);
                 }
             });
         });
@@ -158,7 +161,7 @@ function initializeFaqAccordions() {
 
     console.log('Initializing FAQ accordions for', faqItems.length, 'items');
 
-    faqItems.forEach(item => {
+    faqItems.forEach((item, index) => {
         const button = item.querySelector('button');
         const answer = item.querySelector('.faq-answer');
         const arrow = item.querySelector('svg');
@@ -168,20 +171,14 @@ function initializeFaqAccordions() {
             return;
         }
 
-        // Initially hide all answers except the first one
-        if (item !== faqItems[0]) {
-            answer.style.maxHeight = '0';
-            answer.style.overflow = 'hidden';
-            answer.style.opacity = '0';
-            answer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
-        } else {
+        // Initially hide all answers
+        if (index === 0) {
             // First item starts open
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-            answer.style.overflow = 'visible';
-            answer.style.opacity = '1';
-            answer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
             answer.classList.add('active');
             arrow.style.transform = 'rotate(180deg)';
+        } else {
+            // All other items start closed
+            answer.classList.remove('active');
         }
 
         button.addEventListener('click', () => {
@@ -195,13 +192,9 @@ function initializeFaqAccordions() {
 
                 if (otherAnswer && otherItem !== item) {
                     otherAnswer.classList.remove('active');
-                    otherAnswer.style.maxHeight = '0';
-                    otherAnswer.style.overflow = 'hidden';
-                    otherAnswer.style.opacity = '0';
-                }
-
-                if (otherArrow && otherItem !== item) {
-                    otherArrow.style.transform = 'rotate(0deg)';
+                    if (otherArrow) {
+                        otherArrow.style.transform = 'rotate(0deg)';
+                    }
                 }
             });
 
@@ -209,16 +202,10 @@ function initializeFaqAccordions() {
             if (isOpen) {
                 // Close the current item
                 answer.classList.remove('active');
-                answer.style.maxHeight = '0';
-                answer.style.overflow = 'hidden';
-                answer.style.opacity = '0';
                 arrow.style.transform = 'rotate(0deg)';
             } else {
                 // Open the current item
                 answer.classList.add('active');
-                answer.style.maxHeight = answer.scrollHeight + 'px';
-                answer.style.overflow = 'visible';
-                answer.style.opacity = '1';
                 arrow.style.transform = 'rotate(180deg)';
             }
         });
