@@ -11,11 +11,10 @@ export class FridayAIApp {
     this.gameModules = {};
     this.activeGame = null;
 
-    // Initialize immediately upon instantiation
-    this.initializeApp();
+    console.log(`FridayAI App instance created`);
   }
 
-  initializeApp() {
+  initialize() {
     console.log(`Initializing FridayAI Gaming Companion v${this.version}`);
 
     // Force display all content immediately before any other initialization
@@ -47,9 +46,11 @@ export class FridayAIApp {
 
     // Dispatch event for other components to know app is ready
     document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
+
+    return this;
   }
 
-  // New method to force display all content
+  // Force display all content
   forceDisplayAllContent() {
     console.log('FridayAI: Forcing display of all content');
 
@@ -420,13 +421,8 @@ export class FridayAIApp {
   }
 }
 
-// Create and export a singleton instance
+// Create but do not initialize the app instance
 const fridayAIApp = new FridayAIApp();
 
-// Make available globally
-if (typeof window !== 'undefined') {
-  window.fridayAIApp = fridayAIApp;
-}
-
+// Export both the class and the singleton instance
 export default fridayAIApp;
-export { fridayAIApp };

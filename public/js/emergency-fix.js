@@ -13,8 +13,10 @@
         console.log('🚨 FORCING DISPLAY OF ALL CONTENT');
 
         // Add classes to body
-        document.body.classList.add('app-initialized');
-        document.body.classList.add('force-display');
+        if (document.body) {
+            document.body.classList.add('app-initialized');
+            document.body.classList.add('force-display');
+        }
 
         // Force all sections and important elements to display
         const selectors = [
@@ -24,30 +26,34 @@
         ];
 
         selectors.forEach(function(selector) {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(function(el) {
-                if (el) {
-                    el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; position: relative !important;';
-                    el.classList.add('force-visible');
-                }
-            });
+            try {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(function(el) {
+                    if (el) {
+                        el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; position: relative !important;';
+                        el.classList.add('force-visible');
+                    }
+                });
+            } catch (e) {
+                console.error('Error selecting elements:', e);
+            }
         });
-
-        // If the window fridayAIApp is available, use its method too
-        if (window.fridayAIApp && typeof window.fridayAIApp.forceDisplayAllContent === 'function') {
-            window.fridayAIApp.forceDisplayAllContent();
-        }
-
-        // If the global function is available, use it too
-        if (window.forceDisplayContent && typeof window.forceDisplayContent === 'function') {
-            window.forceDisplayContent();
-        }
     }
 
-    // Run immediately and add event listeners
-    forceDisplay();
-    document.addEventListener('DOMContentLoaded', forceDisplay);
-    window.addEventListener('load', forceDisplay);
+    // Run immediately, but wrapped in try-catch for safety
+    try {
+        forceDisplay();
+    } catch (e) {
+        console.error('Error in emergency fix initial run:', e);
+    }
+
+    // Add event listeners safely
+    try {
+        document.addEventListener('DOMContentLoaded', forceDisplay);
+        window.addEventListener('load', forceDisplay);
+    } catch (e) {
+        console.error('Error setting up emergency fix listeners:', e);
+    }
 
     // Also run delayed to catch any late rendering issues
     setTimeout(forceDisplay, 500);
@@ -57,16 +63,21 @@
     window.emergencyForceDisplay = forceDisplay;
 
     // Add direct CSS rules for extra protection
-    const emergencyStyle = document.createElement('style');
-    emergencyStyle.textContent = `
-        body section, body footer, #features, #games, #pricing, #docs,
-        .features-section, .games-section, .pricing-section, .docs-section, .footer-section,
-        .page-container, .force-visible {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            height: auto !important;
-        }
-    `;
-    document.head.appendChild(emergencyStyle);
+    try {
+        const emergencyStyle = document.createElement('style');
+        emergencyStyle.textContent = `
+            body section, body footer, #features, #games, #pricing, #docs,
+            .features-section, .games-section, .pricing-section, .docs-section, .footer-section,
+            .page-container, .force-visible {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                height: auto !important;
+                position: relative !important;
+            }
+        `;
+        document.head.appendChild(emergencyStyle);
+    } catch (e) {
+        console.error('Error adding emergency styles:', e);
+    }
 })();

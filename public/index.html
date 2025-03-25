@@ -645,9 +645,9 @@
         // Import app module
         import fridayAIApp from './js/app.js?v=20250325';
 
-        // Force display function that ensures visibility
+        // Force display first (before any other initialization)
         function forceDisplayContent() {
-            console.log('Forcing display of all content');
+            console.log('Emergency content display: Ensuring all content is visible');
 
             // Classes on body
             document.body.classList.add('app-initialized', 'force-display');
@@ -672,21 +672,35 @@
             }
         }
 
-        // Run force display multiple times to ensure content is visible
+        // Run immediately first
         forceDisplayContent();
-        window.addEventListener('DOMContentLoaded', forceDisplayContent);
+
+        // Initialize the app when the DOM is ready
+        function initApp() {
+            console.log('Initializing FridayAI application');
+
+            // Initialize and make globally available
+            window.fridayAIApp = fridayAIApp.initialize();
+
+            // Force display again after initialization
+            forceDisplayContent();
+        }
+
+        // Initialize when DOM is loaded (defer initialization until DOM is ready)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            // DOM already loaded, initialize immediately
+            initApp();
+        }
+
+        // Run force display multiple times to ensure content is visible
         window.addEventListener('load', forceDisplayContent);
         setTimeout(forceDisplayContent, 500);
         setTimeout(forceDisplayContent, 1000);
 
         // Make forceDisplayContent available globally
         window.forceDisplayContent = forceDisplayContent;
-
-        // Verify app initialization
-        document.addEventListener('fridayai-app-ready', (event) => {
-            console.log('FridayAI app initialized and ready');
-            forceDisplayContent();
-        });
     </script>
 
     <!-- Authentication Scripts with cache busting -->
