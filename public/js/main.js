@@ -3,18 +3,23 @@ import { PricingSection } from './ui/pricing.js';
 import { PRICING_TIERS } from './data/pricing.js';
 import analyticsManager from './analytics.js';
 import { DownloadManager } from './ui/downloadUI.js';
+import fridayAIApp from './app.js';
 
-// Documentation Tabs
+// Document ready initialization
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize analytics
-    analyticsManager.initialize();
+    console.log('Main.js initialization started');
 
-    // Track page view
-    analyticsManager.trackPageView(window.location.pathname);
+    // Initialize analytics if not already initialized
+    if (!analyticsManager.initialized) {
+        analyticsManager.initialize();
 
-    // Track initial funnel step
-    if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
-        analyticsManager.trackFunnelStep('acquisition', 'visit_home');
+        // Track page view
+        analyticsManager.trackPageView(window.location.pathname);
+
+        // Track initial funnel step
+        if (window.location.pathname === '/' || window.location.pathname === '/index.html') {
+            analyticsManager.trackFunnelStep('acquisition', 'visit_home');
+        }
     }
 
     // Initialize download manager if on download page
@@ -22,12 +27,30 @@ document.addEventListener('DOMContentLoaded', function() {
         window.downloadManager = new DownloadManager();
     }
 
-    // Safeguard for content visibility
-    document.body.classList.add('app-initialized');
+    // Initialize tabs
+    initializeTabs();
 
-    // Make sure all sections are visible
-    ensureContentVisibility();
+    // Initialize FAQ accordions
+    initializeFaqAccordions();
 
+    // Initialize pricing section
+    initializePricingSection();
+
+    // Ensure content visibility as a final check
+    if (window.emergencyForceDisplay) {
+        window.emergencyForceDisplay();
+    } else if (window.forceDisplayContent) {
+        window.forceDisplayContent();
+    } else if (fridayAIApp && fridayAIApp.forceDisplayAllContent) {
+        fridayAIApp.forceDisplayAllContent();
+    } else {
+        // Final fallback
+        ensureContentVisibility();
+    }
+});
+
+// Documentation Tab initialization
+function initializeTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -81,8 +104,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     });
+}
 
-    // FAQ Accordion
+// FAQ Accordion initialization
+function initializeFaqAccordions() {
     const faqItems = document.querySelectorAll('.faq-item');
 
     faqItems.forEach(item => {
@@ -108,8 +133,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+}
 
-    // Initialize pricing section
+// Pricing section initialization
+function initializePricingSection() {
     if (document.getElementById('pricing-section')) {
         // Initialize pricing section with the pricing tiers data
         new PricingSection('pricing-section', {
@@ -118,9 +145,9 @@ document.addEventListener('DOMContentLoaded', function() {
             tiers: PRICING_TIERS
         });
     }
-});
+}
 
-// Safeguard function to ensure content visibility
+// Fallback content visibility function
 function ensureContentVisibility() {
     // Force display all major sections
     ['features', 'games', 'pricing', 'docs'].forEach(function(id) {

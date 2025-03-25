@@ -11,6 +11,7 @@ export class FridayAIApp {
     this.gameModules = {};
     this.activeGame = null;
 
+    // Initialize immediately upon instantiation
     this.initializeApp();
   }
 
@@ -43,6 +44,9 @@ export class FridayAIApp {
 
     // Force display again after initialization
     setTimeout(() => this.forceDisplayAllContent(), 100);
+
+    // Dispatch event for other components to know app is ready
+    document.dispatchEvent(new CustomEvent('fridayai-app-ready', { detail: { app: this } }));
   }
 
   // New method to force display all content
@@ -416,35 +420,13 @@ export class FridayAIApp {
   }
 }
 
-// Initialize immediately but make sure the DOM is ready
-export let fridayAIApp = null;
+// Create and export a singleton instance
+const fridayAIApp = new FridayAIApp();
 
-// Create the app instance immediately
-function initApp() {
-  console.log('Initializing FridayAI App instance');
-  fridayAIApp = new FridayAIApp();
-
-  // Make app available globally
+// Make available globally
+if (typeof window !== 'undefined') {
   window.fridayAIApp = fridayAIApp;
-
-  // Dispatch event that app is ready
-  document.dispatchEvent(new CustomEvent('fridayai-initialized'));
 }
 
-// Execute immediately, but also ensure it runs after DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  // DOM already loaded, initialize immediately
-  initApp();
-}
-
-// Also initialize on load to make absolutely sure
-window.addEventListener('load', () => {
-  if (!fridayAIApp) {
-    initApp();
-  } else {
-    // If already initialized, just force display content again
-    fridayAIApp.forceDisplayAllContent();
-  }
-});
+export default fridayAIApp;
+export { fridayAIApp };
