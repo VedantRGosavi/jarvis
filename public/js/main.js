@@ -83,22 +83,35 @@ function initializeTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
 
+    if (!tabButtons.length || !tabContents.length) {
+        console.log('Tabs not found, skipping tab initialization');
+        return;
+    }
+
+    console.log('Initializing tab functionality with', tabButtons.length, 'buttons and', tabContents.length, 'content areas');
+
     // Set initial state - show only getting started
     tabContents.forEach(content => {
         if (content.id === 'getting-started') {
             content.classList.remove('hidden');
-            requestAnimationFrame(() => {
-                content.classList.add('active');
-            });
+            content.classList.add('active');
         } else {
             content.classList.add('hidden');
             content.classList.remove('active');
         }
     });
 
+    // Ensure the first tab button is active
+    if (tabButtons.length > 0) {
+        tabButtons[0].classList.add('active');
+        tabButtons[0].classList.add('text-gaming-light');
+        tabButtons[0].classList.remove('text-gaming-gray-400');
+    }
+
     tabButtons.forEach(button => {
         button.addEventListener('click', function() {
             const tabId = button.getAttribute('data-tab');
+            console.log('Tab clicked:', tabId);
 
             // Remove active class from all buttons
             tabButtons.forEach(btn => {
@@ -117,18 +130,17 @@ function initializeTabs() {
                 if (content.id === tabId) {
                     // Show new content
                     content.classList.remove('hidden');
-                    requestAnimationFrame(() => {
+                    setTimeout(() => {
                         content.classList.add('active');
-                    });
+                    }, 10);
                 } else {
                     // Hide other content
                     content.classList.remove('active');
-                    const transitionDuration = 400; // Match CSS transition duration
                     setTimeout(() => {
                         if (!content.classList.contains('active')) {
                             content.classList.add('hidden');
                         }
-                    }, transitionDuration);
+                    }, 300); // Shorter transition for better UX
                 }
             });
         });
@@ -139,27 +151,74 @@ function initializeTabs() {
 function initializeFaqAccordions() {
     const faqItems = document.querySelectorAll('.faq-item');
 
+    if (!faqItems.length) {
+        console.log('No FAQ items found, skipping accordion initialization');
+        return;
+    }
+
+    console.log('Initializing FAQ accordions for', faqItems.length, 'items');
+
     faqItems.forEach(item => {
         const button = item.querySelector('button');
         const answer = item.querySelector('.faq-answer');
         const arrow = item.querySelector('svg');
 
-        if (!button || !answer || !arrow) return;
+        if (!button || !answer || !arrow) {
+            console.warn('FAQ item missing required elements');
+            return;
+        }
+
+        // Initially hide all answers except the first one
+        if (item !== faqItems[0]) {
+            answer.style.maxHeight = '0';
+            answer.style.overflow = 'hidden';
+            answer.style.opacity = '0';
+            answer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
+        } else {
+            // First item starts open
+            answer.style.maxHeight = answer.scrollHeight + 'px';
+            answer.style.overflow = 'visible';
+            answer.style.opacity = '1';
+            answer.style.transition = 'max-height 0.3s ease, opacity 0.3s ease';
+            answer.classList.add('active');
+            arrow.style.transform = 'rotate(180deg)';
+        }
 
         button.addEventListener('click', () => {
             const isOpen = answer.classList.contains('active');
+            console.log('FAQ item clicked, current state:', isOpen ? 'open' : 'closed');
 
             // Close all FAQ items
             faqItems.forEach(otherItem => {
                 const otherAnswer = otherItem.querySelector('.faq-answer');
                 const otherArrow = otherItem.querySelector('svg');
-                if (otherAnswer) otherAnswer.classList.remove('active');
-                if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
+
+                if (otherAnswer && otherItem !== item) {
+                    otherAnswer.classList.remove('active');
+                    otherAnswer.style.maxHeight = '0';
+                    otherAnswer.style.overflow = 'hidden';
+                    otherAnswer.style.opacity = '0';
+                }
+
+                if (otherArrow && otherItem !== item) {
+                    otherArrow.style.transform = 'rotate(0deg)';
+                }
             });
 
             // Toggle clicked item
-            if (!isOpen) {
+            if (isOpen) {
+                // Close the current item
+                answer.classList.remove('active');
+                answer.style.maxHeight = '0';
+                answer.style.overflow = 'hidden';
+                answer.style.opacity = '0';
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                // Open the current item
                 answer.classList.add('active');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                answer.style.overflow = 'visible';
+                answer.style.opacity = '1';
                 arrow.style.transform = 'rotate(180deg)';
             }
         });

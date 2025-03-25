@@ -27,6 +27,74 @@
         .fade-in-element {
             opacity: 1 !important;
         }
+
+        /* Tab transitions */
+        .tab-content {
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tab-button {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: rgba(75, 85, 99, 0.5);
+            color: #fff;
+        }
+
+        /* Auth form transitions */
+        .auth-form {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .auth-form.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* OAuth icon styling */
+        .oauth-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+        }
+
+        .oauth-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* FAQ accordion styling */
+        .faq-answer {
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .faq-answer.active {
+            max-height: 500px; /* Large enough to fit content */
+            opacity: 1;
+        }
+
+        .faq-item button svg {
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item button:hover {
+            color: #cbd5e0; /* Light hover effect */
+        }
     </style>
 </head>
 <body class="bg-gaming-primary text-gaming-light font-sans">
@@ -84,8 +152,8 @@
             </div>
             <div class="container mx-auto px-4 sm:px-6 relative z-10 h-full flex justify-center">
                 <div class="hero-content text-center">
-                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">Your Ultimate Gaming Companion</h1>
-                    <p class="text-lg sm:text-xl mb-8 sm:mb-10 text-gaming-gray-200">A minimalist overlay tool for games like Elden Ring and Baldur's Gate 3.</p>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight">Your Ultimate Gaming Buddy</h1>
+                    <p class="text-lg sm:text-xl mb-8 sm:mb-10 text-gaming-gray-200">A minimalist overlay tool for games like Elden Ring and Baldur's Gate 3 and more.</p>
                     <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                         <a href="#download" class="w-full sm:w-auto text-center bg-gaming-gray-600 hover:bg-gaming-gray-500 text-white font-bold py-3 px-8 rounded-md transition">
                             Get Started
@@ -372,6 +440,28 @@
                                 <button id="show-login" class="text-gaming-accent hover:text-gaming-accent-hover">Login</button>
                             </p>
                         </div>
+
+                        <div class="mt-6 pt-4 border-t border-gaming-gray-700">
+                            <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="google-register" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="google-icon-register"></span>
+                                    <span class="ml-2">Google</span>
+                                </button>
+                                <button id="github-register" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="github-icon-register"></span>
+                                    <span class="ml-2">GitHub</span>
+                                </button>
+                                <button id="psn-register" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="psn-icon-register"></span>
+                                    <span class="ml-2">PlayStation</span>
+                                </button>
+                                <button id="steam-register" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="steam-icon-register"></span>
+                                    <span class="ml-2">Steam</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="login-form" class="auth-form hidden">
@@ -395,6 +485,28 @@
                                 Don't have an account?
                                 <button id="show-register" class="text-gaming-accent hover:text-gaming-accent-hover">Create an Account</button>
                             </p>
+                        </div>
+
+                        <div class="mt-6 pt-4 border-t border-gaming-gray-700">
+                            <p class="text-center text-sm text-gaming-gray-400 mb-4">Or continue with</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button id="google-login" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="google-icon-login"></span>
+                                    <span class="ml-2">Google</span>
+                                </button>
+                                <button id="github-login" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="github-icon-login"></span>
+                                    <span class="ml-2">GitHub</span>
+                                </button>
+                                <button id="psn-login" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="psn-icon-login"></span>
+                                    <span class="ml-2">PlayStation</span>
+                                </button>
+                                <button id="steam-login" class="flex items-center justify-center px-4 py-2 border border-gaming-gray-600 rounded-md bg-gaming-gray-700 hover:bg-gaming-gray-600 transition">
+                                    <span class="oauth-icon" id="steam-icon-login"></span>
+                                    <span class="ml-2">Steam</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -524,7 +636,7 @@
                 <div class="max-w-3xl mx-auto">
                     <div class="space-y-4">
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                            <button type="button" class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
                                 <span class="text-base sm:text-lg font-medium">How does FridayAI affect game performance?</span>
                                 <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -535,7 +647,7 @@
                             </div>
                         </div>
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                            <button type="button" class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
                                 <span class="text-base sm:text-lg font-medium">Is FridayAI compatible with game mods?</span>
                                 <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -546,7 +658,7 @@
                             </div>
                         </div>
                         <div class="faq-item bg-gaming-gray-800/90 backdrop-blur-sm rounded-lg shadow-xl overflow-hidden fade-in-element">
-                            <button class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
+                            <button type="button" class="w-full px-4 sm:px-6 py-4 text-left flex justify-between items-center">
                                 <span class="text-base sm:text-lg font-medium">Will more games be supported in the future?</span>
                                 <svg class="transform transition-transform flex-shrink-0 ml-2" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -673,8 +785,24 @@
         </footer>
     </div>
 
-    <!-- Scripts -->
+    <!-- External Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Auth Scripts -->
+    <script src="js/ui/icons.js"></script>
+    <script type="module">
+        import { AuthService } from './js/data/authService.js';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize auth service
+            window.authService = new AuthService();
+            console.log('Auth service initialized');
+        });
+    </script>
+
+    <!-- App Scripts -->
     <script src="js/main.js?v=20250324"></script>
+
     <!-- Pricing section fallback initialization -->
     <script type="module">
         import { PricingSection } from './js/ui/pricing.js';
@@ -711,6 +839,87 @@
                     console.log('Pricing section already initialized or not found, fallback not needed');
                 }
             }, 500); // Half-second delay to let main.js do its thing first
+        });
+    </script>
+
+    <!-- OAuth Buttons Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize OAuth icons
+            if (window.authIcons) {
+                // For registration form
+                const googleIconReg = document.getElementById('google-icon-register');
+                const githubIconReg = document.getElementById('github-icon-register');
+                const psnIconReg = document.getElementById('psn-icon-register');
+                const steamIconReg = document.getElementById('steam-icon-register');
+
+                if (googleIconReg) googleIconReg.innerHTML = window.authIcons.GoogleIcon();
+                if (githubIconReg) githubIconReg.innerHTML = window.authIcons.GithubIcon();
+                if (psnIconReg) psnIconReg.innerHTML = window.authIcons.PlayStationIcon();
+                if (steamIconReg) steamIconReg.innerHTML = window.authIcons.SteamIcon();
+
+                // For login form
+                const googleIconLogin = document.getElementById('google-icon-login');
+                const githubIconLogin = document.getElementById('github-icon-login');
+                const psnIconLogin = document.getElementById('psn-icon-login');
+                const steamIconLogin = document.getElementById('steam-icon-login');
+
+                if (googleIconLogin) googleIconLogin.innerHTML = window.authIcons.GoogleIcon();
+                if (githubIconLogin) githubIconLogin.innerHTML = window.authIcons.GithubIcon();
+                if (psnIconLogin) psnIconLogin.innerHTML = window.authIcons.PlayStationIcon();
+                if (steamIconLogin) steamIconLogin.innerHTML = window.authIcons.SteamIcon();
+            }
+
+            // OAuth button click handlers
+            function handleOAuthLogin(provider) {
+                console.log(`Initiating ${provider} OAuth login`);
+                if (window.authService) {
+                    window.authService.getOAuthUrl(provider)
+                        .then(result => {
+                            if (result.success && result.auth_url) {
+                                console.log(`Redirecting to ${provider} authorization`);
+                                window.location.href = result.auth_url;
+                            } else {
+                                console.error(`Failed to get ${provider} OAuth URL`, result);
+                                alert(`Failed to connect to ${provider}. Please try again later.`);
+                            }
+                        })
+                        .catch(error => {
+                            console.error(`Error getting ${provider} OAuth URL:`, error);
+                            alert(`Error connecting to ${provider}. Please try again later.`);
+                        });
+                } else {
+                    console.error('Auth service not available');
+                    alert('Authentication service is currently unavailable. Please try again later.');
+                }
+            }
+
+            // Register form OAuth buttons
+            document.getElementById('google-register')?.addEventListener('click', () => handleOAuthLogin('google'));
+            document.getElementById('github-register')?.addEventListener('click', () => handleOAuthLogin('github'));
+            document.getElementById('psn-register')?.addEventListener('click', () => handleOAuthLogin('playstation'));
+            document.getElementById('steam-register')?.addEventListener('click', () => handleOAuthLogin('steam'));
+
+            // Login form OAuth buttons
+            document.getElementById('google-login')?.addEventListener('click', () => handleOAuthLogin('google'));
+            document.getElementById('github-login')?.addEventListener('click', () => handleOAuthLogin('github'));
+            document.getElementById('psn-login')?.addEventListener('click', () => handleOAuthLogin('playstation'));
+            document.getElementById('steam-login')?.addEventListener('click', () => handleOAuthLogin('steam'));
+
+            // Handle show login/register buttons
+            document.getElementById('show-login')?.addEventListener('click', function() {
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('register-form').classList.remove('active');
+                document.getElementById('login-form').classList.remove('hidden');
+                document.getElementById('login-form').classList.add('active');
+            });
+
+            document.getElementById('show-register')?.addEventListener('click', function() {
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('login-form').classList.remove('active');
+                document.getElementById('register-form').classList.remove('hidden');
+                document.getElementById('register-form').classList.add('active');
+            });
         });
     </script>
 </body>
